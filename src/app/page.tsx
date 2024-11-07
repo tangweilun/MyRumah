@@ -9,14 +9,14 @@ export default function Home() {
     <div>
       <Navbar></Navbar>
       {/* Hero section with search */}
-      <div className="bg-green-100 py-16">
+      <div className="bg-green-100 w-screen py-16">
         <div className="max-w-xl mx-auto">
           <h1 className="text-4xl font-bold text-green-900 mb-4 text-center">
-            Explore Decentralized Rentals with MyRumah Add
+            Explore Decentralized Rentals with MyRumah
           </h1>
           <p className="text-xl text-green-700 mb-8 text-center">
             Discover trusted rentals powered by blockchain technology for
-            transparent, securee, and hassle-free agreements.
+            transparent, secure, and hassle-free agreements.
           </p>
           <div className="flex shadow-lg rounded-lg overflow-hidden bg-white">
             <div className="flex-grow flex items-center">

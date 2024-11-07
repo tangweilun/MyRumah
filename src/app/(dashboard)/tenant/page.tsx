@@ -1,11 +1,8 @@
-import React from 'react';
+import { MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const TenantPage = () => {
-  return (
-    <div>
-      <h1 className="text-green-700">Tenant Page</h1>
-    </div>
-  );
+  return <div></div>;
 };
 
 export default TenantPage;
