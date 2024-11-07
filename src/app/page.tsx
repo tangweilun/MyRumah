@@ -1,6 +1,5 @@
 import Navbar from '@/components/Navbar';
 import { MapPin, Search } from 'lucide-react';
-import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -9,17 +8,17 @@ export default function Home() {
     <div>
       <Navbar></Navbar>
       {/* Hero section with search */}
-      <div className="bg-green-100 w-screen py-16">
-        <div className="max-w-xl mx-auto">
-          <h1 className="text-4xl font-bold text-green-900 mb-4 text-center">
+      <div className="bg-green-100 py-16 md:py-24 lg:py-32">
+        <div className="max-w-xl mx-auto px-4">
+          <h1 className="text-4xl font-bold text-green-900 mb-4 text-center md:text-5xl">
             Explore Decentralized Rentals with MyRumah
           </h1>
-          <p className="text-xl text-green-700 mb-8 text-center">
+          <p className="text-xl text-green-700 mb-8 text-center md:text-2xl">
             Discover trusted rentals powered by blockchain technology for
             transparent, secure, and hassle-free agreements.
           </p>
-          <div className="flex shadow-lg rounded-lg overflow-hidden bg-white">
-            <div className="flex-grow flex items-center">
+          <div className="flex flex-col md:flex-row shadow-lg rounded-lg overflow-hidden bg-white">
+            <div className="flex-grow flex items-center mb-4 md:mb-0">
               <MapPin className="h-5 w-5 text-stone-400 ml-3" />
               <Input
                 type="text"
@@ -37,6 +36,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/*Properties listing */}
     </div>
   );
 }
