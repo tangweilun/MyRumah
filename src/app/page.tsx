@@ -12,7 +12,7 @@ export default function Home() {
       <div className="bg-green-100 py-16">
         <div className="max-w-xl mx-auto">
           <h1 className="text-4xl font-bold text-green-900 mb-4 text-center">
-            Explore Decentralized Rentals with MyRumah Add textting
+            Explore Decentralized Rentals with MyRumah Add
           </h1>
           <p className="text-xl text-green-700 mb-8 text-center">
             Discover trusted rentals powered by blockchain technology for
