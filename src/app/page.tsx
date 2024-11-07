@@ -16,7 +16,7 @@ export default function Home() {
           </h1>
           <p className="text-xl text-green-700 mb-8 text-center">
             Discover trusted rentals powered by blockchain technology for
-            transparent, secure, and hassle-free agreements.
+            transparent, securee, and hassle-free agreements.
           </p>
           <div className="flex shadow-lg rounded-lg overflow-hidden bg-white">
             <div className="flex-grow flex items-center">
