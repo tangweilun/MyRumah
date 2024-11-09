@@ -1,10 +1,11 @@
+'use client';
 import { Menu, Home, User } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   return (
-    <div className="flex items-center justify-between w-screen h-16 px-8">
+    <div className="flex items-center justify-between h-16 px-16 m-8">
       {/* Logo */}
       <div className="flex-shrink-0 flex items-center">
         <Home className="h-8 w-auto text-green-700" />
@@ -29,6 +30,7 @@ const Navbar = () => {
           variant="outline"
           size="sm"
           className="text-white hover:text-green-700 hidden md:block bg-green-700"
+          asChild
         >
           Get Started
         </Button>
@@ -38,6 +40,7 @@ const Navbar = () => {
           variant="outline"
           size="icon"
           className="ml-4 text-green-700 border-green-700 md:hidden"
+          asChild
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -47,6 +50,7 @@ const Navbar = () => {
           variant="outline"
           size="icon"
           className="ml-4 text-green-700 border-green-700 hidden md:flex"
+          asChild
         >
           <User className="h-4 w-4" />
         </Button>

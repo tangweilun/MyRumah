@@ -1,12 +1,15 @@
+'use client';
+
 import Navbar from '@/components/Navbar';
 import { MapPin, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import PropertyGrid from '@/components/propertyGrid';
 
 export default function Home() {
   return (
     <div>
-      <Navbar></Navbar>
+      <Navbar />
       {/* Hero section with search */}
       <div className="bg-green-100 py-16 md:py-24 lg:py-32">
         <div className="max-w-xl mx-auto px-4">
@@ -36,7 +39,10 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/*Properties listing */}
+      {/* Properties listing */}
+      <div>
+        <PropertyGrid />
+      </div>
     </div>
   );
 }
