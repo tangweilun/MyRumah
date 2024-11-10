@@ -32,37 +32,44 @@ export default function PropertyPage() {
     <div>
       <Navbar></Navbar>
       <div className="bg-green-100 w-screen py-16">
-        <div className="flex">
-          <div className="space-y-4 w-1/2">
-            <div className="px-5 rounded-lg">
+        <div className="grid gap-6 lg:grid-cols-2 p-6">
+          <div className="space-y-4">
+            <div className="relative aspect-[4/3] rounded-lg">
               <Image
                 src={images[currentImgIndex]}
-                width={300}
-                height={300}
+                width={600}
+                height={100}
                 alt={`Property Image ${currentImgIndex + 1}`}
-                className="object-cover"
+                className="object-center mx-auto"
               />
               <button
                 onClick={prevImg}
-                className="top-1/2 rounded-full hover:bg-black/75"
+                className="absolute left-2 top-1/2 rounded-full -translate-y-1/2 bg-black/50 hover:bg-black/75"
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
+              <button
+                onClick={nextImg}
+                className="absolute right-2 top-1/2 rounded-full -translate-y-1/2 bg-black/50 hover:bg-black/75"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
             </div>
           </div>
-          <div className="flex w-1/2 px-5">
-            <div className="w-4/5">
-              <h3 className="text-2xl font-bold text-green-900 mb-4">
-                Modern Apartment 1
-              </h3>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-green-600" />
-                <span className="text-xl text-green-700">
-                  123 Main St, Downtown Area, City, 12345
-                </span>
+
+          <div className="space-y-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-2xl font-bold text-green-900 mb-4">
+                  Modern Apartment 1
+                </h3>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-green-600" />
+                  <span className="text-xl text-green-700">
+                    123 Main St, Downtown Area, City, 12345
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="w-1/5">
               <button className="rounded-full p-2 hover:bg-gray-100">
                 <Heart className="h-6 w-6 text-gray-400" />
               </button>
