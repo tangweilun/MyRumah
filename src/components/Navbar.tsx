@@ -2,6 +2,7 @@
 import { Menu, Home, User } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { role } from '@/lib/data'; // Import the role
 
 const Navbar = () => {
   return (
@@ -16,12 +17,45 @@ const Navbar = () => {
 
       {/* Navigation for medium and larger screens */}
       <nav className="hidden md:flex items-center gap-2 space-x-4">
-        <Link href={'/'} className="text-stone-600 hover:text-green-700">
-          How it works
-        </Link>
-        <Link href={'/'} className="text-stone-600 hover:text-green-700">
-          About Us
-        </Link>
+        {/* Dynamic Links based on role */}
+        {role === 'owner' && (
+          <>
+            <Link
+              href={'/owner'}
+              className="text-stone-600 hover:text-green-700"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href={'/my-proposals'}
+              className="text-stone-600 hover:text-green-700"
+            >
+              My Proposals
+            </Link>
+            <Link
+              href={'/my-tenants'}
+              className="text-stone-600 hover:text-green-700"
+            >
+              My Tenants
+            </Link>
+          </>
+        )}
+        {role === 'tenant' && (
+          <>
+            <Link
+              href={'/my-proposals'}
+              className="text-stone-600 hover:text-green-700"
+            >
+              My Proposals
+            </Link>
+            <Link
+              href={'/wishlist'}
+              className="text-stone-600 hover:text-green-700"
+            >
+              Wishlist
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* User menu and responsive menu icon */}
