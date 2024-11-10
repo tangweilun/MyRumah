@@ -52,7 +52,7 @@ const SingleProperyPage = () => {
   const propertyId = '1'; // Replace with the actual property ID
 
   return (
-    <div className="px-16">
+    <div className="px-16 py-8 bg-stone-50">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-green-800">
@@ -62,9 +62,7 @@ const SingleProperyPage = () => {
           <Button
             variant="outline"
             className="text-green-600"
-            onClick={() =>
-              router.push(`${window.location.pathname}/edit/${propertyId}`)
-            } // Navigate to the edit page
+            onClick={() => router.push(`${window.location.pathname}/edit`)} // Navigate to the edit page
           >
             <Edit2 className="h-4 w-4 mr-2" />
             Edit Property
@@ -204,7 +202,11 @@ const SingleProperyPage = () => {
                   </div>
 
                   <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/property/${proposal.id}`)} // Navigate to the specific property page
+                    >
                       View Details
                     </Button>
                     {proposal.status === 'Pending' && (

@@ -1,9 +1,10 @@
-'use cient';
+'use client';
 
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BedDouble } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // Sample data - in a real app this would come from an API/database
 const properties = [
@@ -50,6 +51,8 @@ const properties = [
 ];
 
 export default function MyPropertiesGrid() {
+  const router = useRouter();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {properties.map((property) => (
@@ -80,9 +83,7 @@ export default function MyPropertiesGrid() {
           <CardFooter className="p-4 pt-0">
             <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white"
-              //   onClick={() =>
-              //     (window.location.href = `/properties/${property.id}`)
-              //   }
+              onClick={() => router.push(`/property/${property.id}`)}
             >
               View Details
             </Button>

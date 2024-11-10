@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import { MapPin, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import PropertyGrid from '@/components/propertyGrid';
+import PropertyGrid from '@/components/PropertyGrid';
 
 export default function Home() {
   return (

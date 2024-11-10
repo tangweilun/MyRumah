@@ -27,13 +27,13 @@ const Navbar = () => {
               Dashboard
             </Link>
             <Link
-              href={'/my-proposals'}
+              href={'/list/my-proposals'}
               className="text-stone-600 hover:text-green-700"
             >
               My Proposals
             </Link>
             <Link
-              href={'/my-tenants'}
+              href={'/list/my-tenants'}
               className="text-stone-600 hover:text-green-700"
             >
               My Tenants
@@ -43,13 +43,13 @@ const Navbar = () => {
         {role === 'tenant' && (
           <>
             <Link
-              href={'/my-proposals'}
+              href={'/list/my-proposals'}
               className="text-stone-600 hover:text-green-700"
             >
               My Proposals
             </Link>
             <Link
-              href={'/wishlist'}
+              href={'/list/wishlist'}
               className="text-stone-600 hover:text-green-700"
             >
               Wishlist

@@ -17,17 +17,40 @@ import { Trash, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { DatePickerWithRange } from '@/components/DateRangePicker';
+import { toast } from 'react-toastify';
 
 const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
   const router = useRouter();
   const { id } = use(params);
+  const [saveStatus, setSaveStatus] = React.useState(false);
+
+  useEffect(() => {
+    if (saveStatus) {
+      toast.success('Changes saved successfully!');
+      setSaveStatus(false);
+    }
+  }, [saveStatus]);
+
+  const handleSave = async () => {
+    try {
+      const response = await simulateSave();
+      if (response.success) {
+        setSaveStatus(true);
+        router.back();
+      } else {
+        throw new Error('Save failed');
+      }
+    } catch (error) {
+      toast.error('Failed to save changes. Please try again.');
+    }
+  };
 
   useEffect(() => {
     if (id) {
-      // Fetch property data logic here
       console.log(`Fetching data for property ID: ${id}`);
     }
   }, [id]);
+
   return (
     <div className="bg-stone-50 p-16 space-y-6">
       {/* Header */}
@@ -36,10 +59,15 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
           Edit Property: Cozy Cottage in the Woods
         </h1>
         <div className="space-x-2">
-          <Button className="bg-green-600 hover:bg-green-700">
+          <Button
+            className="bg-green-600 hover:bg-green-700"
+            onClick={handleSave}
+          >
             Save Changes
           </Button>
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" onClick={() => router.back()}>
+            Cancel
+          </Button>
         </div>
       </div>
 
@@ -204,6 +232,14 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
       </div>
     </div>
   );
+};
+
+const simulateSave = async (): Promise<{ success: boolean }> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ success: true });
+    }, 1000);
+  });
 };
 
 export default EditProperty;
