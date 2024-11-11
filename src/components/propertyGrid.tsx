@@ -33,17 +33,17 @@ const PropertyCard = ({
         {/* Image Section */}
         <div className="relative h-48 bg-gray-200">
           <Image
-            width={50}
-            height={50}
+            width={300}
+            height={192}
             src={imageUrl || '/api/placeholder/300/192'}
             alt={title}
             className="h-full w-full object-cover"
           />
           <Button
             variant={'outline'}
-            className={`absolute right-2 top-2 rounded-full p-1.5 transition-all duration-300 ${
+            className={`absolute right-2 top-2 p-1.5 transition-all duration-300 ${
               isLiked ? 'bg-red-400' : 'bg-white'
-            }`}
+            } rounded-md`}
             onClick={toggleLike}
           >
             {isLiked ? (
@@ -94,21 +94,21 @@ const PropertyGrid = () => {
               price: 1200,
               location: 'Downtown Area',
               rooms: 2,
-              imageUrl: '/api/placeholder/300/192',
+              imageUrl: '/propertyImage1.jpeg',
             },
             {
               title: 'Modern Apartment 2',
               price: 1200,
               location: 'Downtown Area',
               rooms: 2,
-              imageUrl: '/api/placeholder/300/192',
+              imageUrl: '/propertyImage2.jpeg',
             },
             {
               title: 'Modern Apartment 3',
               price: 1200,
               location: 'Downtown Area',
               rooms: 2,
-              imageUrl: '/api/placeholder/300/192',
+              imageUrl: '/propertyImage3.jpeg',
             },
           ]);
         }, 1000);

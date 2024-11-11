@@ -18,6 +18,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { DatePickerWithRange } from '@/components/DateRangePicker';
 import { toast } from 'react-toastify';
+import { propertyImage } from '@/lib/data';
+import Image from 'next/image';
 
 const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
   const router = useRouter();
@@ -182,9 +184,9 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                {[1, 2, 3, 4].map((index) => (
+                {propertyImage.map((image) => (
                   <div
-                    key={index}
+                    key={image.id}
                     className="relative aspect-[4/3] bg-gray-100 rounded-md"
                   >
                     <Button
@@ -194,10 +196,12 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
-                    <img
-                      src="/api/placeholder/400/300"
-                      alt={`Property photo ${index}`}
+                    <Image
+                      src={image.url}
+                      alt={`Property photo ${image.id}`}
                       className="w-full h-full object-cover rounded-md"
+                      width={400}
+                      height={300}
                     />
                   </div>
                 ))}

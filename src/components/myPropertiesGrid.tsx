@@ -14,7 +14,7 @@ const properties = [
     price: '$1200/mo',
     location: 'Downtown Area',
     rooms: 2,
-    image: '/placeholder.svg?height=200&width=400',
+    image: '/propertyImage1.jpeg',
   },
   {
     id: 2,
@@ -22,7 +22,7 @@ const properties = [
     price: '$1200/mo',
     location: 'Downtown Area',
     rooms: 2,
-    image: '/placeholder.svg?height=200&width=400',
+    image: '/propertyImage3.jpeg',
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ const properties = [
     price: '$1200/mo',
     location: 'Downtown Area',
     rooms: 2,
-    image: '/placeholder.svg?height=200&width=400',
+    image: '/propertyImage2.jpeg',
   },
   {
     id: 4,
@@ -38,7 +38,7 @@ const properties = [
     price: '$1200/mo',
     location: 'Downtown Area',
     rooms: 2,
-    image: '/placeholder.svg?height=200&width=400',
+    image: '/propertyImage1.jpeg',
   },
   {
     id: 5,
@@ -46,7 +46,7 @@ const properties = [
     price: '$1200/mo',
     location: 'Downtown Area',
     rooms: 2,
-    image: '/placeholder.svg?height=200&width=400',
+    image: '/propertyImage3.jpeg',
   },
 ];
 

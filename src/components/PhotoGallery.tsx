@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image'; // Import Image from Next.js
 
 type Photo = {
   url: string;
@@ -38,10 +39,12 @@ const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
             className="relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
             onClick={() => openModal(index)}
           >
-            <img
+            <Image
               src={photo.url || '/api/placeholder/400/300'}
               alt={photo.alt || `Photo ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              width={400} // Specify width
+              height={300} // Specify height
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
           </div>
@@ -83,10 +86,12 @@ const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
 
           {/* Main Image */}
           <div className="flex justify-center items-center max-w-full max-h-[80vh] overflow-hidden">
-            <img
+            <Image
               src={photos[selectedPhoto]?.url || '/api/placeholder/800/600'}
               alt={photos[selectedPhoto]?.alt || `Photo ${selectedPhoto + 1}`}
               className="max-w-full max-h-full object-contain"
+              width={800} // Specify width
+              height={600} // Specify height
             />
           </div>
         </div>
