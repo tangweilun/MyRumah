@@ -4,17 +4,20 @@ import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
-import { Heart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import {
+  Heart,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  BedDouble,
+  Bath,
+  Home,
+  Calendar,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function PropertyPage() {
-  const images = [
-    '/image.png',
-    '/image.png',
-    '/image.png',
-    '/image.png',
-    '/image.png',
-  ];
+  const images = ['/1.png', '/2.png', '/3.png', '/4.png', '/5.png'];
 
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
@@ -37,8 +40,8 @@ export default function PropertyPage() {
             <div className="relative aspect-[4/3] rounded-lg">
               <Image
                 src={images[currentImgIndex]}
-                width={600}
-                height={100}
+                width={800}
+                height={600}
                 alt={`Property Image ${currentImgIndex + 1}`}
                 className="object-center mx-auto"
               />
@@ -55,14 +58,33 @@ export default function PropertyPage() {
                 <ChevronRight className="h-6 w-6" />
               </button>
             </div>
+            <div className="flex space-x-2 justify-center overflow-x-auto pb-2">
+              {images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImgIndex(index)}
+                  className={`aspect-[4/3] h-20 flex-shrink-0 rounded-lg ${
+                    index === currentImgIndex ? 'bg-green-700' : 'bg-gray-300'
+                  }`}
+                >
+                  <Image
+                    src={image}
+                    width={800}
+                    height={600}
+                    alt={`Image ${index + 1}`}
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 mr-5">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-2xl font-bold text-green-900 mb-4">
+                <h2 className="text-2xl font-bold text-green-900 mb-4">
                   Modern Apartment 1
-                </h3>
+                </h2>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-green-600" />
                   <span className="text-xl text-green-700">
@@ -74,6 +96,55 @@ export default function PropertyPage() {
                 <Heart className="h-6 w-6 text-gray-400" />
               </button>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg border bg-white p-4">
+                <div className="flex items-center gap-2">
+                  <BedDouble className="h-5 w-5 text-green-600" />
+                  <span className="font-medium">2 Bedrooms</span>
+                </div>
+              </div>
+              <div className="rounded-lg border bg-white p-4">
+                <div className="flex items-center gap-2">
+                  <Bath className="h-5 w-5 text-green-600" />
+                  <span className="font-medium">2 Bathrooms</span>
+                </div>
+              </div>
+              <div className="rounded-lg border bg-white p-4">
+                <div className="flex items-center gap-2">
+                  <Home className="h-5 w-5 text-green-600" />
+                  <span className="font-medium">1,200 sq ft</span>
+                </div>
+              </div>
+              <div className="rounded-lg border bg-white p-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-green-600" />
+                  <span className="font-medium">Available Now</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold">Description</h3>
+              <p className="mt-2 text-gray-600">
+                This modern apartment offers a comfortable living space with
+                high-end finishes and amenities. Enjoy the open-concept layout,
+                fully equipped kitchen, and private balcony with city views.
+                Located in the heart of downtown, you'll have easy access to
+                restaurants, shops, and public transportation.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold">Price</h3>
+              <p className="mt-2 text-2xl font-bold text-green-700">
+                RM600/month
+              </p>
+            </div>
+
+            <Button className="w-full bg-green-700 hover:bg-green-800">
+              Apply Now
+            </Button>
           </div>
         </div>
       </div>
