@@ -15,7 +15,10 @@ const Navbar = () => {
 
       {/* Navigation for medium and larger screens */}
       <nav className="hidden md:flex items-center gap-2 space-x-4">
-        <Link href={'/'} className="text-stone-600 hover:text-green-700">
+        <Link
+          href={'/tenant/fee'}
+          className="text-stone-600 hover:text-green-700"
+        >
           How it works
         </Link>
         <Link href={'/'} className="text-stone-600 hover:text-green-700">
