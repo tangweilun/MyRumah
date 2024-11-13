@@ -58,15 +58,6 @@ export default function FeeManagementPage() {
               </Card>
             </TabsContent>
           </Tabs>
-
-          {/* <div className="border bg-white p-5">
-            <div className="flex gap-2">
-              <Clock className="h-7 w-7 text-green-600" />
-              <span className="text-2xl font-bold text-green-700">
-                Pending Fees
-              </span>
-            </div>
-          </div> */}
         </div>
       </div>
     </div>
