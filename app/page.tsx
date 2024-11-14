@@ -7,7 +7,7 @@ export default function Home() {
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [role, setRole] = useState<string>('');
+  const [userRole, setRole] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
   const handleSubmit = async (event: FormEvent) => {
@@ -18,40 +18,28 @@ export default function Home() {
       username,
       email,
       phoneNumber,
-      role,
+      userRole,
       password,
     };
 
     // Send the data to the API
-    // const response = await fetch('/api/add-user', {
-    //   method: 'GET',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(userData), // Pass the entire object
-    // });
-
-    // const result = await response.json();
-    // if (result.status === 'success') {
-    //   console.log('User added successfully:', result.newUser);
-    //   alert('User added successfully!');
-    // } else {
-    //   console.error('Error:', result.message);
-    //   alert('Failed to add User.');
-    // }
-
-    // testing GET method
-    //
-    const response = await fetch(`/api/add-user`, {
-      method: 'GET',
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData), // Pass the entire object
     });
 
     const result = await response.json();
-    if (result.status === 'success') {
-      console.log('User get successfully:', result.message);
-      alert('User get successfully!');
+    if (result.status === 200) {
+      console.log(result.message);
+      console.log(result.newUser);
+      alert('User registered successfully!');
+    } else if (result.status === 400) {
+      console.log(result.message);
+      alert('Failed to register user.');
     } else {
-      console.error('Error:', result.message);
-      alert('Failed to get User.');
+      console.error(result.message);
+      alert('Error occur when registering user.');
     }
   };
 
@@ -116,7 +104,7 @@ export default function Home() {
           <input
             type="text"
             id="role"
-            value={role}
+            value={userRole}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setRole(e.target.value)
             }

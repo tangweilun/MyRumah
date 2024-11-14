@@ -1,11 +1,17 @@
 import { ethers } from 'ethers';
-import prisma from '../lib/prisma'; // Ensure Prisma is set up properly
-import { PrismaClient, UserRole } from '@prisma/client';
+import prisma from '../../lib/prisma'; // Ensure Prisma is set up properly
+import { Prisma, PrismaClient, UserRole } from '@prisma/client';
 
 // need install bcrypt to do salting and hashing
-// npm install bcrypt pg
+// npm install bcryptjs
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
+
+// All fucntion with no export is set as private function by default
+
+// a Type Guard to check the role match with Enum value or not
+const isUserRole = (role: string): role is UserRole =>
+  Object.values(UserRole).includes(role as UserRole);
 
 async function register(
   username: string,
@@ -16,8 +22,14 @@ async function register(
 ) {
   // Check if the provided userRole matches one of the Role enum values
   // this will returned an array of predefined enum value: Object.values(UserRole)
-
-  if (!Object.values(UserRole).includes(userRole as UserRole)) {
+  // if (!Object.values(UserRole).includes(userRole as UserRole)) {
+  //   throw new Error(
+  //     `Invalid role: ${userRole}. Must be one of ${Object.values(UserRole).join(
+  //       ', '
+  //     )}`
+  //   );
+  // }
+  if (!isUserRole(userRole)) {
     throw new Error(
       `Invalid role: ${userRole}. Must be one of ${Object.values(UserRole).join(
         ', '
@@ -25,11 +37,9 @@ async function register(
     );
   }
 
+  // return { status: 'success', data: 'sss' };
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10);
-
-  // if want to compare passwrod in the future
-  // const passwordMatches = await bcrypt.compare(input password, saved password)
 
   try {
     const newUser = await prisma.userInfo.create({
@@ -38,13 +48,12 @@ async function register(
         password: hashedPassword,
         email: email,
         phone_number: phoneNumber,
-        role: userRole as UserRole,
+        role: UserRole[userRole as keyof typeof UserRole],
         wallet_amount: 1000,
       },
     });
-
-    console.log('User created in database:', newUser);
-    return { status: 'success', newUser };
+    // console.log('User created in database:', newUser);
+    return { status: 200, newUser: newUser };
   } catch (error) {
     console.error('Error creating user in database:', error);
     return {
@@ -54,7 +63,57 @@ async function register(
   }
 }
 
-export { register };
+async function login(email: string, password: string) {}
+
+async function checkAccExist(
+  type: string,
+  email: string,
+  role: UserRole,
+  password?: string
+) {
+  try {
+    const count = await prisma.userInfo.count({
+      where: { email: email, role: role },
+    });
+
+    // if type = register, check duplication email and role
+    if (type === 'register') {
+      return count > 0
+        ? (console.log(`You have used the current email to register ${role}!`),
+          false)
+        : true;
+    }
+    // if type = login, check matching with email, role, password
+    else if (type === 'login') {
+      if (count > 0) {
+        try {
+          const user = await prisma.userInfo.findUnique({
+            // unique key name is defined in prisma.schema
+            where: { emailRole: { email: email, role: role } },
+            select: { password: true },
+          });
+          if (password && user) {
+            const passwordMatches = await bcrypt.compare(
+              password,
+              user.password
+            );
+            return passwordMatches ? true : false;
+          }
+          return false;
+        } catch (error) {
+          console.error('Error with Prisma query:', error);
+          throw new Error('Database error');
+        }
+      } else if (count === 0) {
+      }
+    }
+  } catch (error) {
+    console.error('Error with Prisma query:', error);
+    throw new Error('Database error');
+  }
+}
+
+export { register, login };
 
 // async function createAgreement(
 //   userId,
