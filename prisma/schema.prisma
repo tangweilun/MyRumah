@@ -34,7 +34,7 @@ model UserInfo {
   notifications Notification[]
   proposals     Proposal[]
 
-  @@unique([email, role])
+  @@unique(name: "emailRole", [email, role])
 }
 
 enum UserRole {
