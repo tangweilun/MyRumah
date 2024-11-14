@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CircleCheck } from "lucide-react";
+import { Clock, CircleCheck, CircleCheckBig } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -16,25 +16,17 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Fee {
   property: string;
@@ -46,11 +38,6 @@ interface Fee {
 }
 
 export default function FeeManagementPage() {
-  // const [sorting, setSorting] = React.useState<SortingState>([]);
-  // const [colFilters, setColFilters] = React.useState<ColumnFiltersState>([]);
-  // const [colVisibility, setColVisibility] = React.useState<VisibilityState>({});
-  // const [rowSelection, setRowSelection] = React.useState({});
-
   const pendingFees: Fee[] = [
     {
       property: "Cozy Downtown Apartment",
@@ -186,40 +173,16 @@ export default function FeeManagementPage() {
     );
   };
 
-  // const pendingFeesTotalPages = Math.ceil(pendingFees.length / itemsPerPage);
-  // const paymentHistoryTotalPages = Math.ceil(
-  //   paymentHistory.length / itemsPerPage
-  // );
-  // const startIndex = (currentPage - 1) * itemsPerPage;
-  // const endIndex = startIndex + itemsPerPage;
-  // const showingPendingFees = pendingFees.slice(startIndex, endIndex);
-  // const showingPaymentHistory = paymentHistory.slice(startIndex, endIndex);
+  const [selectedPendingFee, setSelectedPendingFee] = useState<Fee | null>(
+    null
+  );
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
 
-  // const cols: ColumnDef<PendingFee>[] = [
-  //   {
-  //     accessorKey: "property",
-  //     header: "Property",
-  //     cell: ({ row }) => <div className="font-medium">{row.getValue("property")}</div>
-  //   },
-  //   {
-  //     accessorKey: "dueDate",
-  //     header: "Due Date"
-  //   },
-  //   {
-  //     accessorKey: "amount",
-  //     header: "Amount",
-  //     cell: ({ row }) => <div>${row.getValue("amount")}</div>
-  //   },
-  //   {
-  //     accessorKey: "status",
-  //     header: "Status",
-  //     cell: ({ row }) => <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800">{row.getValue("status")}</span>
-  //   },
-  //   {
-  //     id: "actions",
-  //     cell: () => <Button className="bg-green-700 hover:bg-green-800">Pay Now</Button>
-  //   }
-  // ]
+  //function to handle selected pending fee for payment
+  const handlePayment = (fee: Fee) => {
+    setSelectedPendingFee(fee);
+    setShowPaymentSuccess(true);
+  };
 
   return (
     <div>
@@ -264,14 +227,17 @@ export default function FeeManagementPage() {
                               {fee.property}
                             </TableCell>
                             <TableCell>{fee.dueDate}</TableCell>
-                            <TableCell>${fee.amount}</TableCell>
+                            <TableCell>${fee.amount.toFixed(2)}</TableCell>
                             <TableCell>
                               <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800">
                                 {fee.status}
                               </span>
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button className="bg-green-700 hover:bg-green-800">
+                              <Button
+                                className="bg-green-700 hover:bg-green-800"
+                                onClick={() => handlePayment(fee)}
+                              >
                                 Pay Now
                               </Button>
                             </TableCell>
@@ -321,7 +287,7 @@ export default function FeeManagementPage() {
                             {fee.property}
                           </TableCell>
                           <TableCell>{fee.paidOn}</TableCell>
-                          <TableCell>${fee.amount}</TableCell>
+                          <TableCell>${fee.amount.toFixed(2)}</TableCell>
                           <TableCell>{fee.receiptNo}</TableCell>
                           <TableCell className="text-right">
                             <Button className="bg-green-700 hover:bg-green-800">
@@ -345,6 +311,47 @@ export default function FeeManagementPage() {
           </Tabs>
         </div>
       </div>
+
+      {selectedPendingFee && (
+        <Dialog open={showPaymentSuccess} onOpenChange={setShowPaymentSuccess}>
+          <DialogContent className="sm:max-w-md">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+                <CircleCheckBig className="h-10 w-10 text-green-600" />
+              </div>
+              <DialogHeader className="mb-8">
+                <DialogTitle className="text-2xl font-bold">
+                  Payment Successful!
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mb-6 w-full space-y-4 text-left">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Transaction ID</span>
+                  <span className="font-medium">TXN123456789</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Property</span>
+                  <span className="font-medium">
+                    {selectedPendingFee.property}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Amount Paid</span>
+                  <span className="font-medium">
+                    ${selectedPendingFee.amount.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Date</span>
+                  <span className="font-medium">
+                    {new Date().toDateString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

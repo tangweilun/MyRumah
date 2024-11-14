@@ -1,8 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Image from 'next/image';
+import { useState } from "react";
+import Image from "next/image";
 import {
   Heart,
   ChevronLeft,
@@ -12,7 +11,7 @@ import {
   Bath,
   Home,
   Calendar,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Dialog,
   DialogHeader,
@@ -20,18 +19,18 @@ import {
   DialogFooter,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function PropertyPage() {
-  const propertyName = 'Modern Apartment 1';
+  const propertyName = "Modern Apartment 1";
 
-  const images = ['/1.png', '/2.png', '/3.png', '/4.png', '/5.png'];
+  const images = ["/1.png", "/2.png", "/3.png", "/4.png", "/5.png"];
 
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
@@ -49,7 +48,6 @@ export default function PropertyPage() {
 
   return (
     <div>
-      <Navbar></Navbar>
       <div className="bg-green-100 w-screen py-16">
         <div className="flex items-start justify-between p-6">
           <div>
@@ -97,7 +95,7 @@ export default function PropertyPage() {
                   key={index}
                   onClick={() => setCurrentImgIndex(index)}
                   className={`aspect-[4/3] h-20 flex-shrink-0 rounded-lg ${
-                    index === currentImgIndex ? 'bg-green-700' : 'bg-gray-300'
+                    index === currentImgIndex ? "bg-green-700" : "bg-gray-300"
                   }`}
                 >
                   <Image
