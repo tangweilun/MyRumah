@@ -23,7 +23,6 @@ model UserInfo {
   password      String // store the hased string after original password + salting
   email         String
   phone_number  String
-  salting       String
   role          UserRole
   wallet_amount Decimal  @db.Decimal(10, 2)
   created_date  DateTime @default(now())
