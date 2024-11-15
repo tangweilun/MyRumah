@@ -139,7 +139,6 @@ export default function FeeManagementPage() {
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              href="#"
               onClick={() => setPage(Math.max(currentPage - 1, 1))}
               className={
                 currentPage === 1 ? "pointer-events-none opacity-50" : ""
@@ -149,7 +148,6 @@ export default function FeeManagementPage() {
           {[...Array(totalPages)].map((_, i) => (
             <PaginationItem key={i}>
               <PaginationLink
-                //href="#"
                 onClick={() => setPage(i + 1)}
                 isActive={currentPage === i + 1}
               >
@@ -159,7 +157,6 @@ export default function FeeManagementPage() {
           ))}
           <PaginationItem>
             <PaginationNext
-              href="#"
               onClick={() => setPage(Math.min(currentPage + 1, totalPages))}
               className={
                 currentPage === totalPages
@@ -227,7 +224,7 @@ export default function FeeManagementPage() {
                               {fee.property}
                             </TableCell>
                             <TableCell>{fee.dueDate}</TableCell>
-                            <TableCell>${fee.amount.toFixed(2)}</TableCell>
+                            <TableCell>${fee.amount}</TableCell>
                             <TableCell>
                               <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800">
                                 {fee.status}
@@ -287,7 +284,7 @@ export default function FeeManagementPage() {
                             {fee.property}
                           </TableCell>
                           <TableCell>{fee.paidOn}</TableCell>
-                          <TableCell>${fee.amount.toFixed(2)}</TableCell>
+                          <TableCell>${fee.amount}</TableCell>
                           <TableCell>{fee.receiptNo}</TableCell>
                           <TableCell className="text-right">
                             <Button className="bg-green-700 hover:bg-green-800">
