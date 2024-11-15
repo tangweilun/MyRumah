@@ -6,8 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PropertyGrid from '@/components/PropertyGrid';
 import LocationSearch from '@/components/LocationSearch';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { UserRole } from '@/lib/data';
 
 export default function Home() {
+  const { user, isLoaded, isSignedIn } = useUser();
+  const router = useRouter();
+  useEffect(() => {
+    const role = user?.publicMetadata.role;
+    console.log('Role' + role);
+    if (isSignedIn) {
+    }
+    if (role == UserRole.Owner) {
+      router.push(`/owner`);
+    } else if (role == UserRole.Tenant) {
+      router.push(`/tenant`);
+    }
+  }, [user, router]);
   return (
     <div>
       <Navbar />

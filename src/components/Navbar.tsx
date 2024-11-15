@@ -1,10 +1,15 @@
 'use client';
+import React from 'react';
 import { Menu, Home, User } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { role } from '@/lib/data'; // Import the role
+import { UserButton, useAuth, useUser } from '@clerk/nextjs'; // Import useAuth
 
 const Navbar = () => {
+  const { isSignedIn } = useAuth(); // Check if the user is signed in
+  const { user } = useUser();
+  const role = user?.publicMetadata.role;
+  // console.log('Inside nav bar isSignedIn:' + isSignedIn);
+  // console.log('Inside nav bar role:' + role);
   return (
     <div className="flex items-center justify-between h-16 px-16 m-8">
       {/* Logo */}
@@ -18,7 +23,7 @@ const Navbar = () => {
       {/* Navigation for medium and larger screens */}
       <nav className="hidden md:flex items-center gap-2 space-x-4">
         {/* Dynamic Links based on role */}
-        {role === 'owner' && (
+        {role === 'owner' && isSignedIn && (
           <>
             <Link
               href={'/owner'}
@@ -40,7 +45,7 @@ const Navbar = () => {
             </Link>
           </>
         )}
-        {role === 'tenant' && (
+        {role === 'tenant' && isSignedIn && (
           <>
             <Link
               href={'/list/my-proposals'}
@@ -59,35 +64,24 @@ const Navbar = () => {
       </nav>
 
       {/* User menu and responsive menu icon */}
-      <div className="flex items-center">
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-white hover:text-green-700 hidden md:block bg-green-700"
-          asChild
-        >
-          Get Started
-        </Button>
-
-        {/* Menu icon for small screens */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="ml-4 text-green-700 border-green-700 md:hidden"
-          asChild
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-
-        {/* User icon for larger screens */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="ml-4 text-green-700 border-green-700 hidden md:flex"
-          asChild
-        >
-          <User className="h-4 w-4" />
-        </Button>
+      <div className="flex items-center gap-6">
+        {!isSignedIn && (
+          <>
+            <Link
+              href={'/sign-in'}
+              className="text-stone-600 hover:text-green-700"
+            >
+              Login
+            </Link>
+            <Link
+              href={'/sign-up'}
+              className="text-stone-600 hover:text-green-700"
+            >
+              Create Account
+            </Link>
+          </>
+        )}
+        <UserButton showName />
       </div>
     </div>
   );

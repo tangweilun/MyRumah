@@ -5,6 +5,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, Bed } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 type PropertyCardProps = {
   title: string;
@@ -22,9 +24,26 @@ const PropertyCard = ({
   imageUrl,
 }: PropertyCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
 
   const toggleLike = () => {
+    if (!isSignedIn) {
+      router.push('/sign-up');
+      return;
+    }
     setIsLiked((prev) => !prev);
+  };
+
+  const handleApplyNow = () => {
+    if (!isSignedIn) {
+      router.push('/sign-in');
+      return;
+    }
+    // Handle the application process for signed-in users
+    router.push(
+      `/dashboard/property/apply?property=${encodeURIComponent(title)}`
+    );
   };
 
   return (
@@ -72,8 +91,11 @@ const PropertyCard = ({
         </CardContent>
 
         <CardFooter className="p-4 pt-0">
-          <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
-            Apply Now
+          <Button
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            onClick={handleApplyNow}
+          >
+            {isSignedIn ? 'Apply Now' : 'Sign in to Apply'}
           </Button>
         </CardFooter>
       </Card>
