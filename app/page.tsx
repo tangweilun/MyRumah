@@ -1,5 +1,6 @@
 'use client';
 
+import { UserRole } from '@prisma/client';
 import { useState, FormEvent, ChangeEvent } from 'react';
 
 export default function Home() {
@@ -7,7 +8,7 @@ export default function Home() {
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [role, setRole] = useState<string>('');
+  const [userRole, setRole] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
   const handleSubmit = async (event: FormEvent) => {
@@ -18,40 +19,24 @@ export default function Home() {
       username,
       email,
       phoneNumber,
-      role,
+      userRole,
       password,
     };
 
     // Send the data to the API
-    // const response = await fetch('/api/add-user', {
-    //   method: 'GET',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(userData), // Pass the entire object
-    // });
-
-    // const result = await response.json();
-    // if (result.status === 'success') {
-    //   console.log('User added successfully:', result.newUser);
-    //   alert('User added successfully!');
-    // } else {
-    //   console.error('Error:', result.message);
-    //   alert('Failed to add User.');
-    // }
-
-    // testing GET method
-    //
-    const response = await fetch(`/api/add-user`, {
-      method: 'GET',
+    const response = await fetch('/api/add-user', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userData }), // Send the object wrapped in a 'userData' field
     });
 
     const result = await response.json();
     if (result.status === 'success') {
-      console.log('User get successfully:', result.message);
-      alert('User get successfully!');
+      console.log('User added successfully:', result.receivedData);
+      alert('User added successfully!');
     } else {
       console.error('Error:', result.message);
-      alert('Failed to get User.');
+      alert('Failed to add user.');
     }
   };
 
@@ -103,20 +88,10 @@ export default function Home() {
 
         <div>
           <label htmlFor="role">Role</label>
-          {/* <select
-            id="role"
-            value={role}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              setRole(e.target.value)
-            }
-          >
-            <option value="tenant">Tenant</option>
-            <option value="owner">Owner</option>
-          </select> */}
           <input
             type="text"
             id="role"
-            value={role}
+            value={userRole}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setRole(e.target.value)
             }

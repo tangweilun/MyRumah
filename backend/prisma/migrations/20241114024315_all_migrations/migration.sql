@@ -1,9 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('tenant', 'owner');
 
@@ -28,9 +22,6 @@ CREATE TYPE "RentalFeeStatus" AS ENUM ('paid', 'pending');
 -- CreateEnum
 CREATE TYPE "NotificationStatus" AS ENUM ('read', 'unread');
 
--- DropTable
-DROP TABLE "User";
-
 -- CreateTable
 CREATE TABLE "UserInfo" (
     "user_id" SERIAL NOT NULL,
@@ -38,7 +29,6 @@ CREATE TABLE "UserInfo" (
     "password" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "phone_number" TEXT NOT NULL,
-    "salting" TEXT NOT NULL,
     "role" "UserRole" NOT NULL,
     "wallet_amount" DECIMAL(10,2) NOT NULL,
     "created_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

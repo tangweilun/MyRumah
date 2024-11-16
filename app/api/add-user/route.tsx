@@ -1,53 +1,43 @@
-// app/api/add-user/route.tsx
 
+// Simulating the register function (for hardcoded values)
+// const registerData = {
+//   username: "chunkee",
+//   password: "CKchunkee8181",
+//   email: "ck@gmail.com",
+//   phoneNumber: "0173538126",
+//   userRole: "tenant"
+// };
+// import { NextResponse } from 'next/server';
 import { register } from '../../../backend/services/user-service';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    return NextResponse.json({ message: 'qqq' });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { status: 'error', message: 'aaa' },
-        { status: 500 }
-      );
-    }
+    const { userData } = await request.json();
+    
+    // Here, you can handle saving the userData to a database or any other logic.
+    // For now, we will just return the received data.
+
+    console.log('Received user data:', userData);
+    const result = await register(userData);
+    return NextResponse.json({
+      status: 'success',
+      receivedData: userData, // Return the received data back to the frontend
+      message: result,
+    });
+  } catch (error) {
+    console.error('Error handling POST request:', error);
+    return NextResponse.json({
+      status: 'error',
+      message: 'Failed to process the request.',
+    });
   }
 }
 
-export async function POST(req: Request) {
-  try {
-    const { userData } = await req.json(); // Parse JSON body
-    console.log(11111);
 
-    if (!userData) {
-      return NextResponse.json(
-        { status: 'error', message: 'Missing userData' },
-        { status: 400 }
-      );
-    }
 
-    const result = await register(
-      userData.username,
-      userData.password,
-      userData.email,
-      userData.phoneNumber,
-      userData.userRole
-    );
 
-    return NextResponse.json(result, { status: 200 });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { status: 'error', message: error.message },
-        { status: 500 }
-      );
-    }
 
-    return NextResponse.json(
-      { status: 'error', message: 'Unknown error occurred' },
-      { status: 500 }
-    );
-  }
-}
+
+
+
