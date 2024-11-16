@@ -24,19 +24,23 @@ export default function Home() {
     };
 
     // Send the data to the API
-    const response = await fetch('/api/add-user', {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userData }), // Send the object wrapped in a 'userData' field
+      body: JSON.stringify(userData), // Pass the entire object
     });
 
     const result = await response.json();
-    if (result.status === 'success') {
-      console.log('User added successfully:', result.receivedData);
-      alert('User added successfully!');
+    if (result.status === 200) {
+      console.log(result.message);
+      console.log(result.newUser);
+      alert('User registered successfully!');
+    } else if (result.status === 400) {
+      console.log(result.message);
+      alert('Failed to register user.');
     } else {
-      console.error('Error:', result.message);
-      alert('Failed to add user.');
+      console.error(result.message);
+      alert('Error occur when registering user.');
     }
   };
 
