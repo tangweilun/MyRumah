@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Heart, Bed } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
 
 type PropertyCardProps = {
   title: string;
@@ -24,11 +23,10 @@ const PropertyCard = ({
   imageUrl,
 }: PropertyCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
-  const { isSignedIn } = useAuth();
   const router = useRouter();
 
   const toggleLike = () => {
-    if (!isSignedIn) {
+    if (!true) {
       router.push('/sign-up');
       return;
     }
@@ -36,7 +34,7 @@ const PropertyCard = ({
   };
 
   const handleApplyNow = () => {
-    if (!isSignedIn) {
+    if (!true) {
       router.push('/sign-in');
       return;
     }
@@ -95,7 +93,7 @@ const PropertyCard = ({
             className="w-full bg-green-600 hover:bg-green-700 text-white"
             onClick={handleApplyNow}
           >
-            {isSignedIn ? 'Apply Now' : 'Sign in to Apply'}
+            {true ? 'Apply Now' : 'Sign in to Apply'}
           </Button>
         </CardFooter>
       </Card>
@@ -133,7 +131,7 @@ const PropertyGrid = () => {
               imageUrl: '/propertyImage3.jpeg',
             },
           ]);
-        }, 1000);
+        }, 10);
       });
       setProperties(response);
     };

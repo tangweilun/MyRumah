@@ -1,32 +1,10 @@
-'use client';
-
 import Navbar from '@/components/Navbar';
-import { MapPin, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import PropertyGrid from '@/components/PropertyGrid';
 import LocationSearch from '@/components/LocationSearch';
-import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { UserRole } from '@/lib/data';
+import PropertyGrid from '@/components/propertyGrid';
 
 export default function Home() {
-  const { user, isLoaded, isSignedIn } = useUser();
-  const router = useRouter();
-  useEffect(() => {
-    const role = user?.publicMetadata.role;
-    console.log('Role' + role);
-    if (isSignedIn) {
-    }
-    if (role == UserRole.Owner) {
-      router.push(`/owner`);
-    } else if (role == UserRole.Tenant) {
-      router.push(`/tenant`);
-    }
-  }, [user, router]);
   return (
-    <div>
+    <div className="bg-gradient-to-b from-stone-50 to-stone-100">
       <Navbar />
       {/* Hero section with search */}
       <div className="bg-green-100 py-8 md:py-16 lg:py-16">

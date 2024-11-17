@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { useState } from 'react';
 import { MapPin, Search, Loader2 } from 'lucide-react';
@@ -68,7 +69,7 @@ const LocationSearch = () => {
     setTimeout(() => {
       setLoading(false);
       console.log('Searching for:', value);
-    }, 1000);
+    }, 100);
   };
 
   const filteredLocations = locations.filter(
