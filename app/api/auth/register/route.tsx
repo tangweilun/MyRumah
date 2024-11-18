@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const userData = await req.json(); // Parse JSON body
-    console.log('Received data:', userData);
+    // console.log('Received data:', userData);
 
     if (!userData) {
       return NextResponse.json({
@@ -33,6 +33,11 @@ export async function POST(req: Request) {
       return NextResponse.json({
         status: result.status,
         message: 'Incomplete registration information!',
+      });
+    } else if (result.status === 401) {
+      return NextResponse.json({
+        status: result.status,
+        message: 'Invalid registration credential!',
       });
     } else if (result.status === 409) {
       return NextResponse.json({

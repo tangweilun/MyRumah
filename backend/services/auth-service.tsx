@@ -25,7 +25,7 @@ async function register(
 
   // Check if the provided userRole matches one of the Role enum values
   if (!isUserRole(userRole)) {
-    return { status: 500 };
+    return { status: 401 };
   }
 
   const accExist = await checkAccExist(email, userRole);
@@ -65,7 +65,7 @@ async function login(email: string, userRole: string, password: string) {
   }
 
   if (!isUserRole(userRole)) {
-    return { status: 500 };
+    return { status: 401 };
   }
 
   const accExist = await checkAccExist(email, userRole);
