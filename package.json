@@ -14,6 +14,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "decimal.js": "^10.4.3",
     "lucide-react": "^0.454.0",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
@@ -22,6 +23,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/decimal.js": "^0.0.32",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
