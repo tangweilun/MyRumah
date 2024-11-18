@@ -75,3 +75,85 @@ export async function getAllProperties() {
       throw new Error("Error fetching properties");
     }
   }
+
+  //delete/edit
+  export async function editProperty(
+    propertyId: number,
+    deleteProperty: boolean,
+    data: {
+      ownerId?: number;
+      address?: string;
+      image?: Buffer;
+      description?: string;
+      occupantNum?: number;
+      rentalFee?: number;
+      startDate?: Date;
+      endDate?: Date;
+      status?: string;
+    }
+  ) {
+    try {
+      if (deleteProperty) {
+        // Mark the property status as 'trash'
+        const updatedProperty = await prisma.propertyInfo.update({
+          where: { property_id: propertyId },
+          data: { status: 'trash' },
+        });
+        return { status: 200, property: updatedProperty };
+      } else {
+        // Validate the status if provided
+        if (data.status) {
+          const validStatuses = ['active', 'inactive', 'occupied', 'trash'];
+          if (!validStatuses.includes(data.status)) {
+            return { status: 400, message: 'Invalid property status.' };
+          }
+        }
+  
+        // Update the property with provided fields
+        const updatedProperty = await prisma.propertyInfo.update({
+          where: { property_id: propertyId },
+          data: {
+            owner_id: data.ownerId,
+            address: data.address,
+            image: data.image,
+            description: data.description,
+            occupant_num: data.occupantNum,
+            rental_fee: data.rentalFee,
+            start_date: data.startDate,
+            end_date: data.endDate,
+            status: data.status as any, // Casting for Prisma's enum type
+            modified_date: new Date(), // Ensure the `@updatedAt` trigger
+          },
+        });
+  
+        return { status: 200, property: updatedProperty };
+      }
+    } catch (error) {
+      console.error('Error updating property in database:', error);
+      return { status: 500, message: 'Error updating property.' };
+    }
+  }
+
+  export async function getProperty(propertyId: number) {
+    try {
+      const property = await prisma.propertyInfo.findUnique({
+        where: { property_id: propertyId },
+        include: {
+          owner: true, // Include owner details
+          proposals: true, // Include proposals associated with the property
+          wishlists: true, // Include wishlists associated with the property
+          WishlistProperty: true, // Include WishlistProperty association
+        },
+      });
+  
+      if (!property) {
+        return { status: 404, message: 'Property not found.' };
+      }
+  
+      return { status: 200, property };
+    } catch (error) {
+      console.error('Error fetching property from database:', error);
+      return { status: 500, message: 'Error retrieving property.' };
+    }
+  }
+  
