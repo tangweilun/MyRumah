@@ -2,7 +2,10 @@
 pragma solidity ^0.8.0;
 
 contract User {
-    enum Role {tenant, owner}
+    enum Role {
+        tenant,
+        owner
+    }
 
     // Caution: solidity don't have float type. so store as uint256, when use, divide to show two decimal place; when store, expect the input has two decimal place so can multiply by 100 to store in unint256.
     // solidity don't support datetime. use timestamp.
@@ -16,12 +19,12 @@ contract User {
         string phoneNumber;
         Role role;
         uint256 walletAmount;
-        uint createdTimestamp;        
+        uint createdTimestamp;
     }
 
     // Store the hash of the agreement data
     // key is user id
-    mapping(uint256 => bytes32) public agreements; 
+    mapping(uint256 => bytes32) public agreements;
 
     event UserCreated();
 
@@ -48,17 +51,19 @@ contract User {
         });
 
         // Hash the agreement struct (you can concatenate fields or use a more complex hash if needed)
-        bytes32 userInfoHash = keccak256(abi.encodePacked(
-            newUser.username,
-            newUser.password,
-            newUser.email,
-            newUser.phoneNumber,
-            newUser.role,
-            newUser.walletAmount,
-            newUser.createdTimestamp
-        ));
+        bytes32 userInfoHash = keccak256(
+            abi.encodePacked(
+                newUser.username,
+                newUser.password,
+                newUser.email,
+                newUser.phoneNumber,
+                newUser.role,
+                newUser.walletAmount,
+                newUser.createdTimestamp
+            )
+        );
 
-        uint256 newUserId = newUser.userId; 
+        uint256 newUserId = newUser.userId;
         agreements[newUserId] = userInfoHash; // Store the hash of the agreement data in the mapping
 
         // Emit event for agreement creation

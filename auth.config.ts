@@ -1,30 +1,30 @@
-import Credentials from 'next-auth/providers/credentials';
-import { signInSchema } from '@/lib/zod';
-import prisma from '@/lib/prisma';
+import Credentials from "next-auth/providers/credentials";
+import { signInSchema } from "@/lib/zod";
+import prisma from "@/lib/prisma";
 // import bcryptjs from 'bcryptjs';
-import { NextAuthConfig } from 'next-auth';
+import { NextAuthConfig } from "next-auth";
 
-const publicRoutes = ['/auth/sign-in', '/auth/sign-up', '/'];
-const authRoutes = ['/auth/sign-in', '/auth/sign-up'];
-const tenantRoutes = ['/tenant'];
-const ownerRoutes = ['/owner'];
+const publicRoutes = ["/auth/sign-in", "/auth/sign-up", "/"];
+const authRoutes = ["/auth/sign-in", "/auth/sign-up"];
+const tenantRoutes = ["/tenant"];
+const ownerRoutes = ["/owner"];
 export default {
   providers: [
     Credentials({
       credentials: {
-        email: { label: 'Email', type: 'email', placeholder: 'Email' },
+        email: { label: "Email", type: "email", placeholder: "Email" },
         password: {
-          label: 'Password',
-          type: 'password',
-          placeholder: 'Password',
+          label: "Password",
+          type: "password",
+          placeholder: "Password",
         },
       },
-      authorize(credentials) {
+      async authorize(credentials) {
         let user = null;
         // validate credentials
         const parsedCredentials = signInSchema.safeParse(credentials);
         if (!parsedCredentials.success) {
-          console.error('Invalid credentials:', parsedCredentials.error.errors);
+          console.error("Invalid credentials:", parsedCredentials.error.errors);
           return null;
         }
         // user = await prisma.user.findUnique({
@@ -33,32 +33,20 @@ export default {
         //   },
         // });
         user = {
-          id: '1', // Add an ID field
-          email: 'testing@gmail.com',
-          password: 'A123b123', // Example hashed password
-          role: 'owner', // Optional: Include any fields relevant to your app
+          id: "1", // Add an ID field
+          email: "testing@gmail.com",
+          password: "A123b123", // Example hashed password
+          role: "owner", // Optional: Include any fields relevant to your app
         };
 
-        // user = await new Promise((resolve) => {
-        //   // Simulate async operation and return fake user data
-        //   setTimeout(() => {
-        //     resolve({
-        //       id: '1', // Add an ID field
-        //       email: 'testing@gmail.com',
-        //       password: 'A123b123', // Example hashed password
-        //       role: 'tenant', // Optional: Include any fields relevant to your app
-        //     });
-        //   }, 0); // Simulates a delay of 100ms
-        // });
-
         if (!user) {
-          console.log('Invalid credentials');
+          console.log("Invalid credentials");
           return null;
         }
 
         if (!user.password) {
           console.log(
-            'User has no password. They probably signed up with an oauth provider.'
+            "User has no password. They probably signed up with an oauth provider."
           );
           return null;
         }
@@ -68,7 +56,7 @@ export default {
         //   user.password
         // );
         if (!isPasswordValid) {
-          console.log('Invalid password');
+          console.log("Invalid password");
           return null;
         }
 
@@ -81,11 +69,11 @@ export default {
     authorized({ request: { nextUrl }, auth }) {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
-      console.log('isLoggedin' + isLoggedIn);
-      console.log('pathname in callback auth.config' + pathname);
-      console.log('Auth state:', !!auth?.user);
-      console.log('Current pathname:', pathname);
-      console.log('User role:', auth?.user?.role);
+      console.log("isLoggedin" + isLoggedIn);
+      console.log("pathname in callback auth.config" + pathname);
+      console.log("Auth state:", !!auth?.user);
+      console.log("Current pathname:", pathname);
+      console.log("User role:", auth?.user?.role);
       // 1. Handle public routes
       if (publicRoutes.includes(pathname)) {
         return true;
@@ -99,11 +87,11 @@ export default {
           const role = auth.user.role;
           const baseUrl = new URL(nextUrl.origin);
 
-          if (role === 'tenant') {
-            baseUrl.pathname = '/tenant';
+          if (role === "tenant") {
+            baseUrl.pathname = "/tenant";
             return Response.redirect(baseUrl);
-          } else if (role === 'owner') {
-            baseUrl.pathname = '/owner';
+          } else if (role === "owner") {
+            baseUrl.pathname = "/owner";
             return Response.redirect(baseUrl);
           }
         }
@@ -113,8 +101,8 @@ export default {
       // 3. Handle protected routes
       if (!isLoggedIn) {
         // Redirect to sign-in page if trying to access protected routes while not logged in
-        const signInUrl = new URL('/auth/sign-in', nextUrl.origin);
-        signInUrl.searchParams.set('callbackUrl', nextUrl.href);
+        const signInUrl = new URL("/auth/sign-in", nextUrl.origin);
+        signInUrl.searchParams.set("callbackUrl", nextUrl.href);
         return Response.redirect(signInUrl);
       }
 
@@ -127,7 +115,7 @@ export default {
         token.id = user.id as string;
         token.role = user.role as string;
       }
-      if (trigger === 'update' && session) {
+      if (trigger === "update" && session) {
         token = { ...token, ...session };
       }
       return token;
@@ -139,6 +127,6 @@ export default {
     },
   },
   pages: {
-    signIn: '/auth/sign-in',
+    signIn: "/auth/sign-in",
   },
 } satisfies NextAuthConfig;

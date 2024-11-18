@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent, ChangeEvent } from "react";
 
 export default function Home() {
   // Define state for multiple fields
-  const [username, setUsername] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [userRole, setRole] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [userRole, setRole] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -23,9 +23,9 @@ export default function Home() {
     };
 
     // Send the data to the API
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData), // Pass the entire object
     });
 
@@ -33,13 +33,13 @@ export default function Home() {
     if (result.status === 200) {
       console.log(result.message);
       console.log(result.newUser);
-      alert('User registered successfully!');
+      alert("User registered successfully!");
     } else if (result.status === 400) {
       console.log(result.message);
-      alert('Failed to register user.');
+      alert("Failed to register user.");
     } else {
       console.error(result.message);
-      alert('Error occur when registering user.');
+      alert("Error occur when registering user.");
     }
   };
 

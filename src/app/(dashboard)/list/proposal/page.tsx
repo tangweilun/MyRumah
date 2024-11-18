@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const Proposal = () => {
   return <div className="">Proposal </div>;

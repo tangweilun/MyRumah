@@ -1,10 +1,10 @@
-import prisma from '../../lib/prisma'; // Ensure Prisma is set up properly
-import { UserRole } from '@prisma/client';
+import prisma from "../../lib/prisma"; // Ensure Prisma is set up properly
+import { UserRole } from "@prisma/client";
 
 // need install bcrypt to do salting and hashing
 // npm install bcryptjs
 
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
 // All function with no export is set as private function by default
 
@@ -52,7 +52,7 @@ async function register(
         newUser: newUser,
       };
     } catch (error) {
-      console.error('Error creating user in database:', error);
+      console.error("Error creating user in database:", error);
       return { status: 500 };
     }
   }
@@ -88,7 +88,7 @@ async function login(email: string, userRole: string, password: string) {
       return { exist: false };
     } catch (error) {
       // console.error('Error with Prisma query:', error);
-      console.error('Error with Prisma query');
+      console.error("Error with Prisma query");
       return { status: 500 };
     }
   }
@@ -104,7 +104,7 @@ async function checkAccExist(email: string, role: UserRole) {
   } catch (error) {
     // console.error('Database error');
     // throw new Error('Database error');
-    console.error('Database error');
+    console.error("Database error");
     return { status: 500 };
   }
 }

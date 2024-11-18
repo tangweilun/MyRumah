@@ -180,10 +180,10 @@
 //     </div>
 //   );
 // }
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -191,34 +191,34 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import LoadingButton from '@/components/LoadingButton';
-import ErrorMessage from '@/components/ErrorMessage';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import LoadingButton from "@/components/LoadingButton";
+import ErrorMessage from "@/components/ErrorMessage";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { signUpSchema } from '@/lib/zod';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { signUpSchema } from "@/lib/zod";
 import {
   handleCredentialsSignin,
   handleSignUp,
-} from '@/app/actions/authActions';
-import { Home } from 'lucide-react';
+} from "@/app/actions/authActions";
+import { Home } from "lucide-react";
 
 export default function SignUp() {
-  const [globalError, setGlobalError] = useState('');
+  const [globalError, setGlobalError] = useState("");
 
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      username: '',
-      email: '',
-      password: '',
+      username: "",
+      email: "",
+      password: "",
       role: undefined,
-      phoneNumber: '',
-      confirmPassword: '',
+      phoneNumber: "",
+      confirmPassword: "",
     },
   });
 
@@ -226,7 +226,7 @@ export default function SignUp() {
     try {
       const result: ServerActionResponse = await handleSignUp(values);
       if (result.success) {
-        console.log('Account created successfully.');
+        console.log("Account created successfully.");
         const valuesForSignin = {
           email: values.email,
           password: values.password,
@@ -236,7 +236,7 @@ export default function SignUp() {
         setGlobalError(result.message);
       }
     } catch (error) {
-      setGlobalError('An unexpected error occurred. Please try again.');
+      setGlobalError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -257,7 +257,7 @@ export default function SignUp() {
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
               <div className="space-y-4">
-                {['username', 'email', 'password'].map((field) => (
+                {["username", "email", "password"].map((field) => (
                   <FormField
                     key={field}
                     control={form.control}
@@ -270,11 +270,11 @@ export default function SignUp() {
                         <FormControl>
                           <Input
                             type={
-                              field === 'password'
-                                ? 'password'
-                                : field === 'email'
-                                ? 'email'
-                                : 'text'
+                              field === "password"
+                                ? "password"
+                                : field === "email"
+                                ? "email"
+                                : "text"
                             }
                             placeholder={`Enter your ${field}`}
                             {...fieldProps}
@@ -345,7 +345,7 @@ export default function SignUp() {
                           defaultValue={field.value}
                           className="flex space-x-4"
                         >
-                          {['tenant', 'owner'].map((role) => (
+                          {["tenant", "owner"].map((role) => (
                             <FormItem
                               key={role}
                               className="flex items-center space-x-2"
