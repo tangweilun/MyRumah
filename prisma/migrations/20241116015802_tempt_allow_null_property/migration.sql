@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "PropertyInfo" ALTER COLUMN "image" DROP NOT NULL,
+ALTER COLUMN "start_date" DROP NOT NULL,
+ALTER COLUMN "end_date" DROP NOT NULL;
