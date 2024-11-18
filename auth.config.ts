@@ -69,42 +69,42 @@ export default {
     authorized({ request: { nextUrl }, auth }) {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
-      console.log("isLoggedin" + isLoggedIn);
-      console.log("pathname in callback auth.config" + pathname);
-      console.log("Auth state:", !!auth?.user);
-      console.log("Current pathname:", pathname);
-      console.log("User role:", auth?.user?.role);
-      // 1. Handle public routes
-      if (publicRoutes.includes(pathname)) {
-        return true;
-      }
+      // console.log("isLoggedin" + isLoggedIn);
+      // console.log("pathname in callback auth.config" + pathname);
+      // console.log("Auth state:", !!auth?.user);
+      // console.log("Current pathname:", pathname);
+      // console.log("User role:", auth?.user?.role);
+      // // 1. Handle public routes
+      // if (publicRoutes.includes(pathname)) {
+      //   return true;
+      // }
 
       // 2. Handle auth routes (sign-in, sign-up)
-      if (authRoutes.includes(pathname)) {
-        // If user is logged in and trying to access auth routes,
-        // redirect them based on their role
-        if (isLoggedIn) {
-          const role = auth.user.role;
-          const baseUrl = new URL(nextUrl.origin);
+      // if (authRoutes.includes(pathname)) {
+      //   // If user is logged in and trying to access auth routes,
+      //   // redirect them based on their role
+      //   if (isLoggedIn) {
+      //     const role = auth.user.role;
+      //     const baseUrl = new URL(nextUrl.origin);
 
-          if (role === "tenant") {
-            baseUrl.pathname = "/tenant";
-            return Response.redirect(baseUrl);
-          } else if (role === "owner") {
-            baseUrl.pathname = "/owner";
-            return Response.redirect(baseUrl);
-          }
-        }
-        return true; // Allow access to auth pages if not logged in
-      }
+      //     if (role === "tenant") {
+      //       baseUrl.pathname = "/tenant";
+      //       return Response.redirect(baseUrl);
+      //     } else if (role === "owner") {
+      //       baseUrl.pathname = "/owner";
+      //       return Response.redirect(baseUrl);
+      //     }
+      //   }
+      //   return true; // Allow access to auth pages if not logged in
+      // }
 
       // 3. Handle protected routes
-      if (!isLoggedIn) {
-        // Redirect to sign-in page if trying to access protected routes while not logged in
-        const signInUrl = new URL("/auth/sign-in", nextUrl.origin);
-        signInUrl.searchParams.set("callbackUrl", nextUrl.href);
-        return Response.redirect(signInUrl);
-      }
+      // if (!isLoggedIn) {
+      //   // Redirect to sign-in page if trying to access protected routes while not logged in
+      //   const signInUrl = new URL("/auth/sign-in", nextUrl.origin);
+      //   signInUrl.searchParams.set("callbackUrl", nextUrl.href);
+      //   return Response.redirect(signInUrl);
+      // }
 
       // 4. Allow access to other routes if logged in
       return true;
