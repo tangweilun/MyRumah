@@ -87,7 +87,7 @@ async function login(email: string, userRole: string, password: string) {
       }
       return { exist: false };
     } catch (error) {
-      // console.error("Error with Prisma query:", error);
+      // console.error('Error with Prisma query:', error);
       console.error("Error with Prisma query");
       return { status: 500 };
     }
@@ -102,8 +102,8 @@ async function checkAccExist(email: string, role: UserRole) {
     });
     return count > 0 ? { exist: true } : { exist: false };
   } catch (error) {
-    // console.error("Database error");
-    // throw new Error("Database error");
+    // console.error('Database error');
+    // throw new Error('Database error');
     console.error("Database error");
     return { status: 500 };
   }

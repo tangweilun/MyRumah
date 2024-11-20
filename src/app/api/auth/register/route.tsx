@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const userData = await req.json(); // Parse JSON body
-    // console.log("Received data:", userData);
+    console.log("Received data:", userData);
 
     if (!userData) {
       return NextResponse.json({
