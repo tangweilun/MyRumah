@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -8,46 +8,46 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
-import { signInSchema } from "@/lib/zod";
-import LoadingButton from "@/components/LoadingButton";
-import { handleCredentialsSignin } from "@/app/actions/authActions";
-import { useState, useEffect } from "react";
-import ErrorMessage from "@/components/ErrorMessage";
-import { Button } from "@/components/ui/button";
+import { signInSchema } from '@/lib/zod';
+import LoadingButton from '@/components/LoadingButton';
+import { handleCredentialsSignin } from '@/app/actions/authActions';
+import { useState, useEffect } from 'react';
+import ErrorMessage from '@/components/ErrorMessage';
+import { Button } from '@/components/ui/button';
 
-import { redirect, useRouter, useSearchParams } from "next/navigation";
-import { Home } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { getSession } from "@/lib/getSession";
+import { redirect, useRouter, useSearchParams } from 'next/navigation';
+import { Home } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { getSession } from '@/lib/getSession';
 
 export default function SignIn() {
   const params = useSearchParams();
-  const error = params.get("error");
+  const error = params.get('error');
   const router = useRouter();
   const { data: session } = useSession();
-  const [globalError, setGlobalError] = useState<string>("");
+  const [globalError, setGlobalError] = useState<string>('');
   if (session?.user) {
-    redirect(session.user.role === "tenant" ? "/tenant" : "/owner");
+    redirect(session.user.role === 'tenant' ? '/tenant' : '/owner');
   }
   useEffect(() => {
     if (error) {
-      setGlobalError("An unexpected error occurred. Please try again.");
+      setGlobalError('An unexpected error occurred. Please try again.');
     }
-    router.replace("/auth/sign-in");
+    router.replace('/auth/sign-in');
   }, [error, router]);
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
@@ -59,7 +59,7 @@ export default function SignIn() {
         setGlobalError(result.message);
       }
     } catch (error) {
-      console.log("An unexpected error occurred. Please try again.");
+      console.log('An unexpected error occurred. Please try again.');
     }
   };
 

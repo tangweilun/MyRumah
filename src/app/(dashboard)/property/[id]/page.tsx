@@ -1,9 +1,9 @@
-"use client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+'use client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 import {
   Edit2,
@@ -19,37 +19,37 @@ import {
   MapPin,
   Calendar,
   Clock,
-} from "lucide-react";
-import Image from "next/image";
-import PropertyGallery from "@/components/PhotoGallery";
+} from 'lucide-react';
+import Image from 'next/image';
+import PropertyGallery from '@/components/PhotoGallery';
 
 // Previous property details content remains the same
 const proposals = [
   {
     id: 1,
-    name: "Alice Johnson",
-    property: "Sunset Apartments, Unit 301",
-    duration: "12 months",
-    rate: "$1,500/month",
-    submitted: "Submitted 2 days ago",
-    status: "Pending",
-    avatar: "/placeholder.svg?height=40&width=40",
+    name: 'Alice Johnson',
+    property: 'Sunset Apartments, Unit 301',
+    duration: '12 months',
+    rate: '$1,500/month',
+    submitted: 'Submitted 2 days ago',
+    status: 'Pending',
+    avatar: '/placeholder.svg?height=40&width=40',
   },
   {
     id: 2,
-    name: "Bob Smith",
-    property: "Oakwood Residences, Unit 205",
-    duration: "6 months",
-    rate: "$1,200/month",
-    submitted: "Submitted 1 week ago",
-    status: "Approved",
-    avatar: "/placeholder.svg?height=40&width=40",
+    name: 'Bob Smith',
+    property: 'Oakwood Residences, Unit 205',
+    duration: '6 months',
+    rate: '$1,200/month',
+    submitted: 'Submitted 1 week ago',
+    status: 'Approved',
+    avatar: '/placeholder.svg?height=40&width=40',
   },
 ];
 
 const SingleProperyPage = () => {
   const router = useRouter();
-  const propertyId = "1"; // Replace with the actual property ID
+  const propertyId = '1'; // Replace with the actual property ID
 
   return (
     <div className="px-16 py-8 bg-stone-50">
@@ -178,7 +178,7 @@ const SingleProperyPage = () => {
                     </div>
                     <Badge
                       variant={
-                        proposal.status === "Pending" ? "outline" : "secondary"
+                        proposal.status === 'Pending' ? 'outline' : 'secondary'
                       }
                       className="ml-auto"
                     >
@@ -209,7 +209,7 @@ const SingleProperyPage = () => {
                     >
                       View Details
                     </Button>
-                    {proposal.status === "Pending" && (
+                    {proposal.status === 'Pending' && (
                       <>
                         <Button variant="destructive" size="sm">
                           Reject

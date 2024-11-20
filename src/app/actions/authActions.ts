@@ -1,11 +1,11 @@
-"use server";
+'use server';
 
-import { getSession } from "@/lib/getSession";
-import { auth, signIn, signOut } from "../../../auth";
-import { signUpSchema } from "@/lib/zod";
-import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import { getSession } from '@/lib/getSession';
+import { auth, signIn, signOut } from '../../../auth';
+import { signUpSchema } from '@/lib/zod';
+import { AuthError } from 'next-auth';
+import { redirect } from 'next/navigation';
+// import prisma from "@/lib/prisma";
 
 export async function handleCredentialsSignin({
   email,
@@ -15,21 +15,21 @@ export async function handleCredentialsSignin({
   password: string;
 }) {
   try {
-    const result = await signIn("credentials", {
+    const result = await signIn('credentials', {
       email,
       password,
-      redirectTo: "/guest",
+      redirectTo: '/guest',
     });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
-        case "CredentialsSignin":
+        case 'CredentialsSignin':
           return {
-            message: "Invalid credentials",
+            message: 'Invalid credentials',
           };
         default:
           return {
-            message: "Something went wrong.",
+            message: 'Something went wrong.',
           };
       }
     }
@@ -38,7 +38,7 @@ export async function handleCredentialsSignin({
 }
 
 export async function handleSignOut() {
-  const result = await signOut({ redirectTo: "/" });
+  const result = await signOut({ redirectTo: '/' });
 }
 
 export async function handleSignUp({
@@ -66,21 +66,21 @@ export async function handleSignUp({
       phoneNumber,
     });
     if (!parsedCredentials.success) {
-      return { success: false, message: "Invalid data." };
+      return { success: false, message: 'Invalid data.' };
     }
 
     // check if the email is already taken
-    // const existingUser = await prisma.userInfo.findUnique({
-    //   where: {
-    //     email,
-    //   },
+    // const existingUser = await prisma.user.findUnique({
+    //     where: {
+    //         email,
+    //     },
     // });
 
     //replace false with exisitngUser
     if (false) {
       return {
         success: false,
-        message: "Email already exists. Login to continue.",
+        message: 'Email already exists. Login to continue.',
       };
     }
 
@@ -94,12 +94,12 @@ export async function handleSignUp({
     //     },
     // });
 
-    return { success: true, message: "Account created successfully." };
+    return { success: true, message: 'Account created successfully.' };
   } catch (error) {
-    console.error("Error creating account:", error);
+    console.error('Error creating account:', error);
     return {
       success: false,
-      message: "An unexpected error occurred. Please try again.",
+      message: 'An unexpected error occurred. Please try again.',
     };
   }
 }

@@ -1,14 +1,14 @@
-import { getSession } from "@/lib/getSession";
-import { redirect } from "next/navigation";
+import { getSession } from '@/lib/getSession';
+import { redirect } from 'next/navigation';
 
 const Guest = async () => {
   const session = await getSession();
-  if (session?.user?.role === "tenant") {
-    redirect("/tenant");
-  } else if (session?.user?.role === "owner") {
-    redirect("/owner");
+  if (session?.user?.role === 'tenant') {
+    redirect('/tenant');
+  } else if (session?.user?.role === 'owner') {
+    redirect('/owner');
   } else {
-    redirect("/");
+    redirect('/');
   }
   return <div className="">Guest</div>;
 };

@@ -1,9 +1,9 @@
-"use client";
-import MetricCard from "@/components/MetricCard";
-import MyPropertiesGrid from "@/components/myPropertiesGrid";
-import { Button } from "@/components/ui/button";
-import { Calendar, DollarSign, Home, Menu, Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
+'use client';
+import MetricCard from '@/components/MetricCard';
+import MyPropertiesGrid from '@/components/myPropertiesGrid';
+import { Button } from '@/components/ui/button';
+import { Calendar, DollarSign, Home, Menu, Plus } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 const Owner = () => {
   const { data: session, status } = useSession();
