@@ -1,5 +1,15 @@
-import prisma from '../../lib/prisma';
-import { Prisma, ProposalStatus, UserRole } from '@prisma/client';
+import prisma from "../../lib/prisma";
+import {
+  Prisma,
+  ProposalStatus,
+  UserRole,
+  PropertyStatus,
+} from "@prisma/client";
+import {
+  chkUserRole,
+  chkPropertyExpiration,
+  chkPropertyStatus,
+} from "./misc-service";
 
 const isProposalStatus = (
   proposalStatus: string
@@ -9,16 +19,23 @@ const isProposalStatus = (
 const isUserRole = (role: string): role is UserRole =>
   Object.values(UserRole).includes(role as UserRole);
 
-async function getAllProposal(userId: number, userRole: string) {
-  if (!isUserRole(userRole)) {
-    return { status: 401 };
+// async function getAllProposal(userId: number, userRole: string) {
+async function getAllProposal(userId: number) {
+  // if (!isUserRole(userRole)) {
+  //   return { status: 401 };
+  // }
+
+  const chkRole = await chkUserRole(userId);
+  if (chkRole.status != 200 || !chkRole.userRole) {
+    return { status: chkRole.status };
   }
+
   const tenantFindManyQuery: Prisma.ProposalFindManyArgs = {
     where: {
       tenant_id: userId,
-      property: {
-        status: 'active',
-      },
+      // property: {
+      //   status: "active",
+      // },
     },
     include: {
       // relation name: property
@@ -38,15 +55,16 @@ async function getAllProposal(userId: number, userRole: string) {
           },
         },
       },
+      agreements: true,
     },
-    orderBy: [{ status: 'asc' }, { created_date: 'desc' }],
+    orderBy: [{ status: "asc" }, { created_date: "desc" }],
   };
 
   const ownerFindManyQuery: Prisma.ProposalFindManyArgs = {
     where: {
       property: {
         owner_id: userId,
-        status: 'active',
+        status: "active",
       },
     },
     include: {
@@ -67,15 +85,16 @@ async function getAllProposal(userId: number, userRole: string) {
           },
         },
       },
+      agreements: true,
     },
-    orderBy: [{ status: 'asc' }, { created_date: 'desc' }],
+    orderBy: [{ status: "asc" }, { created_date: "desc" }],
   };
 
   let currFindManyQuery = null;
 
-  if (userRole === UserRole.tenant) {
+  if (chkRole.userRole === UserRole.tenant) {
     currFindManyQuery = tenantFindManyQuery;
-  } else if (userRole === UserRole.owner) {
+  } else if (chkRole.userRole === UserRole.owner) {
     currFindManyQuery = ownerFindManyQuery;
   }
 
@@ -96,21 +115,27 @@ async function getAllProposal(userId: number, userRole: string) {
       proposalList: allProposal,
     };
   } catch (error) {
-    console.error('Error in retrieving proposal list from database: ', error);
+    console.error("Error in retrieving proposal list from database: ", error);
     return { status: 500 };
   }
 }
 
-async function getSpecTenantProposal(
-  tenantId: number,
-  ownerId: number,
-  userRole: string
-) {
-  if (!isUserRole(userRole)) {
-    return { status: 401 };
+// async function getSpecTenantProposal(
+//   tenantId: number,
+//   ownerId: number,
+//   userRole: string
+// )
+async function getSpecTenantProposal(tenantId: number, ownerId: number) {
+  // if (!isUserRole(userRole)) {
+  //   return { status: 401 };
+  // }
+
+  const chkRole = await chkUserRole(ownerId);
+  if (chkRole.status != 200 || !chkRole.userRole) {
+    return { status: chkRole.status };
   }
 
-  if (userRole !== UserRole.owner) {
+  if (chkRole.userRole !== UserRole.owner) {
     return { status: 403 };
   }
 
@@ -124,11 +149,12 @@ async function getSpecTenantProposal(
       },
       include: {
         property: true,
+        agreements: true,
       },
-      orderBy: [{ status: 'asc' }, { created_date: 'desc' }],
+      orderBy: [{ status: "asc" }, { created_date: "desc" }],
     });
 
-    if (!specTenantProposal) {
+    if (!specTenantProposal || Object.keys(specTenantProposal).length === 0) {
       return { status: 404 };
     }
 
@@ -138,7 +164,7 @@ async function getSpecTenantProposal(
     };
   } catch (error) {
     console.error(
-      'Error in retrieving proposal list of specific tenant from database: ',
+      "Error in retrieving proposal list of specific tenant from database: ",
       error
     );
     return { status: 500 };
@@ -153,6 +179,7 @@ async function getSpecProposal(proposalId: number) {
       },
       include: {
         property: true,
+        agreements: true,
       },
     });
 
@@ -163,7 +190,7 @@ async function getSpecProposal(proposalId: number) {
     return { status: 200, specProposal: specProposal };
   } catch (error) {
     console.error(
-      'Error in retrieving specified proposal from database: ',
+      "Error in retrieving specified proposal from database: ",
       error
     );
     return { status: 500 };
@@ -175,8 +202,45 @@ async function createProposal(tenantId: number, propertyId: number) {
     return { status: 400 };
   }
 
-  const initialStatus = 'pending';
+  const userRole = await chkUserRole(tenantId);
+  if (userRole.status != 200 || !userRole.userRole) {
+    return { status: userRole.status };
+  }
+
+  if (userRole.userRole !== UserRole.tenant) {
+    return { status: 403 };
+  }
+
+  const initialStatus = "pending";
+
   try {
+    // check current date and start date of property
+    const isPropertyExpired = await chkPropertyExpiration(propertyId);
+    if (
+      !isPropertyExpired ||
+      isPropertyExpired.status !== 200 ||
+      isPropertyExpired.isExpired === null
+    ) {
+      return { status: isPropertyExpired?.status ?? 500 };
+    }
+    if (isPropertyExpired.isExpired === true) {
+      return { status: isPropertyExpired.status };
+    }
+    // check property status
+    const propertyStatus = await chkPropertyStatus(propertyId);
+    if (
+      !propertyStatus ||
+      propertyStatus.status !== 200 ||
+      propertyStatus.propertyStatus === null
+    ) {
+      return { status: propertyStatus?.status ?? 500 };
+    }
+    // only active property can be proposed
+    if (propertyStatus.propertyStatus !== PropertyStatus.active) {
+      return { status: isPropertyExpired.status };
+    }
+
+    // if current date is <= property start rental date
     const newProposal = await prisma.proposal.create({
       data: {
         tenant_id: tenantId,
@@ -190,7 +254,7 @@ async function createProposal(tenantId: number, propertyId: number) {
 
     return { status: 200, newProposal: newProposal };
   } catch (error) {
-    console.error('Error in creating new proposal: ', error);
+    console.error("Error in creating new proposal: ", error);
     return { status: 500 };
   }
 }
@@ -210,20 +274,51 @@ async function updateProposalStatus(
 
   try {
     // check current of specified proposal
-    const currProposalStatus = await prisma.proposal.findUnique({
+    const currProposal = await prisma.proposal.findUnique({
       where: {
         proposal_id: proposalId,
       },
       select: {
         status: true,
+        property_id: true,
       },
     });
 
-    if (!currProposalStatus) {
+    if (!currProposal) {
       return { status: 404 };
     }
-    // tenant and owner cannot modify status anymore if the status is rejected/approved/cancelled
-    if (currProposalStatus.status !== ProposalStatus.pending) {
+    // if current date is over the rental start date of the property, change the status to cancelled.
+    const isPropertyExpired = await chkPropertyExpiration(
+      currProposal.property_id
+    );
+    if (
+      !isPropertyExpired ||
+      isPropertyExpired.status !== 200 ||
+      isPropertyExpired.isExpired === null
+    ) {
+      return { status: isPropertyExpired?.status ?? 500 };
+    }
+
+    if (isPropertyExpired.isExpired === true) {
+      const cancelledStatus = "cancelled";
+      if (proposalStatus !== ProposalStatus.cancelled) {
+        const expiredProposal = await prisma.proposal.update({
+          where: {
+            proposal_id: proposalId,
+          },
+          data: {
+            status:
+              ProposalStatus[cancelledStatus as keyof typeof ProposalStatus],
+          },
+        });
+
+        return { updatedProposal: expiredProposal, status: 400 };
+      }
+      // the proposal already cancelled before
+      return { updatedProposal: currProposal, status: 400 };
+    }
+    if (currProposal.status !== ProposalStatus.pending) {
+      // tenant and owner cannot modify status anymore if the status is rejected/approved/cancelled
       return { status: 400 };
     }
 
@@ -255,7 +350,7 @@ async function updateProposalStatus(
     return { status: 200, updatedProposal: updatedProposal };
   } catch (error) {
     console.error(
-      'Error in updating status of specified proposal from database: ',
+      "Error in updating status of specified proposal from database: ",
       error
     );
     return { status: 500 };

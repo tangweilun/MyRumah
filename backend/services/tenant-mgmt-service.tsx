@@ -1,5 +1,5 @@
-import prisma from '../../lib/prisma'; // Ensure Prisma is set up properly
-import { UserRole } from '@prisma/client';
+import prisma from "../../lib/prisma"; // Ensure Prisma is set up properly
+import { UserRole } from "@prisma/client";
 
 // All function with no export is set as private function by default
 
@@ -15,13 +15,13 @@ async function getAllTenant(ownerId: number, userRole: string) {
   try {
     const allTenant = await prisma.userInfo.findMany({
       where: {
-        role: 'tenant',
+        role: "tenant",
         proposals: {
           // choose those with at least one proposal done with passed ownerId and related to active property published by that ownerId.
           some: {
             property: {
               owner_id: ownerId,
-              status: 'active',
+              // status: "active",
             },
           },
         },
@@ -31,7 +31,7 @@ async function getAllTenant(ownerId: number, userRole: string) {
           where: {
             property: {
               owner_id: ownerId,
-              status: 'active',
+              // status: "active",
             },
           },
           include: { property: true },
@@ -48,7 +48,7 @@ async function getAllTenant(ownerId: number, userRole: string) {
       tenantList: allTenant,
     };
   } catch (error) {
-    console.error('Error in retrieving tenant list from database: ', error);
+    console.error("Error in retrieving tenant list from database: ", error);
     return { status: 500 };
   }
 }
@@ -60,9 +60,9 @@ async function checkAccExist(email: string, role: UserRole) {
     });
     return count > 0 ? { exist: true } : { exist: false };
   } catch (error) {
-    // console.error('Database error');
-    // throw new Error('Database error');
-    console.error('Database error');
+    // console.error("Database error");
+    // throw new Error("Database error");
+    console.error("Database error");
     return { status: 500 };
   }
 }

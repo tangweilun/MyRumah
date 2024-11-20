@@ -1,10 +1,10 @@
-import prisma from '../../lib/prisma'; // Ensure Prisma is set up properly
-import { UserRole } from '@prisma/client';
+import prisma from "../../lib/prisma"; // Ensure Prisma is set up properly
+import { UserRole } from "@prisma/client";
 
 // need install bcrypt to do salting and hashing
 // npm install bcryptjs
 
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
 // All function with no export is set as private function by default
 
@@ -31,7 +31,7 @@ async function register(
   const accExist = await checkAccExist(email, userRole);
 
   if (accExist && !accExist.exist) {
-    // return { status: 'success', data: 'sss' };
+    // return { status: "success", data: "sss" };
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -46,13 +46,13 @@ async function register(
           wallet_amount: 1000,
         },
       });
-      // console.log('User created in database:', newUser);
+      // console.log("User created in database:", newUser);
       return {
         status: 200,
         newUser: newUser,
       };
     } catch (error) {
-      console.error('Error creating user in database:', error);
+      console.error("Error creating user in database:", error);
       return { status: 500 };
     }
   }
@@ -87,8 +87,8 @@ async function login(email: string, userRole: string, password: string) {
       }
       return { exist: false };
     } catch (error) {
-      // console.error('Error with Prisma query:', error);
-      console.error('Error with Prisma query');
+      // console.error("Error with Prisma query:", error);
+      console.error("Error with Prisma query");
       return { status: 500 };
     }
   }
@@ -102,9 +102,9 @@ async function checkAccExist(email: string, role: UserRole) {
     });
     return count > 0 ? { exist: true } : { exist: false };
   } catch (error) {
-    // console.error('Database error');
-    // throw new Error('Database error');
-    console.error('Database error');
+    // console.error("Database error");
+    // throw new Error("Database error");
+    console.error("Database error");
     return { status: 500 };
   }
 }

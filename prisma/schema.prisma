@@ -67,8 +67,8 @@ model PropertyInfo {
   description   String
   occupant_num  Int
   rental_fee    Decimal        @db.Decimal(10, 2)
-  start_date    DateTime?      @db.Date
-  end_date      DateTime?       @db.Date
+  start_date    DateTime    @db.Date
+  end_date      DateTime      @db.Date
   status        PropertyStatus
   created_date  DateTime      @default(now())
   modified_date DateTime?       @updatedAt

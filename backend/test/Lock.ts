@@ -63,7 +63,7 @@ describe("Lock", function () {
     });
 
     it("Should fail if the unlockTime is not in the future", async function () {
-      // We don't use the fixture here because we want a different deployment
+      // We don"t use the fixture here because we want a different deployment
       const latestTime = BigInt(await time.latest());
       await expect(
         hre.viem.deployContract("Lock", [latestTime], {
@@ -79,7 +79,7 @@ describe("Lock", function () {
         const { lock } = await loadFixture(deployOneYearLockFixture);
 
         await expect(lock.write.withdraw()).to.be.rejectedWith(
-          "You can't withdraw yet"
+          "You can"t withdraw yet"
         );
       });
 
@@ -98,11 +98,11 @@ describe("Lock", function () {
           { client: { wallet: otherAccount } }
         );
         await expect(lockAsOtherAccount.write.withdraw()).to.be.rejectedWith(
-          "You aren't the owner"
+          "You aren"t the owner"
         );
       });
 
-      it("Shouldn't fail if the unlockTime has arrived and the owner calls it", async function () {
+      it("Shouldn"t fail if the unlockTime has arrived and the owner calls it", async function () {
         const { lock, unlockTime } = await loadFixture(
           deployOneYearLockFixture
         );

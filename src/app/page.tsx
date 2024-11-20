@@ -1,8 +1,8 @@
-import Navbar from '@/components/Navbar';
-import { MapPin, Search } from 'lucide-react';
-import Image from 'next/image';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import Navbar from "@/components/Navbar";
+import { MapPin, Search } from "lucide-react";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
