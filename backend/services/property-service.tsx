@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-
 const prisma = new PrismaClient();
-
 
 import { PropertyInfo } from '@prisma/client';
 
@@ -16,65 +14,107 @@ export async function createProperty(
   endDate: Date,
   status: string
 ) {
-  if (
-    !ownerId ||
-    !address ||
-    !image ||
-    !description ||
-    !occupantNum ||
-    !rentalFee ||
-    !startDate ||
-    !endDate ||
-    !status
-  ) {
-    return { status: 400, message: 'Missing property details.' };
+  // Validate required fields
+  if (!ownerId || typeof ownerId !== "number" || ownerId <= 0) {
+    return { status: 400, message: "Invalid or missing ownerId." };
   }
 
-  // Validate the property status against the enum
-  const validStatuses = ['active', 'inactive', 'occupied', 'trash'];
-  if (!validStatuses.includes(status)) {
-    return { status: 400, message: 'Invalid property status.' };
+  if (!address || typeof address !== "string" || address.trim().length === 0) {
+    return { status: 400, message: "Invalid or missing address." };
+  }
+
+  if (!image || !(image instanceof Buffer)) {
+    return { status: 400, message: "Invalid or missing image." };
+  }
+
+  if (!description || typeof description !== "string" || description.trim().length === 0) {
+    return { status: 400, message: "Invalid or missing description." };
+  }
+
+  if (
+    !occupantNum ||
+    typeof occupantNum !== "number" ||
+    occupantNum <= 0 ||
+    !Number.isInteger(occupantNum)
+  ) {
+    return { status: 400, message: "Invalid or missing occupant number." };
+  }
+
+  if (!rentalFee || typeof rentalFee !== "number" || rentalFee <= 0) {
+    return { status: 400, message: "Invalid or missing rental fee." };
+  }
+
+  if (!startDate || !(startDate instanceof Date) || isNaN(startDate.getTime())) {
+    return { status: 400, message: "Invalid or missing start date." };
+  }
+
+  if (!endDate || !(endDate instanceof Date) || isNaN(endDate.getTime())) {
+    return { status: 400, message: "Invalid or missing end date." };
+  }
+
+  if (startDate >= endDate) {
+    return { status: 400, message: "Start date must be before end date." };
+  }
+
+  const validStatuses = ["active", "inactive", "occupied", "trash"];
+  if (!status || typeof status !== "string" || !validStatuses.includes(status)) {
+    return { status: 400, message: "Invalid or missing property status." };
   }
 
   try {
+    // Create the new property in the database
     const newProperty = await prisma.propertyInfo.create({
       data: {
         owner_id: ownerId,
-        address: address,
-        image: image,
-        description: description,
+        address,
+        image, // The image is passed as a Buffer
+        description,
         occupant_num: occupantNum,
         rental_fee: rentalFee,
         start_date: startDate,
         end_date: endDate,
-        status: status as any, // Casting to match Prisma's enum type
+        status: status as any,
       },
     });
 
     return { status: 200, property: newProperty };
   } catch (error) {
-    console.error('Error creating property in database:', error);
-    return { status: 500, message: 'Error creating property.' };
+    console.error("Error creating property in database:", error);
+    return { status: 500, message: "Error creating property." };
   }
 }
 
-// Function to fetch all properties from the database
-export async function getAllProperties() {
-    try {
-      // Fetch all properties including related `owner` info (UserInfo relation)
+
+
+// Function to fetch properties based on user role
+export async function getPropertiesByUser(userId: number, role: string): Promise<PropertyInfo[]> {
+  try {
+    if (role === "owner") {
+      // Fetch properties owned by the user
       const properties = await prisma.propertyInfo.findMany({
+        where: { owner_id: userId },
         include: {
-          owner: true, // Include related user info (UserInfo) if needed
+          owner: true, // Include owner details if needed
         },
       });
-  
-      // Return the fetched properties
       return properties;
-    } catch (error) {
-      console.error("Error fetching properties:", error);
-      throw new Error("Error fetching properties");
+    } else if (role === "tenant") {
+      // Fetch all properties
+      const properties = await prisma.propertyInfo.findMany({
+        include: {
+          owner: true, // Include owner details if needed
+        },
+      });
+      return properties;
+    } else {
+      throw new Error("Invalid role specified");
     }
+  } catch (error) {
+    console.error("Error fetching properties:", error);
+    throw new Error("Error fetching properties");
   }
+}
+
 
   //delete/edit
   export async function editProperty(

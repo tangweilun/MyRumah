@@ -3,8 +3,21 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const propertyData = await req.json(); // Parse JSON body
-    console.log('Received property data:', propertyData);
+    const body = await req.json(); // Parse JSON body instead of FormData
+    
+    // Extract the property data from the parsed JSON body
+    const propertyData = {
+      ownerId: body.ownerId,
+      address: body.address,
+      image: body.image, // base64 image string
+      description: body.description,
+      occupantNum: body.occupantNum,
+      rentalFee: body.rentalFee,
+      startDate: new Date(body.startDate),
+      endDate: new Date(body.endDate),
+      status: body.status,
+    };
+    console.log(propertyData);
 
     if (!propertyData) {
       return NextResponse.json({
@@ -13,15 +26,18 @@ export async function POST(req: Request) {
       });
     }
 
+    // Convert the base64 image to a Buffer
+    const imageBuffer = Buffer.from(propertyData.image.split(',')[1], 'base64');
+
     const result = await createProperty(
       propertyData.ownerId,
       propertyData.address,
-      Buffer.from(propertyData.image, 'base64'), // Assuming the image is sent as a base64 string
+      imageBuffer, // Use the image buffer created from base64
       propertyData.description,
       propertyData.occupantNum,
       propertyData.rentalFee,
-      new Date(propertyData.startDate),
-      new Date(propertyData.endDate),
+      propertyData.startDate,
+      propertyData.endDate,
       propertyData.status
     );
 
@@ -51,13 +67,25 @@ export async function POST(req: Request) {
   }
 }
 
-//view all properties
-import { getAllProperties } from "@backend/services/property-service";
+
+
+import { getPropertiesByUser } from "@backend/services/property-service";
+import { PropertyInfo } from "@prisma/client";
 
 export async function GET(req: Request) {
   try {
-    // Fetch all properties from the service
-    const properties = await getAllProperties();
+    // Extract user info from the request (e.g., token or query params)
+    const url = new URL(req.url);
+    const userId = parseInt(url.searchParams.get("userId") || "0");
+    const role = url.searchParams.get("role"); // 'owner' or 'tenant'
+
+    if (!userId || !role) {
+      return new Response(JSON.stringify({ message: "Invalid userId or role." }), { status: 400 });
+    }
+
+    // Fetch properties based on user role
+    const properties: PropertyInfo[] = await getPropertiesByUser(userId, role);
+    console.log(properties);
 
     // Return the properties as a JSON response
     return new Response(JSON.stringify({ properties }), { status: 200 });
@@ -66,6 +94,7 @@ export async function GET(req: Request) {
     return new Response(JSON.stringify({ message: "Internal server error." }), { status: 500 });
   }
 }
+
 
 
 

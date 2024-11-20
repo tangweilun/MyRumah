@@ -73,16 +73,20 @@ export async function createAgreement(proposalId: number) {
   }
   
 
-//sign agreement
-export async function signAgreement(agreementId: number, userType: 'owner' | 'tenant') {
+  export async function updateAgreement(
+    agreementId: number,
+    action: 'sign' | 'approve' | 'editDeposit',
+    userType?: 'owner' | 'tenant',
+    newDepositStatus?: 'pending' | 'submitted' | 'pending_returned' | 'returned' // Strict type for deposit statuses
+  ) {
     try {
-      // Fetch the agreement and related proposal and property details
+      // Fetch the agreement along with related details
       const agreement = await prisma.agreement.findUnique({
         where: { agreement_id: agreementId },
         include: {
           proposal: {
             include: {
-              property: true, // Include property for owner details
+              property: true, // Include property details
             },
           },
         },
@@ -92,55 +96,82 @@ export async function signAgreement(agreementId: number, userType: 'owner' | 'te
         return { status: 404, message: 'Agreement not found.' };
       }
   
-      // Update the respective signature field
-      if (userType === 'owner') {
+      const currentDate = new Date();
+      const { start_date, end_date } = agreement.proposal.property;
+  
+      if (action === 'sign') {
+        if (!userType) {
+          return { status: 400, message: 'User type is required for signing.' };
+        }
+  
+        const updateData = userType === 'owner'
+          ? { owner_signature: true }
+          : { tenant_signature: true };
+  
         await prisma.agreement.update({
           where: { agreement_id: agreementId },
-          data: { owner_signature: true },
+          data: updateData,
         });
-        return { status: 200, message: 'Owner has signed the agreement.' };
-      } else if (userType === 'tenant') {
+  
+        return {
+          status: 200,
+          message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} has signed the agreement.`,
+        };
+      } else if (action === 'approve') {
+        if (!agreement.owner_signature || !agreement.tenant_signature) {
+          return { status: 400, message: 'Both owner and tenant must sign the agreement before approval.' };
+        }
+  
+        let agreementStatus = agreement.agreement_status;
+        let depositStatus = agreement.deposit_status;
+  
+        // Determine the agreement status
+        if (currentDate > end_date) {
+          agreementStatus = 'completed';
+          depositStatus = 'pending_returned'; // Status changes to `pending_returned`
+        } else if (currentDate >= start_date && currentDate <= end_date) {
+          agreementStatus = 'ongoing';
+        } else if (currentDate < start_date) {
+          agreementStatus = 'expired';
+        }
+  
+        // Update agreement status and deposit status if needed
         await prisma.agreement.update({
           where: { agreement_id: agreementId },
-          data: { tenant_signature: true },
+          data: { agreement_status: agreementStatus, deposit_status: depositStatus },
         });
-        return { status: 200, message: 'Tenant has signed the agreement.' };
+  
+        return {
+          status: 200,
+          message: `Agreement has been updated to status: ${agreementStatus}.`,
+        };
+      } else if (action === 'editDeposit') {
+        if (!newDepositStatus) {
+          return { status: 400, message: 'New deposit status is required for editing deposit.' };
+        }
+  
+        // Validate that the new deposit status is within the enum values
+        const validDepositStatuses = ['pending', 'submitted', 'pending_returned', 'returned'];
+        if (!validDepositStatuses.includes(newDepositStatus)) {
+          return { status: 400, message: `Invalid deposit status. Allowed values are: ${validDepositStatuses.join(', ')}.` };
+        }
+  
+        await prisma.agreement.update({
+          where: { agreement_id: agreementId },
+          data: { deposit_status: newDepositStatus },
+        });
+  
+        return {
+          status: 200,
+          message: `Deposit status updated to ${newDepositStatus}.`,
+        };
       } else {
-        return { status: 400, message: 'Invalid user type.' };
+        return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", or "editDeposit".' };
       }
     } catch (error) {
-      console.error('Error signing agreement:', error);
-      return { status: 500, message: 'Error signing agreement.' };
+      console.error('Error updating agreement:', error);
+      return { status: 500, message: 'Error updating agreement.' };
     }
   }
-
-  //approve or confirm agreement
-  export async function approveAgreement(agreementId: number) {
-    try {
-      // Fetch the agreement to verify signatures
-      const agreement = await prisma.agreement.findUnique({
-        where: { agreement_id: agreementId },
-      });
   
-      if (!agreement) {
-        return { status: 404, message: 'Agreement not found.' };
-      }
-  
-      // Check if both signatures are present
-      if (!agreement.owner_signature || !agreement.tenant_signature) {
-        return { status: 400, message: 'Both owner and tenant must sign the agreement before approval.' };
-      }
-  
-      // Approve the agreement
-      await prisma.agreement.update({
-        where: { agreement_id: agreementId },
-        data: { agreement_status: 'completed' },
-      });
-  
-      return { status: 200, message: 'Agreement has been approved successfully.' };
-    } catch (error) {
-      console.error('Error approving agreement:', error);
-      return { status: 500, message: 'Error approving agreement.' };
-    }
-  }
   
