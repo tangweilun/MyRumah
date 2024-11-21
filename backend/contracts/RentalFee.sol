@@ -17,7 +17,6 @@ contract RentalFee {
     // key is user id
     mapping(uint256 => RentalFeeRecord) public rentalFeeRecords; 
 
-    event UserCreated();
 
     // Function to create an agreement
     function createFee(

@@ -79,13 +79,19 @@ export async function POST(req: NextRequest) {
     } else if (result.status === 400) {
       return NextResponse.json(
         {
-          message: "Missing fee creation information.",
+          message:
+            "Missing fee creation information or agreement is not ongoing.",
         },
         { status: result.status }
       );
     } else if (result.status === 404) {
       return NextResponse.json(
         { message: "Agreement not found." },
+        { status: result.status }
+      );
+    } else if (result.status === 409) {
+      return NextResponse.json(
+        { message: "The fee(s) for the current agreement has been created." },
         { status: result.status }
       );
     } else if (result.status === 500) {

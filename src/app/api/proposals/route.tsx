@@ -16,9 +16,9 @@ export async function GET(req: NextRequest) {
 
   // const userRole = "owner";
   // id of curr login user (tenant)
-  const tenantId = 1;
+  const tenantId = 2;
   // id of curr login user (owner)
-  const ownerId = 8;
+  const ownerId = 1;
 
   const currId = ownerId;
 
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   // simulate retrieve the current login role from token
   // simulate retrieve the user id of current login role from token
   const userRole = "tenant";
-  const tenantId = 1;
+  const tenantId = 3;
   try {
     const newProposalData = await req.json();
     if (!newProposalData) {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           message:
-            "Missing proposal creation information, or proposal is invalid due to exceeding property rental start date, or property.",
+            "Missing proposal creation information, or proposal is invalid due to exceeding property rental start date, or property not open for rental.",
         },
         { status: result.status }
       );

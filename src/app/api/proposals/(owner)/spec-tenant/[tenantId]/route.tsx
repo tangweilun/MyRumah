@@ -18,7 +18,7 @@ export async function GET(
   // id of specific tenant
   const tenantId = parseInt((await params).tenantId, 10);
   // id of curr login user (owner)
-  const ownerId = 8;
+  const ownerId = 1;
 
   try {
     // const result = await getSpecTenantProposal(tenantId, ownerId, userRole);

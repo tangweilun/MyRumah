@@ -228,6 +228,7 @@ async function createProposal(tenantId: number, propertyId: number) {
     }
     // check property status
     const propertyStatus = await chkPropertyStatus(propertyId);
+
     if (
       !propertyStatus ||
       propertyStatus.status !== 200 ||
@@ -235,11 +236,12 @@ async function createProposal(tenantId: number, propertyId: number) {
     ) {
       return { status: propertyStatus?.status ?? 500 };
     }
+
     // only active property can be proposed
     if (propertyStatus.propertyStatus !== PropertyStatus.active) {
-      return { status: isPropertyExpired.status };
+      return { status: 400 };
     }
-
+    console.log(propertyStatus);
     // if current date is <= property start rental date
     const newProposal = await prisma.proposal.create({
       data: {
@@ -251,6 +253,8 @@ async function createProposal(tenantId: number, propertyId: number) {
         property: true,
       },
     });
+
+    console.log(newProposal);
 
     return { status: 200, newProposal: newProposal };
   } catch (error) {
@@ -325,6 +329,7 @@ async function updateProposalStatus(
     if (userRole === UserRole.tenant) {
       if (proposalStatus !== ProposalStatus.cancelled) {
         // tenant can only change status from pending to cancelled, not others
+
         return { status: 400 };
       }
     } else if (userRole === UserRole.owner) {

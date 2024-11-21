@@ -44,22 +44,18 @@ export async function GET(
 // update proposal status only
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { proposalId: string } }
+  { params }: { params: Promise<{ proposalId: string }> }
 ) {
-  const proposalId = parseInt(params.proposalId, 10);
+  const proposalId = parseInt((await params).proposalId, 10);
 
   // dummy
   // in future will get owner role and id form token passed by frontend using http request
-  const userRole = "owner";
-  const ownerId = 8; // Henry, got property 6,7
-  // will pass in
+  const userRole = "tenant";
 
   try {
     // assume the passed data is {status: "???"}
     const { status } = await req.json();
-
     const result = await updateProposalStatus(proposalId, status, userRole);
-
     if (result.status === 200) {
       return NextResponse.json({
         status: result.status,
@@ -75,8 +71,7 @@ export async function PATCH(
       return NextResponse.json({
         status: result.status,
         updatedProposal: updatedProposal,
-        message:
-          "Invalid action for proposal status change. It may due to current login role cannot modify certain status or the proposal is expired.",
+        message: "Invalid action for proposal status change.",
       });
     } else if (result.status === 401) {
       return NextResponse.json({

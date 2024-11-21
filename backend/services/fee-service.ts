@@ -1,13 +1,38 @@
 import { ethers } from "ethers";
 import prisma from "../../lib/prisma";
-import { Prisma, UserRole, RentalFeeStatus } from "@prisma/client";
+import {
+  Prisma,
+  UserRole,
+  RentalFeeStatus,
+  AgreementStatus,
+} from "@prisma/client";
 import { deductWallet } from "./wallet-service";
 import { chkUserRole } from "./misc-service";
+import { RentalFeeContractAddress } from "../../src/utils/smartContractAddress";
+import rentalFeeAbi from "../../src/abi/rentalFee.json";
 
 const isUserRole = (role: string): role is UserRole =>
   Object.values(UserRole).includes(role as UserRole);
 
 // async function getAllFee(userId: number, userRole: string) {
+
+const getContract = async () => {
+  const provider = new ethers.JsonRpcProvider("http://localhost:8545"); // Local blockchain (e.g., Hardhat)
+  const signer = await provider.getSigner();
+  const contractAddress = RentalFeeContractAddress; // Replace with actual deployed contract address
+  if (!contractAddress) {
+    throw new Error(
+      "Contract address (NEXT_PUBLIC_RENTAL_FEE_CONTRACT_ADDRESS) is missing."
+    );
+  }
+  const rentalFeeContract = new ethers.Contract(
+    contractAddress,
+    rentalFeeAbi.abi,
+    signer
+  );
+
+  return rentalFeeContract;
+};
 
 async function getAllFee(userId: number) {
   // if (!isUserRole(userRole)) {
@@ -176,7 +201,7 @@ async function createFee(agreementId: number) {
     const agreement = await prisma.agreement.findUnique({
       where: {
         agreement_id: agreementId,
-        agreement_status: "ongoing",
+        // agreement_status: "ongoing",
       },
       include: {
         proposal: {
@@ -190,6 +215,22 @@ async function createFee(agreementId: number) {
     if (!agreement) {
       return { status: 404 };
     }
+
+    if (agreement.agreement_status !== AgreementStatus.ongoing) {
+      return { status: 400 };
+    }
+
+    // check if fees of specific agreement are already created before
+    const prevFee = await prisma.rentalFee.findFirst({
+      where: {
+        agreement_id: agreementId,
+      },
+    });
+
+    if (prevFee) {
+      return { status: 409 };
+    }
+
     const startDate = agreement.proposal.property.start_date;
     const endDate = agreement.proposal.property.end_date;
     const rentalFee = agreement.proposal.property.rental_fee;
@@ -212,6 +253,10 @@ async function createFee(agreementId: number) {
     const newRentalFee = await prisma.rentalFee.createManyAndReturn({
       data: multipleRentalFee,
     });
+
+    const rentalFeeContract = await getContract();
+
+    const tx = await rentalFeeContract.createFee();
 
     return { status: 200, newRentalFee: newRentalFee };
   } catch (error) {

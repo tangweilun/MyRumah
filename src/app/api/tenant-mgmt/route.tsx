@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   // dummy
   // in future will get owner role and id form token passed by frontend using http request
   const userRole = "owner";
-  const ownerId = 8; // Henry, got property 6,7
+  const ownerId = 1;
 
   try {
     const result = await getAllTenant(ownerId, userRole);
