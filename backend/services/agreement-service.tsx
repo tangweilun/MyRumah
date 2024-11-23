@@ -174,4 +174,38 @@ export async function createAgreement(proposalId: number) {
     }
   }
   
+  export async function getAgreementsByUserId(userId: number, userType: 'tenant' | 'owner') {
+    try {
+      const agreements = await prisma.agreement.findMany({
+        where: {
+          proposal: {
+            OR: [
+              userType === 'tenant' ? { tenant_id: userId } : {},
+              userType === 'owner' ? { property: { owner_id: userId } } : {},
+            ],
+          },
+        },
+        include: {
+          proposal: {
+            include: {
+              tenant: true,
+              property: {
+                include: {
+                  owner: true,
+                },
+              },
+            },
+          },
+        },
+      });
   
+      if (!agreements.length) {
+        return { status: 404, message: 'No agreements found for the provided userId.' };
+      }
+  
+      return { status: 200, agreements };
+    } catch (error) {
+      console.error('Error fetching agreements:', error);
+      return { status: 500, message: 'Error occurred while fetching agreements.' };
+    }
+  }

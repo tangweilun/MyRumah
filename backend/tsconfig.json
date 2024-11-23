@@ -1,11 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ES6", // Or whatever version you're targeting
     "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",  // Enable JSX support
+    "esModuleInterop": true, // Helps with importing modules
     "strict": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
-  }
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "backend/**/*", // Or the relevant directory for your backend
+    "services/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
+
