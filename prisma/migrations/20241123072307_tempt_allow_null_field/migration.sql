@@ -51,7 +51,7 @@ CREATE TABLE "PropertyInfo" (
     "property_id" SERIAL NOT NULL,
     "owner_id" INTEGER NOT NULL,
     "address" TEXT NOT NULL,
-    "image" BYTEA NOT NULL,
+    "image" BYTEA,
     "description" TEXT NOT NULL,
     "occupant_num" INTEGER NOT NULL,
     "rental_fee" DECIMAL(10,2) NOT NULL,
