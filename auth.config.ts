@@ -3,6 +3,7 @@ import { signInSchema } from "@/lib/zod";
 import prisma from "@/lib/prisma";
 // import bcryptjs from 'bcryptjs';
 import { NextAuthConfig } from "next-auth";
+import bcrypt from "bcryptjs";
 
 const publicRoutes = ["/auth/sign-in", "/auth/sign-up", "/"];
 const authRoutes = ["/auth/sign-in", "/auth/sign-up"];
@@ -32,12 +33,17 @@ export default {
         //     email: credentials.email as string,
         //   },
         // });
-        user = {
-          id: "1", // Add an ID field
-          email: "testing@gmail.com",
-          password: "A123b123", // Example hashed password
-          role: "owner", // Optional: Include any fields relevant to your app
-        };
+        // user = {
+        //   id: "1", // Add an ID field
+        //   email: "testing@gmail.com",
+        //   password: "A123b123", // Example hashed password
+        //   role: "owner", // Optional: Include any fields relevant to your app
+        // };
+        const pw = credentials.password as string;
+        user = await prisma.userInfo.findFirst({
+          // unique key name is defined in prisma.schema
+          where: { email: credentials.email as string },
+        });
 
         if (!user) {
           console.log("Invalid credentials");
@@ -50,15 +56,22 @@ export default {
           );
           return null;
         }
-        const isPasswordValid = true;
+
+        if (pw && user.password) {
+          const passwordMatches = await bcrypt.compare(pw, user.password);
+          console.log(user);
+
+          if (!passwordMatches) {
+            console.log("Invalid password");
+            return null;
+          }
+        }
+
+        // const isPasswordValid = true;
         // const isPasswordValid = await bcryptjs.compare(
         //   credentials.password as string,
         //   user.password
         // );
-        if (!isPasswordValid) {
-          console.log("Invalid password");
-          return null;
-        }
 
         const { password, ...userWithoutPassword } = user;
         return userWithoutPassword;
@@ -113,6 +126,7 @@ export default {
     jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id as string;
+        token.user_id = user.user_id as number;
         token.role = user.role as string;
       }
       if (trigger === "update" && session) {
@@ -122,6 +136,7 @@ export default {
     },
     session({ session, token }) {
       session.user.id = token.id;
+      session.user.user_id = token.user_id;
       session.user.role = token.role;
       return session;
     },

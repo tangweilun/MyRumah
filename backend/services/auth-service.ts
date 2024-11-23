@@ -25,13 +25,13 @@ async function register(
 
   // Check if the provided userRole matches one of the Role enum values
   if (!isUserRole(userRole)) {
-    return { status: 500 };
+    return { status: 401 };
   }
 
-  const accExist = await checkAccExist(email, userRole);
+  const accExist = await checkAccExist(email);
 
   if (accExist && !accExist.exist) {
-    // return { status: 'success', data: 'sss' };
+    // return { status: "success", data: "sss" };
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -46,7 +46,7 @@ async function register(
           wallet_amount: 1000,
         },
       });
-      // console.log('User created in database:', newUser);
+      // console.log("User created in database:", newUser);
       return {
         status: 200,
         newUser: newUser,
@@ -65,10 +65,10 @@ async function login(email: string, userRole: string, password: string) {
   }
 
   if (!isUserRole(userRole)) {
-    return { status: 500 };
+    return { status: 401 };
   }
 
-  const accExist = await checkAccExist(email, userRole);
+  const accExist = await checkAccExist(email);
 
   if (accExist && accExist.exist) {
     try {
@@ -95,10 +95,10 @@ async function login(email: string, userRole: string, password: string) {
   return { status: 401 };
 }
 
-async function checkAccExist(email: string, role: UserRole) {
+async function checkAccExist(email: string) {
   try {
     const count = await prisma.userInfo.count({
-      where: { email: email, role: role },
+      where: { email: email },
     });
     return count > 0 ? { exist: true } : { exist: false };
   } catch (error) {
