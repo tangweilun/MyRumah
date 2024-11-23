@@ -179,9 +179,9 @@ async function getSpecFee(feeId: number) {
       return { status: 404 };
     }
 
-    const rentalFeeContract = await getContract();
-    const getFeeTx = await rentalFeeContract.getFee(specFee.fee_id);
-    console.log(getFeeTx);
+    // const rentalFeeContract = await getContract();
+    // const getFeeTx = await rentalFeeContract.getFee(specFee.fee_id);
+    // console.log(getFeeTx);
 
     return { status: 200, specFee: specFee };
   } catch (error) {
@@ -254,22 +254,22 @@ async function createFee(agreementId: number) {
       data: multipleRentalFee,
     });
 
-    const rentalFeeContract = await getContract();
+    // const rentalFeeContract = await getContract();
 
     // same structure with the struct in smart contract
-    const fees = newRentalFee.map((fee) => ({
-      feeId: fee.fee_id,
-      agreementId: fee.agreement_id,
-      amount: fee.amount.toString(),
-      status: fee.status === "paid" ? "paid" : "pending",
-      createdDate: fee.created_date.toString(),
-    }));
+    // const fees = newRentalFee.map((fee) => ({
+    //   feeId: fee.fee_id,
+    //   agreementId: fee.agreement_id,
+    //   amount: fee.amount.toString(),
+    //   status: fee.status === "paid" ? "paid" : "pending",
+    //   createdDate: fee.created_date.toString(),
+    // }));
 
-    console.log(fees);
+    // console.log(fees);
 
-    const createFeeTx = await rentalFeeContract.createFee(fees);
+    // const createFeeTx = await rentalFeeContract.createFee(fees);
 
-    console.log(createFeeTx);
+    // console.log(createFeeTx);
 
     return { status: 200, newRentalFee: newRentalFee };
   } catch (error) {
@@ -315,19 +315,19 @@ async function payFee(feeId: number, userId: number) {
       data: { status: RentalFeeStatus["paid" as keyof typeof RentalFeeStatus] },
     });
 
-    const rentalFeeContract = await getContract();
+    // const rentalFeeContract = await getContract();
 
     // same structure with the struct in smart contract
-    const fee = {
-      feeId: paidFee.fee_id,
-      agreementId: paidFee.agreement_id,
-      amount: paidFee.amount.toString(),
-      status: paidFee.status,
-      createdDate: paidFee.created_date.toString(),
-    };
+    // const fee = {
+    //   feeId: paidFee.fee_id,
+    //   agreementId: paidFee.agreement_id,
+    //   amount: paidFee.amount.toString(),
+    //   status: paidFee.status,
+    //   createdDate: paidFee.created_date.toString(),
+    // };
 
-    const payFeeTx = await rentalFeeContract.payFee(fee);
-    console.log(payFeeTx);
+    // const payFeeTx = await rentalFeeContract.payFee(fee);
+    // console.log(payFeeTx);
 
     return { status: 200, paidFee: paidFee };
   } catch (error) {
