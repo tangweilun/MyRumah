@@ -15,6 +15,7 @@ async function chkUserRole(
     if (!user) {
       return { status: 404, userRole: null };
     }
+
     return { status: 200, userRole: user.role };
   } catch (error) {
     console.error("Error in retrieving user role from database: ", error);

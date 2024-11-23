@@ -266,11 +266,21 @@ async function createProposal(tenantId: number, propertyId: number) {
 async function updateProposalStatus(
   proposalId: number,
   proposalStatus: string,
-  userRole: string
+  userId: number
 ) {
-  if (!isUserRole(userRole)) {
-    return { status: 401 };
+  const chkRole = await chkUserRole(userId);
+  if (chkRole.status != 200 || !chkRole.userRole) {
+    return { status: chkRole.status };
   }
+
+  if (
+    chkRole.userRole !== UserRole.tenant &&
+    chkRole.userRole !== UserRole.owner
+  ) {
+    return { status: 403 };
+  }
+
+  const userRole = chkRole.userRole;
 
   if (!isProposalStatus) {
     return { status: 400 };

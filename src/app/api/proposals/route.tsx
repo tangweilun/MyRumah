@@ -8,23 +8,21 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  // simulate retrieve the current login role from token
-  // simulate retrieve the user id of current login role from token
-
-  // Authorization (check has token or not) will be done here
-  // if unauthorized (no token) return status 401
-
-  // const userRole = "owner";
-  // id of curr login user (tenant)
-  const tenantId = 2;
-  // id of curr login user (owner)
-  const ownerId = 1;
-
-  const currId = ownerId;
+  const userId = req.headers.get("User-Id");
+  // const userRole = req.headers.get("User-Role");
+  if (!userId) {
+    return NextResponse.json(
+      {
+        message:
+          "You are unauthorized to retrieve proposal list of specific tenant.",
+      },
+      { status: 401 }
+    );
+  }
 
   try {
     // const result = await getAllProposal(currId, userRole);
-    const result = await getAllProposal(currId);
+    const result = await getAllProposal(parseInt(userId));
 
     if (result.status === 200) {
       return NextResponse.json({
@@ -58,10 +56,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // simulate retrieve the current login role from token
-  // simulate retrieve the user id of current login role from token
-  const userRole = "tenant";
-  const tenantId = 3;
+  const tenantId = req.headers.get("User-Id");
+  if (!tenantId) {
+    return NextResponse.json(
+      {
+        message: "You are unauthorized to create proposal.",
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     const newProposalData = await req.json();
     if (!newProposalData) {
@@ -71,7 +75,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const result = await createProposal(tenantId, newProposalData.propertyId);
+    const result = await createProposal(
+      parseInt(tenantId),
+      newProposalData.propertyId
+    );
 
     if (result.status === 200) {
       return NextResponse.json({
@@ -89,7 +96,7 @@ export async function POST(req: NextRequest) {
       );
     } else if (result.status === 401) {
       return NextResponse.json(
-        { message: "You are unauthorized to retrieve proposal list." },
+        { message: "You are unauthorized to create proposal." },
         { status: result.status }
       );
     } else if (result.status === 403) {

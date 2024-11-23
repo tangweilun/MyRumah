@@ -12,13 +12,24 @@ export async function GET(
 ) {
   const proposalId = parseInt((await params).proposalId, 10);
 
+  const userId = req.headers.get("User-Id");
+
+  if (!userId) {
+    return NextResponse.json(
+      {
+        message: "You are unauthorized to retrieve proposal.",
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     const result = await getSpecProposal(proposalId);
 
     if (result.status === 200) {
       return NextResponse.json({
         status: result.status,
-        tenantList: result.specProposal,
+        specProposal: result.specProposal,
         message: "Proposal is retrieved successfully!",
       });
     } else if (result.status === 404) {
@@ -47,15 +58,25 @@ export async function PATCH(
   { params }: { params: Promise<{ proposalId: string }> }
 ) {
   const proposalId = parseInt((await params).proposalId, 10);
+  const userId = req.headers.get("User-Id");
 
-  // dummy
-  // in future will get owner role and id form token passed by frontend using http request
-  const userRole = "tenant";
+  if (!userId) {
+    return NextResponse.json(
+      {
+        message: "You are unauthorized to retrieve proposal.",
+      },
+      { status: 401 }
+    );
+  }
 
   try {
     // assume the passed data is {status: "???"}
     const { status } = await req.json();
-    const result = await updateProposalStatus(proposalId, status, userRole);
+    const result = await updateProposalStatus(
+      proposalId,
+      status,
+      parseInt(userId)
+    );
     if (result.status === 200) {
       return NextResponse.json({
         status: result.status,
@@ -71,13 +92,21 @@ export async function PATCH(
       return NextResponse.json({
         status: result.status,
         updatedProposal: updatedProposal,
-        message: "Invalid action for proposal status change.",
+        message:
+          "Invalid action for proposal status change. The status cannot be changed anymore.",
       });
     } else if (result.status === 401) {
       return NextResponse.json({
         status: result.status,
         message: "You are unauthorized to change proposal status.",
       });
+    } else if (result.status === 403) {
+      return NextResponse.json(
+        {
+          message: "You are forbidden to change proposal status.",
+        },
+        { status: result.status }
+      );
     } else if (result.status === 404) {
       return NextResponse.json({
         status: result.status,

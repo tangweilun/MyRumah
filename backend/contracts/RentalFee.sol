@@ -8,66 +8,69 @@ contract RentalFee {
     // solidity don"t support datetime. use timestamp.
     // 
 
-    struct RentalFeeRecord {
+    struct OrigRentalFeeRecord{
+        uint256 feeId;        
+        uint256 agreementId;  
+        string amount;       
+        string status;        
+        string createdDate; 
+    }
+
+    struct HashedRentalFeeRecord {
         bytes32 feeHash;
         uint256 timestamp;     
     }
 
     // Store the hash of the agreement data
     // key is user id
-    mapping(uint256 => RentalFeeRecord) public rentalFeeRecords; 
-
+    mapping(uint256 => HashedRentalFeeRecord) public rentalFeeRecords; 
 
     // Function to create an agreement
-    function createFee(
-        uint256 feeId,
-        uint256 agreementId,
-        string memory amount,
-        string memory status,
-        string memory createdDate
-    ) public {
-        // if no record
-        require(rentalFeeRecords[feeId].timestamp == 0, "Fee ID already exists");
+    function createFee (OrigRentalFeeRecord[] memory fees) public{
 
-        bytes32 newFeeHash = keccak256(abi.encodePacked(
-            agreementId,
-            amount,
-            status,
-            createdDate
-        ));
+        for (uint256 i = 0; i < fees.length; i++) {
+            // If no record exists for this feeId
+            require(rentalFeeRecords[fees[i].feeId].timestamp == 0, "Fee is already exists.");
 
-        RentalFeeRecord memory newFee = RentalFeeRecord({
-            feeHash: newFeeHash,
-            timestamp: block.timestamp
-        });
+            bytes32 newFeeHash = keccak256(abi.encodePacked(
+                fees[i].feeId,
+                fees[i].agreementId,
+                fees[i].amount,
+                fees[i].status,
+                fees[i].createdDate
+            ));
 
-        rentalFeeRecords[feeId] = newFee;
+            HashedRentalFeeRecord memory newFee = HashedRentalFeeRecord({
+                feeHash: newFeeHash,
+                timestamp: block.timestamp
+            });
 
+            rentalFeeRecords[fees[i].feeId] = newFee;
+
+        }
     }
 
-    function payFee(
-        uint256 feeId,
-        uint256 agreementId,
-        string memory amount,
-        string memory status,
-        string memory createdDate
-    ) public {
+    function payFee(OrigRentalFeeRecord memory fee) public{
         // if no record
-        require(rentalFeeRecords[feeId].timestamp == 0, 'Appartment not found');
+        require(rentalFeeRecords[fee.feeId].timestamp != 0, 'Rental fee does not exist.');
 
         bytes32 paidFeeHash = keccak256(abi.encodePacked(
-            agreementId,
-            amount,
-            status,
-            createdDate
+            fee.feeId,
+            fee.agreementId,
+            fee.amount,
+            fee.status,
+            fee.createdDate
         ));
 
-        RentalFeeRecord memory paidFee = RentalFeeRecord({
+        HashedRentalFeeRecord memory paidFee = HashedRentalFeeRecord({
             feeHash: paidFeeHash,
             timestamp: block.timestamp
         });
 
-        rentalFeeRecords[feeId] = paidFee;
+        rentalFeeRecords[fee.feeId] = paidFee;
+    }
 
+    function getFee(uint256 feeId) public view returns (HashedRentalFeeRecord memory){
+        return rentalFeeRecords[feeId];
     }
 }

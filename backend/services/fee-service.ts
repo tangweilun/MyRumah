@@ -35,10 +35,6 @@ const getContract = async () => {
 };
 
 async function getAllFee(userId: number) {
-  // if (!isUserRole(userRole)) {
-  //   return { status: 401 };
-  // }
-
   const chkRole = await chkUserRole(userId);
   if (chkRole.status != 200 || !chkRole.userRole) {
     return { status: chkRole.status };
@@ -183,6 +179,10 @@ async function getSpecFee(feeId: number) {
       return { status: 404 };
     }
 
+    const rentalFeeContract = await getContract();
+    const getFeeTx = await rentalFeeContract.getFee(specFee.fee_id);
+    console.log(getFeeTx);
+
     return { status: 200, specFee: specFee };
   } catch (error) {
     console.error(
@@ -256,7 +256,20 @@ async function createFee(agreementId: number) {
 
     const rentalFeeContract = await getContract();
 
-    const tx = await rentalFeeContract.createFee();
+    // same structure with the struct in smart contract
+    const fees = newRentalFee.map((fee) => ({
+      feeId: fee.fee_id,
+      agreementId: fee.agreement_id,
+      amount: fee.amount.toString(),
+      status: fee.status === "paid" ? "paid" : "pending",
+      createdDate: fee.created_date.toString(),
+    }));
+
+    console.log(fees);
+
+    const createFeeTx = await rentalFeeContract.createFee(fees);
+
+    console.log(createFeeTx);
 
     return { status: 200, newRentalFee: newRentalFee };
   } catch (error) {
@@ -265,12 +278,13 @@ async function createFee(agreementId: number) {
   }
 }
 
-async function payFee(feeId: number, userRole: string) {
-  if (!isUserRole(userRole)) {
-    return { status: 401 };
+async function payFee(feeId: number, userId: number) {
+  const chkRole = await chkUserRole(userId);
+  if (chkRole.status != 200 || !chkRole.userRole) {
+    return { status: chkRole.status };
   }
 
-  if (userRole !== UserRole.tenant) {
+  if (chkRole.userRole !== UserRole.tenant) {
     return { status: 403 };
   }
 
@@ -278,6 +292,10 @@ async function payFee(feeId: number, userRole: string) {
     const specFee = await getSpecFee(feeId);
     if (specFee.status !== 200 || !specFee.specFee) {
       return { status: specFee.status };
+    }
+
+    if (specFee.specFee.status !== RentalFeeStatus.pending) {
+      return { status: 400 };
     }
 
     const tenantId = specFee.specFee.agreement.proposal.tenant_id;
@@ -297,8 +315,19 @@ async function payFee(feeId: number, userRole: string) {
       data: { status: RentalFeeStatus["paid" as keyof typeof RentalFeeStatus] },
     });
 
-    if (paidFee) {
-    }
+    const rentalFeeContract = await getContract();
+
+    // same structure with the struct in smart contract
+    const fee = {
+      feeId: paidFee.fee_id,
+      agreementId: paidFee.agreement_id,
+      amount: paidFee.amount.toString(),
+      status: paidFee.status,
+      createdDate: paidFee.created_date.toString(),
+    };
+
+    const payFeeTx = await rentalFeeContract.payFee(fee);
+    console.log(payFeeTx);
 
     return { status: 200, paidFee: paidFee };
   } catch (error) {
@@ -322,60 +351,5 @@ async function calMonth(startDate: Date, endDate: Date) {
 
   return months;
 }
-
-// async function createAgreement(
-//   userId,
-//   document1,
-//   document2,
-//   tenantSigned,
-//   ownerSigned,
-//   status
-// ) {
-//   // Step 1: Set up the provider and contract
-//   const provider = new ethers.JsonRpcProvider('http://localhost:8545'); // Local blockchain (e.g., Hardhat)
-//   const signer = provider.getSigner();
-//   const contractAddress = 'your-smart-contract-address'; // Replace with actual deployed contract address
-//   const abi = [
-//     'function createAgreement(uint256 userId, string memory document1, string memory document2, bool tenantSigned, bool ownerSigned, uint8 status) public returns (bytes32, uint256, string memory, string memory, bool, bool, uint8)',
-//   ];
-//   const contract = new ethers.Contract(contractAddress, abi, signer);
-
-//   // Step 2: Call the smart contract to create the agreement and get the result
-//   const tx = await contract.createAgreement(
-//     userId,
-//     document1,
-//     document2,
-//     tenantSigned,
-//     ownerSigned,
-//     status
-//   );
-//   const [
-//     agreementHash,
-//     userIdReturned,
-//     document1Returned,
-//     document2Returned,
-//     tenantSignedReturned,
-//     ownerSignedReturned,
-//     statusReturned,
-//   ] = tx;
-
-//   // Step 3: Store the full agreement data in PostgreSQL
-//   const newAgreement = await prisma.agreement.create({
-//     data: {
-//       userId: userIdReturned,
-//       document1: document1Returned,
-//       document2: document2Returned,
-//       tenantSigned: tenantSignedReturned,
-//       ownerSigned: ownerSignedReturned,
-//       status: statusReturned,
-//       agreementHash: agreementHash, // Store the hash in PostgreSQL too
-//     },
-//   });
-
-//   console.log('Agreement created in database:', newAgreement);
-
-//   // Step 4: Return the new agreement data
-//   return { newAgreement };
-// }
 
 export { getAllFee, getSpecTenantFee, getSpecFee, createFee, payFee };

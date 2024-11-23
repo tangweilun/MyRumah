@@ -1,5 +1,6 @@
 import prisma from "../../lib/prisma"; // Ensure Prisma is set up properly
 import { UserRole } from "@prisma/client";
+import { chkUserRole } from "./misc-service";
 
 // All function with no export is set as private function by default
 
@@ -7,9 +8,14 @@ import { UserRole } from "@prisma/client";
 const isUserRole = (role: string): role is UserRole =>
   Object.values(UserRole).includes(role as UserRole);
 
-async function getAllTenant(ownerId: number, userRole: string) {
-  if (userRole != UserRole.owner) {
-    return { status: 401 };
+async function getAllTenant(ownerId: number) {
+  const chkRole = await chkUserRole(ownerId);
+  if (chkRole.status != 200 || !chkRole.userRole) {
+    return { status: chkRole.status };
+  }
+
+  if (chkRole.userRole !== UserRole.owner) {
+    return { status: 403 };
   }
 
   try {
@@ -49,20 +55,6 @@ async function getAllTenant(ownerId: number, userRole: string) {
     };
   } catch (error) {
     console.error("Error in retrieving tenant list from database: ", error);
-    return { status: 500 };
-  }
-}
-
-async function checkAccExist(email: string, role: UserRole) {
-  try {
-    const count = await prisma.userInfo.count({
-      where: { email: email, role: role },
-    });
-    return count > 0 ? { exist: true } : { exist: false };
-  } catch (error) {
-    // console.error("Database error");
-    // throw new Error("Database error");
-    console.error("Database error");
     return { status: 500 };
   }
 }

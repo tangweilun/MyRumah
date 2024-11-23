@@ -8,21 +8,22 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ tenantId: string }> }
 ) {
-  // simulate retrieve the current login role from token
-  // simulate retrieve the user id of current login role from token
-
-  // Authorization (check has token or not) will be done here
-  // if unauthorized (no token) return status 401
-
-  // const userRole = "owner";
-  // id of curr login user (tenant)
   const tenantId = parseInt((await params).tenantId, 10);
-  // id of curr login user (owner)
-  const ownerId = 8;
+  const ownerId = req.headers.get("User-Id");
+  // const userRole = req.headers.get("User-Role");
+  if (!ownerId) {
+    return NextResponse.json(
+      {
+        message:
+          "You are unauthorized to retrieve fee list of specific tenant.",
+      },
+      { status: 401 }
+    );
+  }
 
   try {
     // const result = await getSpecTenantFee(tenantId, ownerId, userRole);
-    const result = await getSpecTenantFee(tenantId, ownerId);
+    const result = await getSpecTenantFee(tenantId, parseInt(ownerId));
 
     if (result.status === 200) {
       return NextResponse.json({
