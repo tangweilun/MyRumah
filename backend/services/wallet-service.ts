@@ -47,10 +47,11 @@ async function deductWallet(userId: number, deductAmount: number) {
       return { status: userWallet.status };
     }
 
-    const newWalletAmount = new Decimal(userWallet.walletAmount).sub(
-      deductAmount
-    );
+    const newWalletAmount = Number(userWallet.walletAmount) - deductAmount;
 
+    if (newWalletAmount < 0) {
+      return { status: 400 };
+    }
     const updatedUserData = await prisma.userInfo.update({
       where: {
         user_id: userId,
