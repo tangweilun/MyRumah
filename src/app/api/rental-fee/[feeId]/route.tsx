@@ -79,7 +79,8 @@ export async function PATCH(
     } else if (result.status === 400) {
       return NextResponse.json({
         status: result.status,
-        message: "Fee is paid before.",
+        message:
+          "Failed to pay fee. Fee is either paid before or insufficent wallet amount.",
       });
     } else if (result.status === 401) {
       return NextResponse.json({
