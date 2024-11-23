@@ -38,8 +38,8 @@
       ]
     },
     "D:\\jeffw\\APU Class\\Blockchain Development\\Assignment\\MyRumah\\backend\\contracts\\RentalFee.sol": {
-      "lastModificationDate": 1732115447620,
-      "contentHash": "f10e864722965f85c8728767dd5149dc",
+      "lastModificationDate": 1732335817684,
+      "contentHash": "7f8c2cb6ca22aaa16f3732198981cc0d",
       "sourceName": "contracts/RentalFee.sol",
       "solcConfig": {
         "version": "0.8.27",
@@ -74,7 +74,7 @@
       ]
     },
     "D:\\jeffw\\APU Class\\Blockchain Development\\Assignment\\MyRumah\\backend\\contracts\\User.sol": {
-      "lastModificationDate": 1732115444652,
+      "lastModificationDate": 1732164439410,
       "contentHash": "73c649578bbbdf5232e9628331fd5229",
       "sourceName": "contracts/User.sol",
       "solcConfig": {

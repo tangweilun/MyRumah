@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "npx hardhat ignition deploy ./ignition/modules/Deployment.ts --reset --network localhost",
+    "deploy": "npx hardhat ignition deploy ./ignition/modules/Deployment.ts --reset --network localhost && npx ts-node ./scripts/copyAbiAndAddress.ts",
     "test": "REPORT_GAS=true npx hardhat test",
     "compile": "npx hardhat compile"
   },
@@ -16,6 +16,7 @@
     "@openzeppelin/contracts": "^5.1.0",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/bn.js": "^5.1.6",
     "hardhat": "^2.22.15"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
     "ethers": "^6.13.4",
     "mock-aws-s3": "^4.0.2",
     "nock": "^13.5.6",
