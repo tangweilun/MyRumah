@@ -34,6 +34,11 @@ export async function POST(req: Request) {
         status: result.status,
         message: 'Incomplete registration information!',
       });
+    } else if (result.status === 401) {
+      return NextResponse.json({
+        status: result.status,
+        message: "Invalid registration credential!",
+      });
     } else if (result.status === 409) {
       return NextResponse.json({
         status: result.status,

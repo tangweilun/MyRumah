@@ -6,14 +6,10 @@
     "esModuleInterop": true, // Helps with importing modules
     "strict": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": [
-    "backend/**/*", // Or the relevant directory for your backend
-    "services/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "resolveJsonModule": true,
+
+    // addon
+    "jsx": "preserve"
+  }
 }
 
