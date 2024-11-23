@@ -5,23 +5,19 @@ import { getAllFee, createFee } from "@backend/services/fee-service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  // simulate retrieve the current login role from token
-  // simulate retrieve the user id of current login role from token
-
-  // Authorization (check has token or not) will be done here
-  // if unauthorized (no token) return status 401
-
-  const userRole = "tenant";
-  // id of curr login user (tenant)
-  const tenantId = 1;
-  // id of curr login user (owner)
-  const ownerId = 8;
-
-  const currId = tenantId;
+  const userId = req.headers.get("User-Id");
+  // const userRole = req.headers.get("User-Role");
+  if (!userId) {
+    return NextResponse.json(
+      {
+        message: "You are unauthorized to retrieve rental fee list.",
+      },
+      { status: 401 }
+    );
+  }
 
   try {
-    // const result = await getAllFee(currId, userRole);
-    const result = await getAllFee(currId);
+    const result = await getAllFee(parseInt(userId));
 
     if (result.status === 200) {
       return NextResponse.json({
@@ -55,10 +51,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // simulate retrieve the current login role from token
-  // simulate retrieve the user id of current login role from token
-  const userRole = "tenant";
-  const tenantId = 1;
   try {
     const { agreementId } = await req.json();
     if (!agreementId) {

@@ -2,13 +2,18 @@ import { getAllTenant } from "@backend/services/tenant-mgmt-service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  // dummy
-  // in future will get owner role and id form token passed by frontend using http request
-  const userRole = "owner";
-  const ownerId = 1;
+  const ownerId = req.headers.get("User-Id");
+  if (!ownerId) {
+    return NextResponse.json(
+      {
+        message: "You are unauthorized to retrieve tenant list.",
+      },
+      { status: 401 }
+    );
+  }
 
   try {
-    const result = await getAllTenant(ownerId, userRole);
+    const result = await getAllTenant(parseInt(ownerId));
 
     if (result.status === 200) {
       return NextResponse.json({
@@ -19,6 +24,11 @@ export async function GET(req: NextRequest) {
     } else if (result.status === 401) {
       return NextResponse.json(
         { message: "You are unauthorized to retrieve tenant list." },
+        { status: result.status }
+      );
+    } else if (result.status === 403) {
+      return NextResponse.json(
+        { message: "You are forbidden to retrieve tenant list." },
         { status: result.status }
       );
     } else if (result.status === 404) {

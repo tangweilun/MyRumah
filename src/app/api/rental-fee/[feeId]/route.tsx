@@ -5,9 +5,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { feeId: string } }
+  { params }: { params: Promise<{ feeId: string }> }
 ) {
-  const feeId = parseInt(params.feeId, 10);
+  const feeId = parseInt((await params).feeId, 10);
+
+  const userId = req.headers.get("User-Id");
+
+  if (!userId) {
+    return NextResponse.json(
+      {
+        message: "You are unauthorized to retrieve rental fee record.",
+      },
+      { status: 401 }
+    );
+  }
 
   try {
     const result = await getSpecFee(feeId);
@@ -45,21 +56,30 @@ export async function PATCH(
 ) {
   const feeId = parseInt((await params).feeId, 10);
 
-  // dummy
-  // in future will get owner role and id form token passed by frontend using http request
-  const userRole = "tenant";
+  const userId = req.headers.get("User-Id");
+
+  if (!userId) {
+    return NextResponse.json(
+      {
+        message: "You are unauthorized to pay rental fee.",
+      },
+      { status: 401 }
+    );
+  }
 
   try {
-    // assume the passed data is {status: "???"}
-    const { status } = await req.json();
-
-    const result = await payFee(feeId, userRole);
+    const result = await payFee(feeId, parseInt(userId));
 
     if (result.status === 200) {
       return NextResponse.json({
         status: result.status,
         paidFee: result.paidFee,
         message: "Rental fee is paid successfully!",
+      });
+    } else if (result.status === 400) {
+      return NextResponse.json({
+        status: result.status,
+        message: "Fee is paid before.",
       });
     } else if (result.status === 401) {
       return NextResponse.json({
