@@ -201,7 +201,7 @@ async function createFee(agreementId: number) {
     const agreement = await prisma.agreement.findUnique({
       where: {
         agreement_id: agreementId,
-        // agreement_status: "ongoing",
+        agreement_status: "ongoing",
       },
       include: {
         proposal: {
@@ -294,12 +294,17 @@ async function payFee(feeId: number, userId: number) {
       return { status: specFee.status };
     }
 
+    const tenantId = specFee.specFee.agreement.proposal.tenant_id;
+    const payableAmount = Number(specFee.specFee.amount);
+
+    // if current login tenant want to pay fee of other tenant
+    if (userId !== tenantId) {
+      return { status: 403 };
+    }
+
     if (specFee.specFee.status !== RentalFeeStatus.pending) {
       return { status: 400 };
     }
-
-    const tenantId = specFee.specFee.agreement.proposal.tenant_id;
-    const payableAmount = Number(specFee.specFee.amount);
 
     // deductWallet function is came from "user-service.tsx"
     const updatedWallet = await deductWallet(tenantId, payableAmount);
