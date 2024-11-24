@@ -115,6 +115,21 @@ export async function getPropertiesByUser(userId: number, role: string): Promise
   }
 }
 
+export async function getAllProperties(): Promise<PropertyInfo[]> {
+  try {
+    // Fetch all properties
+    const properties = await prisma.propertyInfo.findMany({
+      include: {
+        owner: true, // Include owner details if needed
+      },
+    });
+    return properties;
+  } catch (error) {
+    console.error("Error fetching all properties:", error);
+    throw new Error("Error fetching all properties");
+  }
+}
+
 
   //delete/edit
   export async function editProperty(

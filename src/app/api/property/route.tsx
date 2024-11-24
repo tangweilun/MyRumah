@@ -70,30 +70,48 @@ export async function POST(req: Request) {
 
 
 import { getPropertiesByUser } from "@backend/services/property-service";
+import { getAllProperties } from "@backend/services/property-service";
 import { PropertyInfo } from "@prisma/client";
 
 export async function GET(req: Request) {
   try {
     // Extract user info from the request (e.g., token or query params)
     const url = new URL(req.url);
-    const userId = parseInt(url.searchParams.get("userId") || "0");
+    const userId = url.searchParams.get("userId");
     const role = url.searchParams.get("role"); // 'owner' or 'tenant'
 
-    if (!userId || !role) {
-      return new Response(JSON.stringify({ message: "Invalid userId or role." }), { status: 400 });
+    console.log(userId);
+    console.log(role);
+
+    let properties: PropertyInfo[];
+
+    if (!userId && !role) {
+      // Guest: Fetch all properties
+      properties = await getAllProperties();
+    } else if (!userId || !role) {
+      // Invalid combination of userId or role
+      return new Response(
+        JSON.stringify({ message: "Invalid userId or role." }),
+        { status: 400 }
+      );
+    } else {
+      // Fetch properties based on user role
+      properties = await getPropertiesByUser(parseInt(userId), role);
     }
 
-    // Fetch properties based on user role
-    const properties: PropertyInfo[] = await getPropertiesByUser(userId, role);
     console.log(properties);
 
     // Return the properties as a JSON response
     return new Response(JSON.stringify({ properties }), { status: 200 });
   } catch (error) {
     console.error("Error in GET request:", error);
-    return new Response(JSON.stringify({ message: "Internal server error." }), { status: 500 });
+    return new Response(
+      JSON.stringify({ message: "Internal server error." }),
+      { status: 500 }
+    );
   }
 }
+
 
 
 
