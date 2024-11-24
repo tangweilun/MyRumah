@@ -1,12 +1,14 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Heart, Bed } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Heart, Bed } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { getSession } from "@/lib/getSession";
+import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 type PropertyCardProps = {
   title: string;
   price: number;
@@ -24,10 +26,9 @@ const PropertyCard = ({
 }: PropertyCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const router = useRouter();
-
   const toggleLike = () => {
     if (!true) {
-      router.push('/sign-up');
+      router.push("/sign-up");
       return;
     }
     setIsLiked((prev) => !prev);
@@ -35,7 +36,7 @@ const PropertyCard = ({
 
   const handleApplyNow = () => {
     if (!true) {
-      router.push('/sign-in');
+      router.push("/sign-in");
       return;
     }
     // Handle the application process for signed-in users
@@ -43,7 +44,20 @@ const PropertyCard = ({
       `/dashboard/property/apply?property=${encodeURIComponent(title)}`
     );
   };
-
+  const { data: session, status } = useSession();
+  const role = session?.user?.role || "tenant";
+  const userId = session?.user?.user_id || "0";
+  // const {
+  //   data: properties,
+  //   isError,
+  //   isPending,
+  // } = useQuery({
+  //   queryKey: ["properties", { properties }],
+  //   queryFn: async () => {
+  //     const response = await fetch(`/api/property?userId?=${userId}`);
+  //     return (await response.json()) as Properties[];
+  //   },
+  // });
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
       <Card>
@@ -52,14 +66,14 @@ const PropertyCard = ({
           <Image
             width={300}
             height={192}
-            src={imageUrl || '/api/placeholder/300/192'}
+            src={imageUrl || "/api/placeholder/300/192"}
             alt={title}
             className="h-full w-full object-cover"
           />
           <Button
-            variant={'outline'}
+            variant={"outline"}
             className={`absolute right-2 top-2 p-1.5 transition-all duration-300 ${
-              isLiked ? 'bg-red-400' : 'bg-white'
+              isLiked ? "bg-red-400" : "bg-white"
             } rounded-md`}
             onClick={toggleLike}
           >
@@ -93,7 +107,7 @@ const PropertyCard = ({
             className="w-full bg-green-600 hover:bg-green-700 text-white"
             onClick={handleApplyNow}
           >
-            {true ? 'Apply Now' : 'Sign in to Apply'}
+            {true ? "Apply Now" : "Sign in to Apply"}
           </Button>
         </CardFooter>
       </Card>
@@ -110,25 +124,25 @@ const PropertyGrid = () => {
         setTimeout(() => {
           resolve([
             {
-              title: 'Modern Apartment 1',
+              title: "Modern Apartment 1",
               price: 1200,
-              location: 'Downtown Area',
+              location: "Downtown Area",
               rooms: 2,
-              imageUrl: '/propertyImage1.jpeg',
+              imageUrl: "/propertyImage1.jpeg",
             },
             {
-              title: 'Modern Apartment 2',
+              title: "Modern Apartment 2",
               price: 1200,
-              location: 'Downtown Area',
+              location: "Downtown Area",
               rooms: 2,
-              imageUrl: '/propertyImage2.jpeg',
+              imageUrl: "/propertyImage2.jpeg",
             },
             {
-              title: 'Modern Apartment 3',
+              title: "Modern Apartment 3",
               price: 1200,
-              location: 'Downtown Area',
+              location: "Downtown Area",
               rooms: 2,
-              imageUrl: '/propertyImage3.jpeg',
+              imageUrl: "/propertyImage3.jpeg",
             },
           ]);
         }, 10);
