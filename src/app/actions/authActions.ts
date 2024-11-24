@@ -102,15 +102,13 @@ export async function handleSignUp({
           wallet_amount: 1000,
         },
       });
-      console.log(22222);
       return {
         success: true,
         message: "Account created successfully.",
         // newUser: newUser,
       };
     }
-    console.log(2777);
-    return { success: false, message: "Account not exist." };
+    return { success: false, message: "Account is already exist." };
 
     // return { success: true, message: "Account created successfully." };
   } catch (error) {
