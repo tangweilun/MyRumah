@@ -78,7 +78,8 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const userId = parseInt(url.searchParams.get("userId") || "0");
     const role = url.searchParams.get("role"); // 'owner' or 'tenant'
-
+    console.log(userId);
+    console.log(role);
     if (!userId || !role) {
       return new Response(JSON.stringify({ message: "Invalid userId or role." }), { status: 400 });
     }

@@ -19,6 +19,15 @@ const abiFiles = [
     addressKey: "DeploymentModule#RentalFee",
   },
   // Add more contracts as needed
+  {
+    source: path.join(
+      __dirname,
+      "../ignition/deployments/chain-31337/artifacts/DeploymentModule#AgreementContract.json"
+    ),
+    destination: "../src/abi/agreementContract.json",
+    envKey: "NEXT_PUBLIC_AGREEMENT_CONTRACT_ADDRESS",
+    addressKey: "DeploymentModule#AgreementContract",
+  },
 ];
 
 // Define the ABI copy logic and address updating
