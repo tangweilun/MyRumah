@@ -47,7 +47,7 @@ const proposals = [
   },
 ];
 
-const SingleProperyPage = () => {
+const SinglePropertyPage = () => {
   const router = useRouter();
   const propertyId = "1"; // Replace with the actual property ID
 
@@ -230,4 +230,4 @@ const SingleProperyPage = () => {
   );
 };
 
-export default SingleProperyPage;
+export default SinglePropertyPage;
