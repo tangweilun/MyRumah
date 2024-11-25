@@ -13,7 +13,6 @@ const Owner = () => {
     <div className="p-16 bg-stone-50">
       {/* Card Section */}
       <h2 className="text-2xl font-bold mb-6">Owner Dashboard</h2>
-      <pre>{JSON.stringify(session, null, 2)}</pre>
       <div className="flex flex-col sm:flex-row gap-16">
         <MetricCard
           title="Total Properties"
