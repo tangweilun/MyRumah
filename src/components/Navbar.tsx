@@ -1,15 +1,16 @@
-import React, { useEffect } from 'react';
-import { Home } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from './ui/button';
-import { handleSignOut } from '@/app/actions/authActions';
+import React, { useEffect } from "react";
+import { Home } from "lucide-react";
+import Link from "next/link";
+import { Button } from "./ui/button";
+import { handleSignOut } from "@/app/actions/authActions";
 
-import { getSession } from '@/lib/getSession';
+import { getSession } from "@/lib/getSession";
+import AuthButton from "./ui/AuthButton";
 
 const Navbar = async () => {
   const session = await getSession();
   // const router = useRouter();
-  console.log('session using server compoment in nav bar:' + session);
+  console.log("session using server compoment in nav bar:" + session);
 
   return (
     <div className="flex items-center justify-between h-16 px-16 bg-transparent">
@@ -25,38 +26,38 @@ const Navbar = async () => {
       {/* Navigation for medium and larger screens */}
       <nav className="hidden md:flex items-center gap-2 space-x-4">
         {/* Dynamic Links based on role */}
-        {session?.user?.role === 'owner' && (
+        {session?.user?.role === "owner" && (
           <>
             <Link
-              href={'/owner'}
+              href={"/owner"}
               className="text-stone-600 hover:text-green-700"
             >
               Dashboard
             </Link>
             <Link
-              href={'/list/my-proposals'}
+              href={"/list/my-proposals"}
               className="text-stone-600 hover:text-green-700"
             >
               My Proposals
             </Link>
             <Link
-              href={'/list/my-tenants'}
+              href={"/list/my-tenants"}
               className="text-stone-600 hover:text-green-700"
             >
               My Tenants
             </Link>
           </>
         )}
-        {session?.user?.role === 'tenant' && (
+        {session?.user?.role === "tenant" && (
           <>
             <Link
-              href={'/list/my-proposals'}
+              href={"/list/my-proposals"}
               className="text-stone-600 hover:text-green-700"
             >
               My Proposals
             </Link>
             <Link
-              href={'/list/wishlist'}
+              href={"/list/wishlist"}
               className="text-stone-600 hover:text-green-700"
             >
               Wishlist
@@ -64,7 +65,7 @@ const Navbar = async () => {
           </>
         )}
 
-        {/* User menu and responsive menu icon */}
+        {/* User menu and responsive menu icon
         <div className="flex items-center gap-6">
           {!session ? (
             <>
@@ -80,6 +81,21 @@ const Navbar = async () => {
               >
                 Create Account
               </Link>
+            </>
+          ) : (
+            <form action={handleSignOut}>
+              <Button variant="default" type="submit">
+                Sign Out
+              </Button>
+            </form>
+          )}
+        </div> */}
+        {/* User menu and responsive menu icon */}
+        <div className="flex items-center gap-6">
+          {!session ? (
+            <>
+              <AuthButton href="/auth/sign-in">Login</AuthButton>
+              <AuthButton href="/auth/sign-up">Create Account</AuthButton>
             </>
           ) : (
             <form action={handleSignOut}>

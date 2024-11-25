@@ -4,6 +4,7 @@ import MyPropertiesGrid from "@/components/myPropertiesGrid";
 import { Button } from "@/components/ui/button";
 import { Calendar, DollarSign, Home, Menu, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 const Owner = () => {
   const { data: session, status } = useSession();
@@ -41,11 +42,13 @@ const Owner = () => {
         <h1 className="text-xl md:text-2xl font-semibold text-green-800">
           My Properties
         </h1>
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Add New Property</span>
-          <span className="sm:hidden">Add</span>
-        </Button>
+        <Link href="/property/add">
+          <Button className="bg-green-600 hover:bg-green-700 text-white">
+            <Plus className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Add New Property</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
+        </Link>
       </div>
       <MyPropertiesGrid></MyPropertiesGrid>
     </div>
