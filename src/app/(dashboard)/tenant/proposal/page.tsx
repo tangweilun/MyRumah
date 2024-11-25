@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Check } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface Proposal {
   property: string;
@@ -31,50 +32,62 @@ interface Proposal {
 }
 
 export default function TenantProposalPage() {
-  const proposalList: Proposal[] = [
-    {
-      property: "Cozy Downtown Apartment",
-      dateSubmitted: "10/15/2024",
-      proposalStatus: "Approved",
-      amount: 1200,
-      agreementStatus: "Pending",
+  const {
+    data: proposal,
+    isLoading,
+    isError,
+  } = useQuery<Proposal[]>({
+    queryKey: [""],
+    queryFn: async () => {
+      const response = await fetch("/api/proposals");
+      const json = await response.json();
     },
-    {
-      property: "Cozy Downtown Apartment",
-      dateSubmitted: "10/15/2024",
-      proposalStatus: "Pending",
-      amount: 1200,
-      agreementStatus: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dateSubmitted: "10/15/2024",
-      proposalStatus: "Pending",
-      amount: 1200,
-      agreementStatus: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dateSubmitted: "10/15/2024",
-      proposalStatus: "Pending",
-      amount: 1200,
-      agreementStatus: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dateSubmitted: "10/15/2024",
-      proposalStatus: "Pending",
-      amount: 1200,
-      agreementStatus: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dateSubmitted: "10/15/2024",
-      proposalStatus: "Cancelled",
-      amount: 1200,
-      agreementStatus: "Pending",
-    },
-  ];
+  });
+
+  // const proposalList: Proposal[] = [
+  //   {
+  //     property: "Cozy Downtown Apartment",
+  //     dateSubmitted: "10/15/2024",
+  //     proposalStatus: "Approved",
+  //     amount: 1200,
+  //     agreementStatus: "Pending",
+  //   },
+  //   {
+  //     property: "Cozy Downtown Apartment",
+  //     dateSubmitted: "10/15/2024",
+  //     proposalStatus: "Pending",
+  //     amount: 1200,
+  //     agreementStatus: "Pending",
+  //   },
+  //   {
+  //     property: "Cozy Downtown Apartment",
+  //     dateSubmitted: "10/15/2024",
+  //     proposalStatus: "Pending",
+  //     amount: 1200,
+  //     agreementStatus: "Pending",
+  //   },
+  //   {
+  //     property: "Cozy Downtown Apartment",
+  //     dateSubmitted: "10/15/2024",
+  //     proposalStatus: "Pending",
+  //     amount: 1200,
+  //     agreementStatus: "Pending",
+  //   },
+  //   {
+  //     property: "Cozy Downtown Apartment",
+  //     dateSubmitted: "10/15/2024",
+  //     proposalStatus: "Pending",
+  //     amount: 1200,
+  //     agreementStatus: "Pending",
+  //   },
+  //   {
+  //     property: "Cozy Downtown Apartment",
+  //     dateSubmitted: "10/15/2024",
+  //     proposalStatus: "Cancelled",
+  //     amount: 1200,
+  //     agreementStatus: "Pending",
+  //   },
+  // ];
 
   const [currentPage, setCurrentPage] = useState(1);
   const paginatedProposals = getPaginatedItems(proposalList, currentPage);
