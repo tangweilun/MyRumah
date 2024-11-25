@@ -92,8 +92,7 @@ export async function PATCH(
       return NextResponse.json({
         status: result.status,
         updatedProposal: updatedProposal,
-        message:
-          "Invalid action for proposal status change. The status cannot be changed anymore.",
+        message: "Invalid action for proposal status change.",
       });
     } else if (result.status === 401) {
       return NextResponse.json({

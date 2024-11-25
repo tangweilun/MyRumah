@@ -301,6 +301,7 @@ async function updateProposalStatus(
     if (!currProposal) {
       return { status: 404 };
     }
+
     // if current date is over the rental start date of the property, change the status to cancelled.
     const isPropertyExpired = await chkPropertyExpiration(
       currProposal.property_id
@@ -336,12 +337,17 @@ async function updateProposalStatus(
       return { status: 400 };
     }
 
+    let isRelated: boolean = false;
+
     if (userRole === UserRole.tenant) {
       if (proposalStatus !== ProposalStatus.cancelled) {
         // tenant can only change status from pending to cancelled, not others
 
         return { status: 400 };
       }
+      isRelated = await chkUserProposalRelation(proposalId, userId, userRole);
+      console.log("tenant");
+      console.log(isRelated);
     } else if (userRole === UserRole.owner) {
       if (
         proposalStatus !== ProposalStatus.approved &&
@@ -350,7 +356,15 @@ async function updateProposalStatus(
         // owner can only change status from pending to approved/rejected, not others
         return { status: 400 };
       }
+      isRelated = await chkUserProposalRelation(proposalId, userId, userRole);
+      console.log("owner");
+      console.log(isRelated);
     }
+
+    if (!isRelated) {
+      return { status: 403 };
+    }
+
     // if update failed such as not found, prisma will throw error
     // if success, by default will returned all fields
     const updatedProposal = await prisma.proposal.update({
@@ -370,6 +384,37 @@ async function updateProposalStatus(
     );
     return { status: 500 };
   }
+}
+
+async function chkUserProposalRelation(
+  proposalId: number,
+  userId: number,
+  userRole: string
+): Promise<boolean> {
+  let proposal = null;
+  if (userRole === UserRole.owner) {
+    proposal = await prisma.proposal.findFirst({
+      where: {
+        proposal_id: proposalId,
+        property: {
+          owner_id: userId,
+        },
+      },
+    });
+  } else if (userRole === UserRole.tenant) {
+    proposal = await prisma.proposal.findUnique({
+      where: {
+        proposal_id: proposalId,
+        tenant_id: userId,
+      },
+    });
+  }
+
+  if (!proposal) {
+    return false;
+  }
+
+  return true;
 }
 
 export {
