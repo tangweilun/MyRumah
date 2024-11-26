@@ -199,63 +199,23 @@ export default function AddProperty() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
-      <h1 className="text-2xl font-bold mb-4">Add New Property</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Basic Information</h2>
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Downtown Area" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
+    <div className="min-h-screen bg-stone-50 py-8">
+      <div className="container mx-auto px-6 py-8 max-w-7xl bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold mb-4">Add New Property</h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Basic Information</h2>
                 <FormField
                   control={form.control}
-                  name="occupantNum"
+                  name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Number of Rooms</FormLabel>
-                      <Select
-                        onValueChange={(value) => field.onChange(Number(value))}
-                        defaultValue={field.value?.toString()} // Convert to string for default
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Number of Rooms" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1">1 Room</SelectItem>
-                          <SelectItem value="2">2 Rooms</SelectItem>
-                          <SelectItem value="3">3 Rooms</SelectItem>
-                          <SelectItem value="4">4 Rooms</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="rentalFee"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Monthly Price ($)</FormLabel>
+                      <FormLabel>Address</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          placeholder="e.g. 1200"
+                          placeholder="e.g. Technology Park 54000, Kuala Lumpur"
                           {...field}
                         />
                       </FormControl>
@@ -263,159 +223,206 @@ export default function AddProperty() {
                     </FormItem>
                   )}
                 />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="occupantNum"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of Rooms</FormLabel>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(Number(value))
+                          }
+                          defaultValue={field.value?.toString()} // Convert to string for default
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Number of Rooms" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="1">1 Room</SelectItem>
+                            <SelectItem value="2">2 Rooms</SelectItem>
+                            <SelectItem value="3">3 Rooms</SelectItem>
+                            <SelectItem value="4">4 Rooms</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rentalFee"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Monthly Price ($)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="e.g. 1200"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Property Details</h2>
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Property Details</h2>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe your property..."
+                          className="h-24"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dateRange"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Available Dates</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              id="date"
+                              variant={"outline"}
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value?.from ? (
+                                field.value.to ? (
+                                  <>
+                                    {format(field.value.from, "LLL dd, y")} -{" "}
+                                    {format(field.value.to, "LLL dd, y")}
+                                  </>
+                                ) : (
+                                  format(field.value.from, "LLL dd, y")
+                                )
+                              ) : (
+                                <span>Pick a date range</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={field.value?.from}
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            numberOfMonths={2}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
-                name="description"
+                name="images"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Upload Images</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Describe your property..."
-                        className="h-24"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dateRange"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Available Dates</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            id="date"
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value?.from ? (
-                              field.value.to ? (
-                                <>
-                                  {format(field.value.from, "LLL dd, y")} -{" "}
-                                  {format(field.value.to, "LLL dd, y")}
-                                </>
-                              ) : (
-                                format(field.value.from, "LLL dd, y")
-                              )
-                            ) : (
-                              <span>Pick a date range</span>
-                            )}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          initialFocus
-                          mode="range"
-                          defaultMonth={field.value?.from}
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          numberOfMonths={2}
+                      <div className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2">
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground text-center">
+                          Upload your images here
+                        </p>
+                        <input
+                          id="images"
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            field.onChange(e.target.files);
+                            setImages(e.target.files);
+                          }}
                         />
-                      </PopoverContent>
-                    </Popover>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            document.getElementById("images")?.click()
+                          }
+                        >
+                          Choose Files
+                        </Button>
+                        {field.value && (
+                          <p className="text-sm text-muted-foreground">
+                            {(field.value as FileList).length} files selected
+                          </p>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Upload images of your property. You can select multiple
+                      files. Only image formats are allowed.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="images"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Upload Images</FormLabel>
-                  <FormControl>
-                    <div className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2">
-                      <Upload className="h-6 w-6 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground text-center">
-                        Drag & drop your images here or click to browse
-                      </p>
-                      <input
-                        id="images"
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          field.onChange(e.target.files);
-                          setImages(e.target.files);
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          document.getElementById("images")?.click()
-                        }
-                      >
-                        Choose Files
-                      </Button>
-                      {field.value && (
-                        <p className="text-sm text-muted-foreground">
-                          {(field.value as FileList).length} files selected
-                        </p>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Upload images of your property. You can select multiple
-                    files. Only image formats are allowed.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex justify-end gap-4">
-            <Button
-              variant="outline"
-              type="button"
-              disabled={isLoading || isCanceling}
-              onClick={handleCancel}
-            >
-              {isCanceling ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Canceling...
-                </>
-              ) : (
-                "Cancel"
-              )}
-            </Button>
-            <Button
-              type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
-                </>
-              ) : (
-                "Add Property"
-              )}
-            </Button>
-          </div>
-        </form>
-      </Form>
+            <div className="flex justify-end gap-4">
+              <Button
+                variant="outline"
+                type="button"
+                disabled={isLoading || isCanceling}
+                onClick={handleCancel}
+              >
+                {isCanceling ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Canceling...
+                  </>
+                ) : (
+                  "Cancel"
+                )}
+              </Button>
+              <Button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  "Add Property"
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }

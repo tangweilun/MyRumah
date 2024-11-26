@@ -2,12 +2,19 @@
 import MetricCard from "@/components/MetricCard";
 import MyPropertiesGrid from "@/components/myPropertiesGrid";
 import { Button } from "@/components/ui/button";
-import { Calendar, DollarSign, Home, Menu, Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Calendar, DollarSign, Home, Menu, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Owner = () => {
-  const { data: session, status } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleAddProperty = () => {
+    setIsLoading(true);
+    router.push("/property/add");
+  };
 
   return (
     <div className="p-16 bg-stone-50">
@@ -41,13 +48,25 @@ const Owner = () => {
         <h1 className="text-xl md:text-2xl font-semibold text-green-800">
           My Properties
         </h1>
-        <Link href="/property/add">
-          <Button className="bg-green-600 hover:bg-green-700 text-white">
-            <Plus className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Add New Property</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
-        </Link>
+        <Button
+          onClick={handleAddProperty}
+          className="bg-green-600 hover:bg-green-700 text-white"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span className="hidden sm:inline">Loading...</span>
+              <span className="sm:hidden">...</span>
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Add New Property</span>
+              <span className="sm:hidden">Add</span>
+            </>
+          )}
+        </Button>
       </div>
       <MyPropertiesGrid></MyPropertiesGrid>
     </div>
