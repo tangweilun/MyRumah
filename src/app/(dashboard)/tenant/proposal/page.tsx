@@ -62,13 +62,18 @@ export default function TenantProposalPage() {
           "User-Id": tenantId ? tenantId.toString() : "",
         },
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch proposals");
+      }
+
       const json = await response.json();
       return json.proposalList.map((proposal: Proposal) => ({
-        proposalId: proposal.proposal_id,
-        propertyId: proposal.property_id,
-        propertyStatus: proposal.status,
-        dateCreated: proposal.created_date,
-        dateModified: proposal.modified_date,
+        proposal_id: proposal.proposal_id,
+        property_id: proposal.property_id,
+        status: proposal.status,
+        created_date: proposal.created_date,
+        modified_date: proposal.modified_date,
         description: proposal.property?.description,
       }));
     },
