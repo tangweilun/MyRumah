@@ -81,7 +81,9 @@ export function useHideProperty(
     onSuccess: (data) => {
       // Invalidate and refetch properties list
       queryClient.invalidateQueries({ queryKey: ["properties"] });
-      toast.success("Property has been successfully hide!");
+      toast.success(
+        "Property has been successfully hidden from being displayed to the potential tenant."
+      );
       setStatusIsActive(false);
       setIsHideLoading(false);
     },
@@ -133,7 +135,7 @@ export function useDeleteProperty(
       redirect("/owner");
     },
     onError: (error: Error) => {
-      toast.error("Failed to delete property. Please try again.");
+      //  toast.error("Failed to delete property. Please try again.");
       setIsHideLoading(false);
     },
   });
