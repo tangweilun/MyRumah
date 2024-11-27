@@ -56,6 +56,13 @@ export async function GET(req: Request) {
 
     const result = await getAgreementsByUserId(userId, userType as 'tenant' | 'owner');
 
+    if (!result) {
+      return NextResponse.json({
+        status: 404,
+        message: 'No agreements found.',
+      });
+    }
+
     if (result.status === 200) {
       return NextResponse.json({
         status: result.status,
@@ -75,3 +82,4 @@ export async function GET(req: Request) {
     );
   }
 }
+

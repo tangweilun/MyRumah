@@ -107,7 +107,7 @@ export async function createAgreement(proposalId: number) {
 
 export async function updateAgreement(
   agreementId: number,
-  action: 'sign' | 'approve' | 'editDeposit',
+  action: 'sign' | 'approve' | 'editDeposit' | 'resetSignatures',
   userType?: 'owner' | 'tenant',
   newDepositStatus?: 'pending' | 'submitted' | 'pending_returned' | 'returned' // Strict type for deposit statuses
 ) {
@@ -154,6 +154,15 @@ export async function updateAgreement(
 
       await tx.wait(); // Wait for the transaction to be confirmed
 
+      // Update the local database with the new signatures
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          tenant_signature: updatedTenantSignature,
+          owner_signature: updatedOwnerSignature,
+        },
+      });
+
       return {
         status: 200,
         message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} has signed the agreement.`,
@@ -187,6 +196,15 @@ export async function updateAgreement(
 
       await tx.wait(); // Wait for the transaction to be confirmed
 
+      // Update the local database with the new statuses
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          agreement_status: agreementStatus,
+          deposit_status: depositStatus,
+        },
+      });
+
       return {
         status: 200,
         message: `Agreement has been updated to status: ${agreementStatus}.`,
@@ -213,18 +231,52 @@ export async function updateAgreement(
 
       await tx.wait(); // Wait for the transaction to be confirmed
 
+      // Update the local database with the new deposit status
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          deposit_status: newDepositStatus,
+        },
+      });
+
       return {
         status: 200,
         message: `Deposit status updated to ${newDepositStatus}.`,
       };
+    } else if (action === 'resetSignatures') {
+      // Reset both owner and tenant signatures to false
+      const tx = await agreementContract.updateAgreement(
+        agreementId,
+        agreement.deposit_status,
+        agreement.agreement_status,
+        false, // Reset tenant signature
+        false  // Reset owner signature
+      );
+
+      await tx.wait(); // Wait for the transaction to be confirmed
+
+      // Reset signatures in the local database
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          tenant_signature: false,
+          owner_signature: false,
+        },
+      });
+
+      return {
+        status: 200,
+        message: 'Owner and tenant signatures have been reset to false.',
+      };
     } else {
-      return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", or "editDeposit".' };
+      return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", "editDeposit", or "resetSignatures".' };
     }
   } catch (error) {
     console.error('Error updating agreement:', error);
     return { status: 500, message: 'Error updating agreement.' };
   }
 }
+
   
 export async function getAgreementsByUserId(userId: number, userType: 'tenant' | 'owner') {
   try {
@@ -279,7 +331,7 @@ export async function getAgreementsByUserId(userId: number, userType: 'tenant' |
     //   })
     // );
 
-    // return { status: 200, agreements: hashedAgreements };
+    return { status: 200, agreements: agreements };
   } catch (error) {
     console.error('Error fetching agreements:', error);
     return { status: 500, message: 'Error occurred while fetching agreements.' };
