@@ -19,19 +19,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check } from "lucide-react";
+import { Check, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 
 interface Proposal {
-  property: string;
-  dateSubmitted: string;
-  proposalStatus: string;
-  amount: number;
-  agreement?: object;
-  agreementStatus: string;
+  proposal_id: number;
+  property_id: number;
+  status: string;
+  created_date: string;
+  modified_date: string;
+  property: Property;
+  agreement: Agreement;
+  // amount: number;
+  // agreement?: object;
+  // agreementStatus: string;
+}
+
+interface Property {
+  description: string;
+}
+
+interface Agreement {
+  proposal_id: number;
 }
 
 export default function TenantProposalPage() {
+  const { data: session } = useSession();
+  console.log("Session Data:", session);
+  const tenantId = session?.user.user_id;
   const {
     data: proposal,
     isLoading,
@@ -39,10 +55,48 @@ export default function TenantProposalPage() {
   } = useQuery<Proposal[]>({
     queryKey: ["proposals"],
     queryFn: async () => {
-      const response = await fetch("/api/proposals");
+      const response = await fetch(`/api/proposals`);
       const json = await response.json();
+      return json.proposalList.map((proposal: Proposal) => ({
+        proposalId: proposal.proposal_id,
+        propertyId: proposal.property_id,
+        propertyStatus: proposal.status,
+        dateCreated: proposal.created_date,
+        dateModified: proposal.modified_date,
+        description: proposal.property?.description,
+      }));
     },
   });
+
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  // if (isLoading) {
+  //   return (
+  //     <div className="p-8">
+  //       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  //         {/* {Array.from({ length: 6 }).map((_, index) => (
+  //           <PropertySkeleton key={index} />
+  //         ))} */}
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  // if (isError) {
+  //   return <PropertyError message={"Something went wrong"} />;
+  // }
+
+  // if (!proposal?.length) {
+  //   console.log(proposal);
+  //   // return <EmptyProposalList />;
+  // }
 
   // const proposalList: Proposal[] = [
   //   {
@@ -90,7 +144,9 @@ export default function TenantProposalPage() {
   // ];
 
   const [currentPage, setCurrentPage] = useState(1);
-  const paginatedProposals = getPaginatedItems(proposalList, currentPage);
+  const paginatedProposals = proposal
+    ? getPaginatedItems(proposal, currentPage)
+    : [];
 
   const [showAgreement, setShowAgreement] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(
@@ -142,16 +198,15 @@ export default function TenantProposalPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedProposals.map((proposal, index) => (
-                    <TableRow key={index} className="h-12">
+                  {paginatedProposals.map((proposal) => (
+                    <TableRow key={proposal.proposal_id} className="h-12">
                       <TableCell className="font-medium">
-                        {proposal.property}
+                        {proposal.property.description}
                       </TableCell>
-                      <TableCell>{proposal.dateSubmitted}</TableCell>
-                      <TableCell>{proposal.proposalStatus}</TableCell>
-                      <TableCell>${proposal.amount}/month</TableCell>
-                      <TableCell>
-                        {proposal.proposalStatus === "Approved" && (
+                      <TableCell>{proposal.created_date}</TableCell>
+                      <TableCell>{proposal.status}</TableCell>
+                      {/* <TableCell>
+                        {proposal.status === "Approved" && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -162,7 +217,7 @@ export default function TenantProposalPage() {
                           </Button>
                         )}
                       </TableCell>
-                      <TableCell>{proposal.agreementStatus}</TableCell>
+                      <TableCell>{proposal.agreementStatus}</TableCell> */}
                       <TableCell>
                         <Button variant="outline" size="sm" className="shadow">
                           View Details
@@ -175,7 +230,7 @@ export default function TenantProposalPage() {
               <div className="mt-4">
                 <PaginationControls
                   currentPage={currentPage}
-                  totalItems={proposalList.length}
+                  totalItems={proposal?.length ? proposal?.length : 0}
                   onPageChange={setCurrentPage}
                 />
               </div>
@@ -191,7 +246,7 @@ export default function TenantProposalPage() {
               Rental Agreement
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <div className="rounded-lg border p-4">
               <h3 className="text-lg font-semibold text-green-700 mb-4">
                 Agreement Terms
@@ -329,7 +384,7 @@ export default function TenantProposalPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
           <DialogFooter className="justify-end space-x-3">
             <Button
               className="bg-green-700 hover:bg-green-800"
@@ -344,3 +399,14 @@ export default function TenantProposalPage() {
     </div>
   );
 }
+
+const EmptyProposalList = () => {
+  <div className="text-center py-12">
+    <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-4">
+      <Search className="h-6 w-6 text-gray-600" />
+    </div>
+    <h3 className="text-lg font-semibold mb-2">
+      You Don't Have Any Proposals Yet
+    </h3>
+  </div>;
+};
