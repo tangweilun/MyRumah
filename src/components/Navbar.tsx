@@ -20,7 +20,6 @@ const Navbar = async () => {
         <span className="ml-2 text-xl font-semibold text-green-900">
           MyRumah
         </span>
-        <pre>{JSON.stringify(session, null, 2)}</pre>
       </div>
 
       {/* Navigation for medium and larger screens */}

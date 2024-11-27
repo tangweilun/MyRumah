@@ -1,34 +1,43 @@
-'use client';
-import React, { use } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+"use client";
+import React, { use } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Trash, Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { DatePickerWithRange } from '@/components/DateRangePicker';
-import { toast } from 'react-toastify';
-import { propertyImage } from '@/lib/data';
-import Image from 'next/image';
-
-const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Trash, Plus } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { DatePickerWithRange } from "@/components/DateRangePicker";
+import { toast } from "react-toastify";
+import { propertyImage } from "@/lib/data";
+import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+const EditProperty = () => {
   const router = useRouter();
-  const { id } = use(params);
+  const { id } = useParams();
   const [saveStatus, setSaveStatus] = React.useState(false);
-
+  type Property = {
+    property_id: number;
+    description: string;
+    rental_fee: number;
+    address: string;
+    occupant_num: number;
+    image?: string | null;
+    start_date: string;
+    end_date: string;
+  };
   useEffect(() => {
     if (saveStatus) {
-      toast.success('Changes saved successfully!');
+      toast.success("Changes saved successfully!");
       setSaveStatus(false);
     }
   }, [saveStatus]);
@@ -40,25 +49,42 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
         setSaveStatus(true);
         router.back();
       } else {
-        throw new Error('Save failed');
+        throw new Error("Save failed");
       }
     } catch (error) {
-      toast.error('Failed to save changes. Please try again.');
+      toast.error("Failed to save changes. Please try again.");
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      console.log(`Fetching data for property ID: ${id}`);
-    }
-  }, [id]);
+  const {
+    data: property,
+    isLoading,
+    isError,
+  } = useQuery<Property>({
+    queryKey: ["property", id],
+    queryFn: async () => {
+      const response = await fetch(`/api/property/${id}`);
+      const { property } = await response.json();
+
+      return {
+        property_id: property.property_id,
+        description: property.description,
+        rental_fee: Number(property.rental_fee),
+        address: property.address,
+        occupant_num: property.occupant_num,
+        image: property.image,
+        start_date: property.start_date,
+        end_date: property.end_date,
+      };
+    },
+  });
 
   return (
     <div className="bg-stone-50 p-16 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-green-800">
-          Edit Property: Cozy Cottage in the Woods
+          Edit Your Property
         </h1>
         <div className="space-x-2">
           <Button
@@ -81,22 +107,22 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="title">Property Title</Label>
                 <Input id="title" defaultValue="Cozy Cottage in the Woods" />
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
                   className="min-h-[100px]"
-                  defaultValue="A charming cottage nestled in the woods, perfect for a peaceful getaway. Features a cozy fireplace and a wraparound porch with stunning forest views."
+                  defaultValue={property?.description}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label>Property Type</Label>
                   <Select defaultValue="cottage">
                     <SelectTrigger>
@@ -108,11 +134,11 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
                       <SelectItem value="house">House</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
-                  <Label>Location</Label>
-                  <Input defaultValue="Woodsville, CA" />
+                  <Label>Address</Label>
+                  <Input defaultValue={property?.address} />
                 </div>
               </div>
             </CardContent>
@@ -124,47 +150,47 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
               <CardTitle>Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Bedrooms</Label>
-                  <Input type="number" defaultValue="2" min="0" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bathrooms</Label>
-                  <Input type="number" defaultValue="1" min="0" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Max Guests</Label>
-                  <Input type="number" defaultValue="4" min="1" />
+                  <Label>Rooms</Label>
+                  <Input
+                    type="number"
+                    defaultValue={property?.occupant_num}
+                    min="0"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Price per Month ($)</Label>
-                  <Input type="number" defaultValue="95" min="0" />
+                  <Input type="number" defaultValue="1000" min="0" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Lease Start Date and Lease End Date</Label>
+                  <DatePickerWithRange></DatePickerWithRange>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Amenities */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Amenities</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
-                  'WiFi',
-                  'TV',
-                  'Washer',
-                  'Hot tub',
-                  'Kitchen',
-                  'Air conditioning',
-                  'Dryer',
-                  'BBQ grill',
-                  'Free parking',
-                  'Heating',
-                  'Pool',
-                  'Gym',
+                  "WiFi",
+                  "TV",
+                  "Washer",
+                  "Hot tub",
+                  "Kitchen",
+                  "Air conditioning",
+                  "Dryer",
+                  "BBQ grill",
+                  "Free parking",
+                  "Heating",
+                  "Pool",
+                  "Gym",
                 ].map((amenity) => (
                   <div key={amenity} className="flex items-center space-x-2">
                     <Checkbox id={amenity} />
@@ -173,7 +199,7 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         <div className="space-y-6">
@@ -213,7 +239,7 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
           </Card>
 
           {/* House Rules */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>House Rules</CardTitle>
             </CardHeader>
@@ -221,7 +247,7 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
               <span>Lease Start Date and Lease End Date</span>
               <DatePickerWithRange></DatePickerWithRange>
               <div className="space-y-4 mt-4">
-                {['Pets Allowed', 'Smoking Allowed', 'Events Allowed'].map(
+                {["Pets Allowed", "Smoking Allowed", "Events Allowed"].map(
                   (rule) => (
                     <div key={rule} className="flex items-center space-x-2">
                       <Checkbox id={rule} />
@@ -231,7 +257,7 @@ const EditProperty = ({ params }: { params: Promise<{ id: string }> }) => {
                 )}
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>

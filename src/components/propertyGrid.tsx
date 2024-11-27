@@ -1,118 +1,128 @@
 "use client";
 
-import React from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Bed, AlertCircle, HomeIcon } from "lucide-react";
+import { AlertCircle, BedDouble, Calendar, HomeIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { useSession } from "next-auth/react";
 
 type Property = {
   property_id: number;
-  title: string;
   description: string;
   rental_fee: number;
   address: string;
   occupant_num: number;
   image?: string | null;
+  start_date: string;
+  end_date: string;
 };
 
-type PropertyCardProps = {
-  title: string;
-  rental_fee: number;
-  location: string;
-  occupant_num: number;
-  imageUrl: string;
-};
-
-const PropertyCard = ({
-  title,
-  rental_fee,
-  location,
-  occupant_num,
-  imageUrl,
-}: PropertyCardProps) => {
-  const [isLiked, setIsLiked] = React.useState(false);
+export default function PropertyGrid() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const isAuthenticated = !!session;
+  const {
+    data: properties,
+    isLoading,
+    isError,
+  } = useQuery<Property[]>({
+    queryKey: ["properties"],
+    queryFn: async () => {
+      const response = await fetch(`/api/property`);
+      const json = await response.json();
+      return json.properties.map((property: Property) => ({
+        property_id: property.property_id,
+        description: property.description,
+        rental_fee: Number(property.rental_fee),
+        address: property.address,
+        occupant_num: property.occupant_num,
+        image: property.image,
+        start_date: property.start_date,
+        end_date: property.end_date,
+      }));
+    },
+  });
 
-  const toggleLike = () => {
-    if (!isAuthenticated) {
-      router.push("/sign-up");
-      return;
-    }
-    setIsLiked((prev) => !prev);
-  };
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
 
-  const handleApplyNow = () => {
-    if (!isAuthenticated) {
-      router.push("/auth/sign-in");
-      return;
-    }
-    router.push(
-      `/dashboard/property/apply?property=${encodeURIComponent(title)}`
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <PropertySkeleton key={index} />
+          ))}
+        </div>
+      </div>
     );
-  };
+  }
+
+  if (isError) {
+    return <PropertyError message={"Something went wrong"} />;
+  }
+
+  if (!properties?.length) {
+    return <EmptyState />;
+  }
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <Card>
-        <div className="relative h-48 bg-gray-200">
-          <Image
-            width={300}
-            height={192}
-            src={imageUrl || "/placeholder.jpg"}
-            alt={title}
-            className="h-full w-full object-cover"
-          />
-          <Button
-            variant="outline"
-            className={`absolute right-2 top-2 p-1.5 transition-all duration-300 ${
-              isLiked ? "bg-red-400" : "bg-white"
-            } rounded-md`}
-            onClick={toggleLike}
-          >
-            <Heart
-              className={`h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 ${
-                isLiked ? "text-white" : "text-gray-600"
-              }`}
-            />
-          </Button>
-        </div>
-
-        <CardContent className="p-4">
-          <div className="mb-2 flex items-start justify-between">
-            <div>
-              <h3 className="font-medium text-green-700">{title}</h3>
-              <p className="text-sm text-gray-600">{location}</p>
-            </div>
-            <p className="font-medium text-green-700">${rental_fee}/mon</p>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-10">
+      {properties?.map((property) => (
+        <Card key={property.property_id} className="overflow-hidden">
+          <div className="relative h-48 w-full">
+            {property.image && (
+              <Image
+                src={`data:image/jpeg;base64,${Buffer.from(
+                  property.image
+                ).toString("base64")}`}
+                alt={"/placeholder.jpg"}
+                fill
+                className="object-cover"
+              />
+            )}
           </div>
-
-          <div className="mb-4 flex items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <Bed className="h-4 w-4" />
-              <span>{occupant_num} Rooms</span>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-lg font-semibold text-green-600">
+                {property.description}
+              </h3>
+              <span className="text-lg font-semibold text-green-600">
+                ${property.rental_fee}
+              </span>
             </div>
-          </div>
-        </CardContent>
-
-        <CardFooter className="p-4 pt-0">
-          <Button
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            onClick={handleApplyNow}
-          >
-            Apply Now
-          </Button>
-        </CardFooter>
-      </Card>
+            <p className="text-muted-foreground mb-2">{property.address}</p>
+            <div className="flex items-center text-muted-foreground">
+              <BedDouble className="h-4 w-4 mr-2" />
+              <span>{property.occupant_num} Rooms</span>
+            </div>
+            <div className="flex items-center text-muted-foreground text-sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              <span>
+                {formatDate(property.start_date)} -{" "}
+                {formatDate(property.end_date)}
+              </span>
+            </div>
+          </CardContent>
+          <CardFooter className="p-4 pt-0">
+            <Button
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => router.push(`/property/${property.property_id}`)}
+            >
+              View Details
+            </Button>
+          </CardFooter>
+        </Card>
+      ))}
     </div>
   );
-};
+}
 
 const PropertySkeleton = () => {
   return (
@@ -161,83 +171,18 @@ const PropertyError = ({ message }: { message: string }) => {
 };
 
 const EmptyState = () => {
+  const { data: session } = useSession();
+  const isOwner = session?.user?.role === "owner";
+  const emptyDesc = isOwner
+    ? `You haven't add any property yet!`
+    : ` There are currently no properties listed. Please check back later.`;
   return (
     <div className="flex h-[50vh] flex-col items-center justify-center gap-4 px-4">
       <div className="rounded-full bg-gray-100 p-4">
         <HomeIcon className="h-8 w-8 text-gray-400" />
       </div>
       <h3 className="text-lg font-semibold">No Properties Available</h3>
-      <p className="text-center text-sm text-gray-500">
-        There are currently no properties listed. Please check back later.
-      </p>
+      <p className="text-center text-sm text-gray-500">{emptyDesc}</p>
     </div>
   );
 };
-
-const PropertyGrid = () => {
-  const {
-    data: properties,
-    isLoading,
-    isError,
-  } = useQuery<Property[]>({
-    queryKey: ["properties"],
-    queryFn: async () => {
-      const response = await fetch("/api/property");
-      const json = await response.json();
-      return json.properties.map((property: any) => ({
-        property_id: property.property_id,
-        title: property.description,
-        rental_fee: Number(property.rental_fee),
-        location: property.address,
-        occupant_num: property.occupant_num,
-        imageUrl: property.image,
-      }));
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <div className="p-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <PropertySkeleton key={index} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return <PropertyError message={"Something went wrong"} />;
-  }
-
-  if (!properties?.length) {
-    return <EmptyState />;
-  }
-  if (!properties?.length) {
-    return (
-      <div className="p-8 text-center">
-        <p>No properties available.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-8">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {properties.map((property) => (
-          <PropertyCard
-            key={property.property_id}
-            title={property.title}
-            rental_fee={Number(property.rental_fee)}
-            location={property.address}
-            occupant_num={property.occupant_num}
-            imageUrl={property.image || "/placeholder.jpg"}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default PropertyGrid;
