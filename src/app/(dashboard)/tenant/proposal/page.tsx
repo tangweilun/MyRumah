@@ -46,6 +46,7 @@ interface Agreement {
 
 export default function TenantProposalPage() {
   const { data: session } = useSession();
+
   console.log("Session Data:", session);
   const tenantId = session?.user.user_id;
   const {
@@ -55,7 +56,12 @@ export default function TenantProposalPage() {
   } = useQuery<Proposal[]>({
     queryKey: ["proposals"],
     queryFn: async () => {
-      const response = await fetch(`/api/proposals`);
+      const response = await fetch(`/api/proposals`, {
+        method: "GET",
+        headers: {
+          "User-Id": tenantId ? tenantId.toString() : "",
+        },
+      });
       const json = await response.json();
       return json.proposalList.map((proposal: Proposal) => ({
         proposalId: proposal.proposal_id,
@@ -89,14 +95,15 @@ export default function TenantProposalPage() {
   //   );
   // }
 
-  // if (isError) {
-  //   return <PropertyError message={"Something went wrong"} />;
-  // }
+  if (isError) {
+    console.log("error");
+    // return <PropertyError message={"Something went wrong"} />;
+  }
 
-  // if (!proposal?.length) {
-  //   console.log(proposal);
-  //   // return <EmptyProposalList />;
-  // }
+  if (!proposal?.length) {
+    console.log(proposal?.length);
+    // return <EmptyProposalList />;
+  }
 
   // const proposalList: Proposal[] = [
   //   {
