@@ -4,12 +4,12 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const body = await req.json(); // Parse JSON body instead of FormData
-    
+
     // Extract the property data from the parsed JSON body
     const propertyData = {
       ownerId: body.ownerId,
       address: body.address,
-      image: body.image, // base64 image string
+      images: body.images, // Array of base64 image strings
       description: body.description,
       occupantNum: body.occupantNum,
       rentalFee: body.rentalFee,
@@ -26,13 +26,26 @@ export async function POST(req: Request) {
       });
     }
 
-    // Convert the base64 image to a Buffer
-    const imageBuffer = Buffer.from(propertyData.image.split(',')[1], 'base64');
+    // Validate the images field
+    if (
+      !Array.isArray(propertyData.images) ||
+      propertyData.images.some((img) => typeof img !== 'string')
+    ) {
+      return NextResponse.json({
+        status: 400,
+        message: 'Invalid or missing images.',
+      });
+    }
+
+    // Convert the base64 images to an array of Buffers
+    const imageBuffers = propertyData.images.map((imageBase64) =>
+      Buffer.from(imageBase64.split(',')[1], 'base64')
+    );
 
     const result = await createProperty(
       propertyData.ownerId,
       propertyData.address,
-      imageBuffer, // Use the image buffer created from base64
+      imageBuffers, // Use the array of image buffers
       propertyData.description,
       propertyData.occupantNum,
       propertyData.rentalFee,

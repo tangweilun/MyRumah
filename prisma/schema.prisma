@@ -38,7 +38,7 @@ model PropertyInfo {
   property_id      Int                @id @default(autoincrement())
   owner_id         Int
   address          String
-  image            Bytes?
+  images           Bytes[] // Change from Bytes? to Bytes[]
   description      String
   occupant_num     Int
   rental_fee       Decimal            @db.Decimal(10, 2)
