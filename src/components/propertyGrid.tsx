@@ -171,18 +171,15 @@ const PropertyError = ({ message }: { message: string }) => {
 };
 
 const EmptyState = () => {
-  const { data: session } = useSession();
-  const isOwner = session?.user?.role === "owner";
-  const emptyDesc = isOwner
-    ? `You haven't add any property yet!`
-    : ` There are currently no properties listed. Please check back later.`;
   return (
     <div className="flex h-[50vh] flex-col items-center justify-center gap-4 px-4">
       <div className="rounded-full bg-gray-100 p-4">
         <HomeIcon className="h-8 w-8 text-gray-400" />
       </div>
       <h3 className="text-lg font-semibold">No Properties Available</h3>
-      <p className="text-center text-sm text-gray-500">{emptyDesc}</p>
+      <p className="text-center text-sm text-gray-500">
+        There are currently no properties listed. Please check back later.
+      </p>
     </div>
   );
 };

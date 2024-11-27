@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { redirect, useParams, useRouter } from "next/navigation";
 
 import {
   Edit2,
@@ -24,6 +24,7 @@ import Image from "next/image";
 import PropertyGallery from "@/components/PhotoGallery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 // Previous property details content remains the same
 const proposals = [
@@ -50,6 +51,7 @@ const proposals = [
 ];
 
 type Property = {
+  deleteProperty: boolean;
   property_id: number;
   description: string;
   rental_fee: number;
@@ -67,23 +69,72 @@ type HidePropertyParams = {
 };
 
 export function useHideProperty(
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsHideLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setStatusIsActive: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: hideProperty,
     onMutate: () => {
-      setIsLoading(true); // Set loading to true when mutation starts
+      setIsHideLoading(true); // Set loading to true when mutation starts
     },
     onSuccess: (data) => {
       // Invalidate and refetch properties list
       queryClient.invalidateQueries({ queryKey: ["properties"] });
       toast.success("Property has been successfully hide!");
-      setIsLoading(false);
+      setStatusIsActive(false);
+      setIsHideLoading(false);
     },
     onError: (error: Error) => {
-      toast.error("Failed to edit property. Please try again.");
-      setIsLoading(false);
+      toast.error("Failed to hide property. Please try again.");
+      setIsHideLoading(false);
+    },
+  });
+}
+
+export function useUnhideProperty(
+  setIsHideLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setStatusIsActive: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: unhideProperty,
+    onMutate: () => {
+      setIsHideLoading(true); // Set loading to true when mutation starts
+    },
+    onSuccess: (data) => {
+      // Invalidate and refetch properties list
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+      toast.success("Property has been successfully unhide!");
+      setStatusIsActive(true);
+      setIsHideLoading(false);
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to unhide property. Please try again.");
+      setIsHideLoading(false);
+    },
+  });
+}
+
+export function useDeleteProperty(
+  setIsHideLoading: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteProperty,
+    onMutate: () => {
+      setIsHideLoading(true); // Set loading to true when mutation starts
+    },
+    onSuccess: (data) => {
+      // Invalidate and refetch properties list
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+      toast.success("Property has been successfully deleted!");
+      setIsHideLoading(false);
+      redirect("/owner");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to delete property. Please try again.");
+      setIsHideLoading(false);
     },
   });
 }
@@ -100,8 +151,34 @@ export async function hideProperty({ id, property }: HidePropertyParams) {
   return response.json();
 }
 
+export async function unhideProperty({ id, property }: HidePropertyParams) {
+  property.status = "active";
+  const response = await fetch(`/api/property/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(property),
+  });
+  return response.json();
+}
+
+export async function deleteProperty({ id, property }: HidePropertyParams) {
+  property.deleteProperty = true;
+  const response = await fetch(`/api/property/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(property),
+  });
+  return response.json();
+}
+
 const SingleProperyPage = () => {
   const router = useRouter();
+  const [isHideLoading, setIsHideLoading] = useState(false);
+  const [isStatusActive, setStatusIsActive] = useState(false);
   const { id } = useParams(); // Extract the 'id' from the URL
   const {
     data: property,
@@ -112,7 +189,9 @@ const SingleProperyPage = () => {
     queryFn: async () => {
       const response = await fetch(`/api/property/${id}`);
       const { property } = await response.json();
-
+      if (property.status === "active") {
+        setStatusIsActive(true);
+      }
       return {
         property_id: property.property_id,
         description: property.description,
@@ -123,9 +202,21 @@ const SingleProperyPage = () => {
         start_date: property.start_date,
         end_date: property.end_date,
         status: property.status,
+        deleteProperty: false,
       };
     },
   });
+  // Initialize the mutation
+  const hidePropertyMutation = useHideProperty(
+    setIsHideLoading,
+    setStatusIsActive
+  );
+  const unHidePropertyMutation = useUnhideProperty(
+    setIsHideLoading,
+    setStatusIsActive
+  );
+
+  const deletePropertyMutation = useDeleteProperty(setIsHideLoading);
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -137,11 +228,23 @@ const SingleProperyPage = () => {
   }
   const handleHideProperty = async () => {
     if (id && property) {
-      await hideProperty({ id: id as string, property });
+      await hidePropertyMutation.mutateAsync({ id: id as string, property });
+    }
+  };
+
+  const handleUnhideProperty = async () => {
+    if (id && property) {
+      await unHidePropertyMutation.mutateAsync({ id: id as string, property });
+    }
+  };
+
+  const handleDeleteProperty = async () => {
+    if (id && property) {
+      await deletePropertyMutation.mutateAsync({ id: id as string, property });
     }
   };
   return (
-    <div className="px-16 py-8 bg-stone-50">
+    <div className="min-h-screen px-16 py-8 bg-stone-50">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-green-800">
@@ -160,14 +263,39 @@ const SingleProperyPage = () => {
           <Button
             variant="outline"
             className="text-orange-600"
-            onClick={handleHideProperty}
+            onClick={isStatusActive ? handleHideProperty : handleUnhideProperty}
+            disabled={isHideLoading} // Disable button when loading
           >
-            <Eye className="h-4 w-4 mr-2" />
-            Hide Property
+            {isHideLoading ? (
+              <div className="flex items-center gap-2">
+                <span className="animate-spin h-4 w-4 border-2 border-orange-600 border-t-transparent rounded-full"></span>
+                Hiding...
+              </div>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                {isStatusActive ? "Hide Property" : "Unhide Property"}
+              </>
+            )}
           </Button>
-          <Button variant="outline" className="text-red-600">
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Property
+
+          <Button
+            variant="outline"
+            className="text-red-600"
+            onClick={handleDeleteProperty}
+            disabled={isHideLoading} // Disable button when loading
+          >
+            {isHideLoading ? (
+              <div className="flex items-center gap-2">
+                <span className="animate-spin h-4 w-4 border-2 border-orange-600 border-t-transparent rounded-full"></span>
+                Hiding...
+              </div>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Property
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -209,6 +337,18 @@ const SingleProperyPage = () => {
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin className="h-4 w-4" />
                         <span>{property?.address}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>
+                          {property?.start_date
+                            ? formatDate(property?.start_date)
+                            : "N/A"}{" "}
+                          -{" "}
+                          {property?.end_date
+                            ? formatDate(property?.end_date)
+                            : "N/A"}
+                        </span>
                       </div>
                     </div>
                   </div>
