@@ -105,6 +105,8 @@ export async function createAgreement(proposalId: number) {
 }
 
 
+import { editProperty } from './property-service'; // Import the editProperty function
+
 export async function updateAgreement(
   agreementId: number,
   action: 'sign' | 'approve' | 'editDeposit' | 'resetSignatures',
@@ -129,7 +131,7 @@ export async function updateAgreement(
     }
 
     const currentDate = new Date();
-    const { start_date, end_date } = agreement.proposal.property;
+    const { start_date, end_date, property_id } = agreement.proposal.property;
 
     // Get the smart contract instance
     const agreementContract = await getContract();
@@ -205,6 +207,18 @@ export async function updateAgreement(
         },
       });
 
+      // Update the associated property's status to 'occupied' if agreement is approved and signed by both parties
+      if (agreementStatus === 'ongoing' && agreement.owner_signature && agreement.tenant_signature) {
+        const propertyUpdateResult = await editProperty(property_id, false, { status: 'occupied' });
+
+        if (propertyUpdateResult.status !== 200) {
+          return {
+            status: 500,
+            message: 'Agreement approved, but failed to update property status to "occupied".',
+          };
+        }
+      }
+
       return {
         status: 200,
         message: `Agreement has been updated to status: ${agreementStatus}.`,
@@ -250,7 +264,7 @@ export async function updateAgreement(
         agreement.deposit_status,
         agreement.agreement_status,
         false, // Reset tenant signature
-        false  // Reset owner signature
+        false // Reset owner signature
       );
 
       await tx.wait(); // Wait for the transaction to be confirmed
@@ -276,6 +290,7 @@ export async function updateAgreement(
     return { status: 500, message: 'Error updating agreement.' };
   }
 }
+
 
   
 export async function getAgreementsByUserId(userId: number, userType: 'tenant' | 'owner') {
