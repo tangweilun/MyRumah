@@ -6,15 +6,13 @@ import {
   RentalFeeStatus,
   AgreementStatus,
 } from "@prisma/client";
-import { deductWallet } from "./wallet-service";
+import { deductWallet, topupWallet } from "./wallet-service";
 import { chkUserRole } from "./misc-service";
 import { RentalFeeContractAddress } from "../../src/utils/smartContractAddress";
 import rentalFeeAbi from "../../src/abi/rentalFee.json";
 
 const isUserRole = (role: string): role is UserRole =>
   Object.values(UserRole).includes(role as UserRole);
-
-// async function getAllFee(userId: number, userRole: string) {
 
 const getContract = async () => {
   const provider = new ethers.JsonRpcProvider("http://localhost:8545"); // Local blockchain (e.g., Hardhat)
@@ -102,16 +100,7 @@ async function getAllFee(userId: number) {
   }
 }
 
-// async function getSpecTenantFee(
-//   tenantId: number,
-//   ownerId: number,
-//   userRole: string
-// )
 async function getSpecTenantFee(tenantId: number, ownerId: number) {
-  // if (!isUserRole(userRole)) {
-  //   return { status: 401 };
-  // }
-
   const chkRole = await chkUserRole(ownerId);
   if (chkRole.status != 200 || !chkRole.userRole) {
     return { status: chkRole.status };
@@ -168,6 +157,7 @@ async function getSpecFee(feeId: number) {
             proposal: {
               select: {
                 tenant_id: true,
+                property: { select: { owner_id: true } },
               },
             },
           },
@@ -178,10 +168,6 @@ async function getSpecFee(feeId: number) {
     if (!specFee) {
       return { status: 404 };
     }
-
-    // const rentalFeeContract = await getContract();
-    // const getFeeTx = await rentalFeeContract.getFee(specFee.fee_id);
-    // console.log(getFeeTx);
 
     return { status: 200, specFee: specFee };
   } catch (error) {
@@ -295,6 +281,7 @@ async function payFee(feeId: number, userId: number) {
     }
 
     const tenantId = specFee.specFee.agreement.proposal.tenant_id;
+    const ownerId = specFee.specFee.agreement.proposal.property.owner_id;
     const payableAmount = Number(specFee.specFee.amount);
 
     // if current login tenant want to pay fee of other tenant
@@ -307,10 +294,23 @@ async function payFee(feeId: number, userId: number) {
     }
 
     // deductWallet function is came from "user-service.tsx"
-    const updatedWallet = await deductWallet(tenantId, payableAmount);
+    // deduct tenant wallet
+    const updatedTenantWallet = await deductWallet(tenantId, payableAmount);
 
-    if (updatedWallet.status !== 200 || !updatedWallet.updatedUserData) {
-      return { status: updatedWallet.status };
+    if (
+      updatedTenantWallet.status !== 200 ||
+      !updatedTenantWallet.updatedUserData
+    ) {
+      return { status: updatedTenantWallet.status };
+    }
+
+    // add owner balance
+    const updatedOwnerWallet = await topupWallet(ownerId, payableAmount);
+    if (
+      updatedOwnerWallet.status !== 200 ||
+      !updatedOwnerWallet.updatedUserData
+    ) {
+      return { status: updatedOwnerWallet.status };
     }
 
     const paidFee = await prisma.rentalFee.update({
@@ -333,6 +333,7 @@ async function payFee(feeId: number, userId: number) {
 
     const payFeeTx = await rentalFeeContract.payFee(fee);
     console.log(payFeeTx);
+    // console.log(payFeeTx);
 
     return { status: 200, paidFee: paidFee };
   } catch (error) {
