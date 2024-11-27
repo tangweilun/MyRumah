@@ -6,7 +6,7 @@ import { PropertyInfo } from '@prisma/client';
 export async function createProperty(
   ownerId: number,
   address: string,
-  image: Buffer,
+  images: Buffer[], // Accept multiple images as an array of Buffers
   description: string,
   occupantNum: number,
   rentalFee: number,
@@ -23,8 +23,13 @@ export async function createProperty(
     return { status: 400, message: "Invalid or missing address." };
   }
 
-  if (!image || !(image instanceof Buffer)) {
-    return { status: 400, message: "Invalid or missing image." };
+  if (
+    !images ||
+    !Array.isArray(images) ||
+    images.length === 0 ||
+    images.some((image) => !(image instanceof Buffer))
+  ) {
+    return { status: 400, message: "Invalid or missing images." };
   }
 
   if (!description || typeof description !== "string" || description.trim().length === 0) {
@@ -67,7 +72,7 @@ export async function createProperty(
       data: {
         owner_id: ownerId,
         address,
-        image, // The image is passed as a Buffer
+        images, // Store multiple images as an array of Buffers
         description,
         occupant_num: occupantNum,
         rental_fee: rentalFee,
@@ -83,6 +88,7 @@ export async function createProperty(
     return { status: 500, message: "Error creating property." };
   }
 }
+
 
 
 
@@ -151,7 +157,7 @@ export async function getAllProperties(): Promise<PropertyInfo[]> {
     data: {
       ownerId?: number;
       address?: string;
-      image?: Buffer;
+      images?: Buffer[]; // Changed from `image` to `images`
       description?: string;
       occupantNum?: number;
       rentalFee?: number;
@@ -177,13 +183,22 @@ export async function getAllProperties(): Promise<PropertyInfo[]> {
           }
         }
   
+        // Validate images if provided
+        if (
+          data.images &&
+          (!Array.isArray(data.images) ||
+            data.images.some((image) => !(image instanceof Buffer)))
+        ) {
+          return { status: 400, message: 'Invalid images provided.' };
+        }
+  
         // Update the property with provided fields
         const updatedProperty = await prisma.propertyInfo.update({
           where: { property_id: propertyId },
           data: {
             owner_id: data.ownerId,
             address: data.address,
-            image: data.image,
+            images: data.images, // Update images array
             description: data.description,
             occupant_num: data.occupantNum,
             rental_fee: data.rentalFee,
@@ -201,6 +216,7 @@ export async function getAllProperties(): Promise<PropertyInfo[]> {
       return { status: 500, message: 'Error updating property.' };
     }
   }
+  
 
   export async function getProperty(propertyId: number) {
     try {

@@ -51,7 +51,7 @@ CREATE TABLE "PropertyInfo" (
     "property_id" SERIAL NOT NULL,
     "owner_id" INTEGER NOT NULL,
     "address" TEXT NOT NULL,
-    "image" BYTEA,
+    "images" BYTEA[],
     "description" TEXT NOT NULL,
     "occupant_num" INTEGER NOT NULL,
     "rental_fee" DECIMAL(10,2) NOT NULL,
@@ -152,16 +152,16 @@ ALTER TABLE "Wishlist" ADD CONSTRAINT "Wishlist_user_id_fkey" FOREIGN KEY ("user
 ALTER TABLE "PropertyInfo" ADD CONSTRAINT "PropertyInfo_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "UserInfo"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "WishlistProperty" ADD CONSTRAINT "WishlistProperty_wishlist_id_fkey" FOREIGN KEY ("wishlist_id") REFERENCES "Wishlist"("wishlist_id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "WishlistProperty" ADD CONSTRAINT "WishlistProperty_property_id_fkey" FOREIGN KEY ("property_id") REFERENCES "PropertyInfo"("property_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Proposal" ADD CONSTRAINT "Proposal_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "UserInfo"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "WishlistProperty" ADD CONSTRAINT "WishlistProperty_wishlist_id_fkey" FOREIGN KEY ("wishlist_id") REFERENCES "Wishlist"("wishlist_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Proposal" ADD CONSTRAINT "Proposal_property_id_fkey" FOREIGN KEY ("property_id") REFERENCES "PropertyInfo"("property_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Proposal" ADD CONSTRAINT "Proposal_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "UserInfo"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Agreement" ADD CONSTRAINT "Agreement_proposal_id_fkey" FOREIGN KEY ("proposal_id") REFERENCES "Proposal"("proposal_id") ON DELETE RESTRICT ON UPDATE CASCADE;
