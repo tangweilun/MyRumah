@@ -37,7 +37,7 @@ export default function TenantProposalPage() {
     isLoading,
     isError,
   } = useQuery<Proposal[]>({
-    queryKey: [""],
+    queryKey: ["proposals"],
     queryFn: async () => {
       const response = await fetch("/api/proposals");
       const json = await response.json();
