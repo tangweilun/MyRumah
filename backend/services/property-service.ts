@@ -90,17 +90,25 @@ export async function createProperty(
 export async function getPropertiesByUser(userId: number, role: string): Promise<PropertyInfo[]> {
   try {
     if (role === "owner") {
-      // Fetch properties owned by the user
+      // Fetch properties owned by the user that are not "trash"
       const properties = await prisma.propertyInfo.findMany({
-        where: { owner_id: userId },
+        where: {
+          owner_id: userId,
+          status: {
+            not: "trash", // Exclude properties with status "trash"
+          },
+        },
         include: {
           owner: true, // Include owner details if needed
         },
       });
       return properties;
     } else if (role === "tenant") {
-      // Fetch all properties
+      // Fetch properties with status "active"
       const properties = await prisma.propertyInfo.findMany({
+        where: {
+          status: "active", // Include only active properties
+        },
         include: {
           owner: true, // Include owner details if needed
         },
@@ -115,20 +123,25 @@ export async function getPropertiesByUser(userId: number, role: string): Promise
   }
 }
 
+
 export async function getAllProperties(): Promise<PropertyInfo[]> {
   try {
-    // Fetch all properties
+    // Fetch all active properties
     const properties = await prisma.propertyInfo.findMany({
+      where: {
+        status: 'active', // Filter properties with status "active"
+      },
       include: {
         owner: true, // Include owner details if needed
       },
     });
     return properties;
   } catch (error) {
-    console.error("Error fetching all properties:", error);
-    throw new Error("Error fetching all properties");
+    console.error("Error fetching active properties:", error);
+    throw new Error("Error fetching active properties");
   }
 }
+
 
 
   //delete/edit

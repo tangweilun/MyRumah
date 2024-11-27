@@ -105,9 +105,11 @@ export async function createAgreement(proposalId: number) {
 }
 
 
+import { editProperty } from './property-service'; // Import the editProperty function
+
 export async function updateAgreement(
   agreementId: number,
-  action: 'sign' | 'approve' | 'editDeposit',
+  action: 'sign' | 'approve' | 'editDeposit' | 'resetSignatures',
   userType?: 'owner' | 'tenant',
   newDepositStatus?: 'pending' | 'submitted' | 'pending_returned' | 'returned' // Strict type for deposit statuses
 ) {
@@ -129,7 +131,7 @@ export async function updateAgreement(
     }
 
     const currentDate = new Date();
-    const { start_date, end_date } = agreement.proposal.property;
+    const { start_date, end_date, property_id } = agreement.proposal.property;
 
     // Get the smart contract instance
     const agreementContract = await getContract();
@@ -153,6 +155,15 @@ export async function updateAgreement(
       );
 
       await tx.wait(); // Wait for the transaction to be confirmed
+
+      // Update the local database with the new signatures
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          tenant_signature: updatedTenantSignature,
+          owner_signature: updatedOwnerSignature,
+        },
+      });
 
       return {
         status: 200,
@@ -187,6 +198,27 @@ export async function updateAgreement(
 
       await tx.wait(); // Wait for the transaction to be confirmed
 
+      // Update the local database with the new statuses
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          agreement_status: agreementStatus,
+          deposit_status: depositStatus,
+        },
+      });
+
+      // Update the associated property's status to 'occupied' if agreement is approved and signed by both parties
+      if (agreementStatus === 'ongoing' && agreement.owner_signature && agreement.tenant_signature) {
+        const propertyUpdateResult = await editProperty(property_id, false, { status: 'occupied' });
+
+        if (propertyUpdateResult.status !== 200) {
+          return {
+            status: 500,
+            message: 'Agreement approved, but failed to update property status to "occupied".',
+          };
+        }
+      }
+
       return {
         status: 200,
         message: `Agreement has been updated to status: ${agreementStatus}.`,
@@ -213,18 +245,53 @@ export async function updateAgreement(
 
       await tx.wait(); // Wait for the transaction to be confirmed
 
+      // Update the local database with the new deposit status
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          deposit_status: newDepositStatus,
+        },
+      });
+
       return {
         status: 200,
         message: `Deposit status updated to ${newDepositStatus}.`,
       };
+    } else if (action === 'resetSignatures') {
+      // Reset both owner and tenant signatures to false
+      const tx = await agreementContract.updateAgreement(
+        agreementId,
+        agreement.deposit_status,
+        agreement.agreement_status,
+        false, // Reset tenant signature
+        false // Reset owner signature
+      );
+
+      await tx.wait(); // Wait for the transaction to be confirmed
+
+      // Reset signatures in the local database
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          tenant_signature: false,
+          owner_signature: false,
+        },
+      });
+
+      return {
+        status: 200,
+        message: 'Owner and tenant signatures have been reset to false.',
+      };
     } else {
-      return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", or "editDeposit".' };
+      return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", "editDeposit", or "resetSignatures".' };
     }
   } catch (error) {
     console.error('Error updating agreement:', error);
     return { status: 500, message: 'Error updating agreement.' };
   }
 }
+
+
   
 export async function getAgreementsByUserId(userId: number, userType: 'tenant' | 'owner') {
   try {
@@ -279,7 +346,7 @@ export async function getAgreementsByUserId(userId: number, userType: 'tenant' |
     //   })
     // );
 
-    // return { status: 200, agreements: hashedAgreements };
+    return { status: 200, agreements: agreements };
   } catch (error) {
     console.error('Error fetching agreements:', error);
     return { status: 500, message: 'Error occurred while fetching agreements.' };
