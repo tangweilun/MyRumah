@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   Edit2,
@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import PropertyGallery from "@/components/PhotoGallery";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 // Previous property details content remains the same
 const proposals = [
@@ -47,16 +49,104 @@ const proposals = [
   },
 ];
 
+type Property = {
+  property_id: number;
+  description: string;
+  rental_fee: number;
+  address: string;
+  occupant_num: number;
+  image?: string | null;
+  start_date: string;
+  end_date: string;
+  status: string;
+};
+
+type HidePropertyParams = {
+  id: String;
+  property: Property;
+};
+
+export function useHideProperty(
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: hideProperty,
+    onMutate: () => {
+      setIsLoading(true); // Set loading to true when mutation starts
+    },
+    onSuccess: (data) => {
+      // Invalidate and refetch properties list
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+      toast.success("Property has been successfully hide!");
+      setIsLoading(false);
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to edit property. Please try again.");
+      setIsLoading(false);
+    },
+  });
+}
+
+export async function hideProperty({ id, property }: HidePropertyParams) {
+  property.status = "inactive";
+  const response = await fetch(`/api/property/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(property),
+  });
+  return response.json();
+}
+
 const SingleProperyPage = () => {
   const router = useRouter();
-  const propertyId = "1"; // Replace with the actual property ID
+  const { id } = useParams(); // Extract the 'id' from the URL
+  const {
+    data: property,
+    isLoading,
+    isError,
+  } = useQuery<Property>({
+    queryKey: ["property", id],
+    queryFn: async () => {
+      const response = await fetch(`/api/property/${id}`);
+      const { property } = await response.json();
 
+      return {
+        property_id: property.property_id,
+        description: property.description,
+        rental_fee: Number(property.rental_fee),
+        address: property.address,
+        occupant_num: property.occupant_num,
+        image: property.image,
+        start_date: property.start_date,
+        end_date: property.end_date,
+        status: property.status,
+      };
+    },
+  });
+
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+  const handleHideProperty = async () => {
+    if (id && property) {
+      await hideProperty({ id: id as string, property });
+    }
+  };
   return (
     <div className="px-16 py-8 bg-stone-50">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-green-800">
-          Cozy Cottage in the Woods
+          {" "}
+          {/* {property?.address} */}
         </h1>
         <div className="flex gap-2">
           <Button
@@ -67,7 +157,11 @@ const SingleProperyPage = () => {
             <Edit2 className="h-4 w-4 mr-2" />
             Edit Property
           </Button>
-          <Button variant="outline" className="text-orange-600">
+          <Button
+            variant="outline"
+            className="text-orange-600"
+            onClick={handleHideProperty}
+          >
             <Eye className="h-4 w-4 mr-2" />
             Hide Property
           </Button>
@@ -97,9 +191,7 @@ const SingleProperyPage = () => {
                   <div>
                     <h3 className="text-sm font-medium mb-2">Description</h3>
                     <p className="text-muted-foreground">
-                      A charming cottage nestled in the woods, perfect for a
-                      peaceful getaway. Features a cozy fireplace and a
-                      wraparound porch with stunning forest views.
+                      {property?.description}
                     </p>
                   </div>
 
@@ -107,20 +199,16 @@ const SingleProperyPage = () => {
                     <h3 className="text-sm font-medium mb-2">Details</h3>
                     <div className="grid gap-2">
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        <span>Sleeps 4 guests</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Bed className="h-4 w-4" />
-                        <span>2 bedrooms</span>
+                        <span>{property?.occupant_num} Rooms</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <DollarSign className="h-4 w-4" />
-                        <span>$95 per night</span>
+                        <span>${property?.rental_fee} per month</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin className="h-4 w-4" />
-                        <span>Woodsville, CA</span>
+                        <span>{property?.address}</span>
                       </div>
                     </div>
                   </div>
@@ -128,7 +216,7 @@ const SingleProperyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Amenities</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -150,9 +238,9 @@ const SingleProperyPage = () => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
-          <PropertyGallery></PropertyGallery>
+          {/* <PropertyGallery photos={property?.image}></PropertyGallery> */}
         </TabsContent>
 
         <TabsContent value="proposals">

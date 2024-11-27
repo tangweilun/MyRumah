@@ -35,7 +35,7 @@ export default function MyPropertiesGrid() {
         `/api/property?userId=${userId}&role=${role}`
       );
       const json = await response.json();
-      return json.properties.map((property: any) => ({
+      return json.properties.map((property: Property) => ({
         property_id: property.property_id,
         description: property.description,
         rental_fee: Number(property.rental_fee),

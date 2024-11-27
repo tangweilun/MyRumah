@@ -30,7 +30,7 @@ export default function PropertyGrid() {
     queryFn: async () => {
       const response = await fetch(`/api/property`);
       const json = await response.json();
-      return json.properties.map((property: any) => ({
+      return json.properties.map((property: Property) => ({
         property_id: property.property_id,
         description: property.description,
         rental_fee: Number(property.rental_fee),

@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image'; // Import Image from Next.js
+import React, { useState } from "react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image"; // Import Image from Next.js
 
 type Photo = {
   url: string;
   alt?: string;
 };
 
-const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
+const PropertyGallery = ({ photos = [] }: { photos: Photo[] }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
 
   const openModal = (index: number) => {
@@ -40,7 +40,7 @@ const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
             onClick={() => openModal(index)}
           >
             <Image
-              src={photo.url || '/api/placeholder/400/300'}
+              src={photo.url || "/api/placeholder/400/300"}
               alt={photo.alt || `Photo ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               width={400} // Specify width
@@ -65,7 +65,7 @@ const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
           <button
             onClick={() => navigatePhoto(-1)}
             className={`absolute left-4 text-white p-2 hover:bg-white/10 rounded-full ${
-              selectedPhoto === 0 ? 'opacity-50 cursor-not-allowed' : ''
+              selectedPhoto === 0 ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={selectedPhoto === 0}
           >
@@ -76,8 +76,8 @@ const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
             onClick={() => navigatePhoto(1)}
             className={`absolute right-4 text-white p-2 hover:bg-white/10 rounded-full ${
               selectedPhoto === photos.length - 1
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             }`}
             disabled={selectedPhoto === photos.length - 1}
           >
@@ -87,7 +87,7 @@ const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
           {/* Main Image */}
           <div className="flex justify-center items-center max-w-full max-h-[80vh] overflow-hidden">
             <Image
-              src={photos[selectedPhoto]?.url || '/api/placeholder/800/600'}
+              src={photos[selectedPhoto]?.url || "/api/placeholder/800/600"}
               alt={photos[selectedPhoto]?.alt || `Photo ${selectedPhoto + 1}`}
               className="max-w-full max-h-full object-contain"
               width={800} // Specify width
@@ -100,19 +100,19 @@ const PhotoGallery = ({ photos = [] }: { photos: Photo[] }) => {
   );
 };
 
-const PropertyGallery = () => {
-  const samplePhotos = [
-    { url: '/propertyImage1.jpeg', alt: 'Living Room' },
-    { url: '/propertyImage2.jpeg', alt: 'Kitchen' },
-    { url: '/propertyImage3.jpeg', alt: 'Bedroom' },
-    { url: '/propertyImage1.jpeg', alt: 'Bathroom' },
-  ];
+// const PropertyGallery = () => {
+//   const image = [
+//     { url: '/propertyImage1.jpeg', alt: 'Living Room' },
+//     { url: '/propertyImage2.jpeg', alt: 'Kitchen' },
+//     { url: '/propertyImage3.jpeg', alt: 'Bedroom' },
+//     { url: '/propertyImage1.jpeg', alt: 'Bathroom' },
+//   ];
 
-  return (
-    <div className="py-10">
-      <PhotoGallery photos={samplePhotos} />
-    </div>
-  );
-};
+//   return (
+//     <div className="py-10">
+//       <PhotoGallery photos={image} />
+//     </div>
+//   );
+// };
 
 export default PropertyGallery;
