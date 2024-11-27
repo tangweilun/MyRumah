@@ -105,7 +105,8 @@ export async function createAgreement(proposalId: number) {
 }
 
 
-import { editProperty } from './property-service'; // Import the editProperty function
+import { editProperty } from './property-service';
+import { processDeposit } from './deposit-service'; // Import the editProperty function
 
 export async function updateAgreement(
   agreementId: number,
@@ -164,6 +165,18 @@ export async function updateAgreement(
           owner_signature: updatedOwnerSignature,
         },
       });
+
+      // Check if deposit status is `pending_returned` and process the deposit
+      if (agreement.deposit_status === 'pending_returned') {
+        const processDepositResult = await processDeposit(agreementId);
+
+        if (processDepositResult.status !== 200) {
+          return {
+            status: processDepositResult.status,
+            message: processDepositResult.message,
+          };
+        }
+      }
 
       return {
         status: 200,
