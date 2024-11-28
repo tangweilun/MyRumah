@@ -2,7 +2,10 @@ import { editProperty } from '@backend/services/property-service';
 import { getProperty } from '@backend/services/property-service';
 import { NextResponse } from 'next/server';
 
-export async function PATCH(req: Request, { params }: { params: { propertyId: string } }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: { propertyId: string } }
+) {
   try {
     const propertyId = parseInt(params.propertyId);
     const body = await req.json();
@@ -15,10 +18,28 @@ export async function PATCH(req: Request, { params }: { params: { propertyId: st
       });
     }
 
+    // Validate and process images
+    let imageBuffers: Buffer[] | undefined = undefined;
+    if (propertyData.images) {
+      if (
+        !Array.isArray(propertyData.images) ||
+        propertyData.images.some((img: string) => typeof img !== 'string') // Explicitly type 'img' as string
+      ) {
+        return NextResponse.json({
+          status: 400,
+          message: 'Invalid images format. Expecting an array of base64 strings.',
+        });
+      }
+      // Convert base64 images to Buffers
+      imageBuffers = propertyData.images.map((imageBase64: string) =>
+        Buffer.from(imageBase64.split(',')[1], 'base64') // Explicitly type 'imageBase64' as string
+      );
+    }
+
     const result = await editProperty(propertyId, deleteProperty, {
       ownerId: propertyData.ownerId,
       address: propertyData.address,
-      image: propertyData.image ? Buffer.from(propertyData.image, 'base64') : undefined,
+      images: imageBuffers, // Pass the array of image buffers
       description: propertyData.description,
       occupantNum: propertyData.occupantNum,
       rentalFee: propertyData.rentalFee,
@@ -46,6 +67,7 @@ export async function PATCH(req: Request, { params }: { params: { propertyId: st
     );
   }
 }
+
 
 export async function GET(req: Request, { params }: { params: { propertyId: string } }) {
     try {
