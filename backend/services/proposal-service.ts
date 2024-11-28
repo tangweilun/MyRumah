@@ -4,6 +4,7 @@ import {
   ProposalStatus,
   UserRole,
   PropertyStatus,
+  AgreementStatus,
 } from "@prisma/client";
 import {
   chkUserRole,
@@ -242,6 +243,26 @@ async function createProposal(tenantId: number, propertyId: number) {
       return { status: 400 };
     }
     console.log(propertyStatus);
+    // before create proposal, check if the tenant previously has created proposal on same property (with status "pending"), if yes, cannot create again
+    const hasPendingProposal = await chkHasPendingProposal(
+      tenantId,
+      propertyId
+    );
+    if (hasPendingProposal) {
+      return { status: 400 };
+    }
+    // also cehck if previous proposal on same property has generated agreement, and the agreement is currently effective or not (pending / ongoing)
+    // if agreement still pending or ongoing, then cannot create proposal by same tenant on same property
+    const isAgreementEffective = await chkHasEffectiveAgreement(
+      tenantId,
+      propertyId
+    );
+    if (isAgreementEffective) {
+      return { status: 400 };
+    }
+
+    console.log(isAgreementEffective);
+
     // if current date is <= property start rental date
     const newProposal = await prisma.proposal.create({
       data: {
@@ -411,6 +432,41 @@ async function chkUserProposalRelation(
   }
 
   if (!proposal) {
+    return false;
+  }
+
+  return true;
+}
+
+async function chkHasPendingProposal(tenantId: number, propertyId: number) {
+  const proposal = await prisma.proposal.findFirst({
+    where: { tenant_id: tenantId, property_id: propertyId, status: "pending" },
+  });
+
+  if (!proposal) {
+    return false;
+  }
+
+  return true;
+}
+
+async function chkHasEffectiveAgreement(tenantId: number, propertyId: number) {
+  const agreement = await prisma.agreement.findFirst({
+    where: {
+      proposal: {
+        tenant_id: tenantId,
+        property_id: propertyId,
+      },
+      agreement_status: {
+        notIn: ["completed", "expired"],
+      },
+    },
+    orderBy: {
+      agreement_id: "desc",
+    },
+  });
+
+  if (!agreement) {
     return false;
   }
 
