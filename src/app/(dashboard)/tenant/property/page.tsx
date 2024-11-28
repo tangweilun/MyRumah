@@ -17,14 +17,10 @@ import {
   Dialog,
   DialogHeader,
   DialogContent,
-  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import "react-datepicker/dist/react-datepicker.css";
 
 export default function PropertyPage() {
   const propertyName = "Modern Apartment 1";
