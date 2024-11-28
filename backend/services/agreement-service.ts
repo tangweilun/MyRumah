@@ -119,7 +119,7 @@ import { processDeposit } from './deposit-service'; // Import the editProperty f
 
 export async function updateAgreement(
   agreementId: number,
-  action: 'sign' | 'approve' | 'editDeposit' | 'resetSignatures',
+  action: 'sign' | 'approve' | 'editDeposit' | 'unsign', // Removed 'resetSignatures'
   userType?: 'owner' | 'tenant',
   newDepositStatus?: 'pending' | 'submitted' | 'pending_returned' | 'returned' // Strict type for deposit statuses
 ) {
@@ -145,6 +145,46 @@ export async function updateAgreement(
 
     // Get the smart contract instance
     const agreementContract = await getContract();
+
+    if (action === 'unsign') {
+      if (!userType) {
+        return { status: 400, message: 'User type is required to unsign.' };
+      }
+
+      // Ensure the agreement has not been approved
+      if (agreement.agreement_status === 'ongoing' || agreement.agreement_status === 'completed') {
+        return { status: 400, message: 'Cannot unsign an approved or completed agreement.' };
+      }
+
+      // Determine which signature to reset
+      const updatedTenantSignature = userType === 'tenant' ? false : agreement.tenant_signature;
+      const updatedOwnerSignature = userType === 'owner' ? false : agreement.owner_signature;
+
+      // Update the blockchain agreement
+      const tx = await agreementContract.updateAgreement(
+        agreementId,
+        agreement.deposit_status,
+        agreement.agreement_status,
+        updatedTenantSignature,
+        updatedOwnerSignature
+      );
+
+      await tx.wait();
+
+      // Update the local database
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          tenant_signature: updatedTenantSignature,
+          owner_signature: updatedOwnerSignature,
+        },
+      });
+
+      return {
+        status: 200,
+        message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} has unsigned the agreement.`,
+      };
+    }
 
     if (action === 'sign') {
       if (!userType) {
@@ -279,39 +319,15 @@ export async function updateAgreement(
         status: 200,
         message: `Deposit status updated to ${newDepositStatus}.`,
       };
-    } else if (action === 'resetSignatures') {
-      // Reset both owner and tenant signatures to false
-      const tx = await agreementContract.updateAgreement(
-        agreementId,
-        agreement.deposit_status,
-        agreement.agreement_status,
-        false, // Reset tenant signature
-        false // Reset owner signature
-      );
-
-      await tx.wait(); // Wait for the transaction to be confirmed
-
-      // Reset signatures in the local database
-      await prisma.agreement.update({
-        where: { agreement_id: agreementId },
-        data: {
-          tenant_signature: false,
-          owner_signature: false,
-        },
-      });
-
-      return {
-        status: 200,
-        message: 'Owner and tenant signatures have been reset to false.',
-      };
     } else {
-      return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", "editDeposit", or "resetSignatures".' };
+      return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", or "editDeposit".' };
     }
   } catch (error) {
     console.error('Error updating agreement:', error);
     return { status: 500, message: 'Error updating agreement.' };
   }
 }
+
 
 
   
