@@ -63,32 +63,6 @@ const Navbar = async () => {
             </Link>
           </>
         )}
-
-        {/* User menu and responsive menu icon
-        <div className="flex items-center gap-6">
-          {!session ? (
-            <>
-              <Link
-                href="/auth/sign-in"
-                className="text-stone-600 hover:text-green-700"
-              >
-                Login
-              </Link>
-              <Link
-                href="/auth/sign-up"
-                className="text-stone-600 hover:text-green-700"
-              >
-                Create Account
-              </Link>
-            </>
-          ) : (
-            <form action={handleSignOut}>
-              <Button variant="default" type="submit">
-                Sign Out
-              </Button>
-            </form>
-          )}
-        </div> */}
         {/* User menu and responsive menu icon */}
         <div className="flex items-center gap-6">
           {!session ? (

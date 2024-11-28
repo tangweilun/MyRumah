@@ -20,9 +20,7 @@ const TenantPage = () => {
         </div>
       </div>
       {/* Properties listing */}
-      <div>
-        <PropertyGrid />
-      </div>
+      <div>{<PropertyGrid />}</div>
     </div>
   );
 };

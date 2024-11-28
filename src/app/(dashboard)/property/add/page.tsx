@@ -4,7 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Upload, CalendarIcon, Loader2 } from "lucide-react";
+import { Upload, CalendarIcon, Loader2, X } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { useSession } from "next-auth/react";
@@ -70,15 +70,19 @@ const formSchema = z.object({
     }
   ),
 });
-export async function createProperty(formData: FormData) {
+export async function createProperty(formData: Record<string, any>) {
   const formDataObject: Record<string, any> = {};
-  for (const [key, value] of formData.entries()) {
-    if (key === "ownerId" || key === "rentalFee" || key === "occupantNum") {
-      formDataObject[key] = Number(value); // Convert to number
-    } else {
-      formDataObject[key] = value; // Leave as is for other keys
+  // Directly iterate over the formData object
+  for (const key in formData) {
+    if (formData.hasOwnProperty(key)) {
+      if (key === "ownerId" || key === "rentalFee" || key === "occupantNum") {
+        formDataObject[key] = Number(formData[key]); // Convert to number
+      } else {
+        formDataObject[key] = formData[key]; // Leave as is for other keys
+      }
     }
   }
+
   const response = await fetch("/api/property", {
     method: "POST",
     headers: {
@@ -99,11 +103,11 @@ export function useCreateProperty(
       setIsLoading(true); // Set loading to true when mutation starts
     },
     onSuccess: (data) => {
+      toast.success("Property has been successfully added!");
       // Invalidate and refetch properties list
       queryClient.invalidateQueries({ queryKey: ["properties"] });
-      toast.success("Property has been successfully added!");
       setIsLoading(false);
-      redirect("/owner");
+      // redirect("/owner");
     },
     onError: (error: Error) => {
       toast.error("Failed to add property. Please try again.");
@@ -138,46 +142,40 @@ export default function AddProperty() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    const formData = new FormData();
-    formData.append("status", "active");
+    const requestBody: any = {
+      status: "active",
+      address: values.address,
+      occupantNum: values.occupantNum,
+      rentalFee: values.rentalFee,
+      description: values.description,
+    };
+
+    // Add ownerId if available
     if (ownerId) {
-      formData.append("ownerId", ownerId.toString());
+      requestBody.ownerId = Number(ownerId);
     }
-    // Convert images to base64 before appending
-    if (values.images) {
+
+    // Handle date range
+    if (values.dateRange?.from && values.dateRange?.to) {
+      requestBody.startDate = values.dateRange.from.toLocaleDateString("en-CA");
+      requestBody.endDate = values.dateRange.to.toLocaleDateString("en-CA");
+    }
+
+    // Handle images
+    if (values.images && values.images.length > 0) {
       const base64Images = await Promise.all(
         Array.from(values.images).map(async (file) => {
           const base64 = await convertToBase64(file);
-          return base64;
+          return `data:${file.type};base64,${base64.split(",")[1]}`;
         })
       );
-      base64Images.forEach((base64, index) => {
-        formData.append("image", base64);
-      });
+
+      // Add images array directly to request body
+      requestBody.images = base64Images;
     }
 
-    // Append other form fields
-    Object.entries(values).forEach(([key, value]) => {
-      if (key !== "images") {
-        // Skip images field, already handled
-        if (key === "dateRange") {
-          const { from, to } = value as DateRange;
-          if (from && to) {
-            // Format the date to "YYYY-MM-DD"
-            const formattedFrom = from.toLocaleDateString("en-CA"); // 'en-CA' gives the format "YYYY-MM-DD"
-            const formattedTo = to.toLocaleDateString("en-CA");
-
-            formData.append("startDate", formattedFrom);
-            formData.append("endDate", formattedTo);
-          }
-        } else {
-          formData.append(key, value as string);
-        }
-      }
-    });
     try {
-      await createPropertyMutation.mutateAsync(formData);
+      await createPropertyMutation.mutateAsync(requestBody);
     } catch (error) {
       console.error("Error creating property:", error);
     }
@@ -347,42 +345,113 @@ export default function AddProperty() {
                   <FormItem>
                     <FormLabel>Upload Images</FormLabel>
                     <FormControl>
-                      <div className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2">
-                        <Upload className="h-6 w-6 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground text-center">
-                          Upload your images here
-                        </p>
-                        <input
-                          id="images"
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            field.onChange(e.target.files);
-                            setImages(e.target.files);
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            document.getElementById("images")?.click()
-                          }
-                        >
-                          Choose Files
-                        </Button>
-                        {field.value && (
-                          <p className="text-sm text-muted-foreground">
-                            {(field.value as FileList).length} files selected
+                      <div className="space-y-4">
+                        <div className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2">
+                          <Upload className="h-6 w-6 text-muted-foreground" />
+                          <p className="text-sm text-muted-foreground text-center">
+                            Upload your images here
                           </p>
+                          <input
+                            id="images"
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const files = e.target.files;
+                              if (files) {
+                                // Combine existing files with new files
+                                const existingFiles = field.value
+                                  ? Array.from(field.value)
+                                  : [];
+                                const newFiles = Array.from(files);
+                                const dataTransfer = new DataTransfer();
+
+                                // Add all files to DataTransfer object
+                                [...existingFiles, ...newFiles].forEach(
+                                  (file) => {
+                                    dataTransfer.items.add(file);
+                                  }
+                                );
+
+                                field.onChange(dataTransfer.files);
+                                setImages(dataTransfer.files);
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              document.getElementById("images")?.click()
+                            }
+                          >
+                            Choose Files
+                          </Button>
+                        </div>
+
+                        {/* File Count Display */}
+                        {field.value && field.value.length > 0 && (
+                          <div className="text-sm text-muted-foreground">
+                            {field.value.length}{" "}
+                            {field.value.length === 1 ? "file" : "files"}{" "}
+                            selected
+                          </div>
+                        )}
+
+                        {/* Image Previews */}
+                        {field.value && field.value.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {Array.from(field.value).map((file, index) => (
+                              <div
+                                key={index}
+                                className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
+                              >
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                {/* Overlay with file name and size */}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
+                                  <div className="text-white text-xs truncate">
+                                    {file.name}
+                                  </div>
+                                  <div className="text-white text-xs">
+                                    {(file.size / (1024 * 1024)).toFixed(2)} MB
+                                  </div>
+                                </div>
+                                {/* Delete Button */}
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => {
+                                    const dt = new DataTransfer();
+                                    const files = Array.from(
+                                      field.value as FileList
+                                    );
+                                    files.forEach((f, i) => {
+                                      if (i !== index) dt.items.add(f);
+                                    });
+                                    field.onChange(dt.files);
+                                    setImages(dt.files);
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </FormControl>
                     <FormDescription>
                       Upload images of your property. You can select multiple
-                      files. Only image formats are allowed.
+                      files. Only image formats are allowed. Maximum file size:
+                      5MB per image.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -402,7 +471,7 @@ export default function AddProperty() {
                     Canceling...
                   </>
                 ) : (
-                  "Cancel"
+                  "Back"
                 )}
               </Button>
               <Button

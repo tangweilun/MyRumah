@@ -77,19 +77,8 @@ export async function handleSignUp({
     if (!isUserRole(role)) {
       return { success: false, message: "Invalid data." };
     }
-
-    // const accExist = await checkAccExist(email, role);
     const accExist = await checkAccExist(email);
-
-    //replace false with exisitngUser
-    // if (false) {
-    //   return {
-    //     success: false,
-    //     message: "Email already exists. Login to continue.",
-    //   };
-    // }
     if (accExist && !accExist.exist) {
-      // return { status: "success", data: "sss" };
       // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await prisma.userInfo.create({
@@ -102,14 +91,12 @@ export async function handleSignUp({
           wallet_amount: 1000,
         },
       });
-      console.log(22222);
       return {
         success: true,
         message: "Account created successfully.",
         // newUser: newUser,
       };
     }
-    console.log(2777);
     return { success: false, message: "Account already exist." };
 
     // return { success: true, message: "Account created successfully." };
@@ -127,9 +114,6 @@ export async function handleSignUp({
 // async function checkAccExist(email: string, role: UserRole) {
 async function checkAccExist(email: string) {
   try {
-    // const count = await prisma.userInfo.count({
-    //   where: { email: email, role: role },
-    // });
     const count = await prisma.userInfo.count({
       where: { email: email },
     });

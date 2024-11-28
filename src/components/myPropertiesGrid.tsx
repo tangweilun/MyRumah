@@ -14,7 +14,7 @@ type Property = {
   rental_fee: number;
   address: string;
   occupant_num: number;
-  image?: string | null;
+  images: Buffer[];
   start_date: string;
   end_date: string;
 };
@@ -36,14 +36,9 @@ export default function MyPropertiesGrid() {
       );
       const json = await response.json();
       return json.properties.map((property: Property) => ({
-        property_id: property.property_id,
-        description: property.description,
+        ...property,
+        images: property.images || [], // Ensure images is always an array
         rental_fee: Number(property.rental_fee),
-        address: property.address,
-        occupant_num: property.occupant_num,
-        image: property.image,
-        start_date: property.start_date,
-        end_date: property.end_date,
       }));
     },
   });
@@ -82,27 +77,31 @@ export default function MyPropertiesGrid() {
       {properties?.map((property) => (
         <Card key={property.property_id} className="overflow-hidden">
           <div className="relative h-48 w-full">
-            {property.image && (
+            {property.images && property.images.length > 0 ? (
               <Image
                 src={`data:image/jpeg;base64,${Buffer.from(
-                  property.image
+                  property.images[0]
                 ).toString("base64")}`}
-                alt={"/placeholder.jpg"}
+                alt={property.description || "Property Image"}
                 fill
                 className="object-cover"
               />
+            ) : (
+              <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                <HomeIcon className="h-12 w-12 text-gray-400" />
+              </div>
             )}
           </div>
           <CardContent className="p-4">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-semibold text-green-600">
-                {property.description}
+                {property.address}
               </h3>
               <span className="text-lg font-semibold text-green-600">
                 ${property.rental_fee}
               </span>
             </div>
-            <p className="text-muted-foreground mb-2">{property.address}</p>
+            <p className="text-muted-foreground mb-2">{property.description}</p>
             <div className="flex items-center text-muted-foreground">
               <BedDouble className="h-4 w-4 mr-2" />
               <span>{property.occupant_num} Rooms</span>
@@ -128,7 +127,7 @@ export default function MyPropertiesGrid() {
     </div>
   );
 }
-
+// ... rest of the component remains the same
 const PropertySkeleton = () => {
   return (
     <Card className="overflow-hidden">
