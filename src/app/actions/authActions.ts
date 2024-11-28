@@ -110,7 +110,7 @@ export async function handleSignUp({
       };
     }
     console.log(2777);
-    return { success: false, message: "Account is exist." };
+    return { success: false, message: "Account is already exist." };
 
     // return { success: true, message: "Account created successfully." };
   } catch (error) {
