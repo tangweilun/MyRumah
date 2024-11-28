@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           message:
-            "Missing proposal creation information, or proposal is invalid due to exceeding property rental start date, or property not open for rental.",
+            "Missing proposal creation information, or pending proposal on same property is exist, or proposal is invalid due to exceeding property rental start date, or property not open for rental, or previous proposal on same property has effective agreement.",
         },
         { status: result.status }
       );
