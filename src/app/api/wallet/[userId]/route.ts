@@ -55,59 +55,56 @@ export async function PATCH(
       });
     }
 
-    if (walletAction === "topup") {
-      const topupResult = await topupWallet(userId, walletAmount);
-      if (topupResult.status === 200) {
-        return NextResponse.json({
-          status: topupResult.status,
-          updatedUserData: topupResult.updatedUserData,
-          message: "Wallet is topped up successfully!",
-        });
-      } else if (topupResult.status === 400) {
-        return NextResponse.json({
-          status: topupResult.status,
-          message: "Invalid top up amount.",
-        });
-      } else if (topupResult.status === 404) {
-        return NextResponse.json({
-          status: topupResult.status,
-          message: "User not found.",
-        });
-      } else if (topupResult.status === 500) {
-        return NextResponse.json(
-          { message: "Error occurred when topping up wallet." },
-          { status: topupResult.status }
-        );
-      }
-    } else if (walletAction === "deduct") {
-      const deductResult = await deductWallet(userId, walletAmount);
-      if (deductResult.status === 200) {
-        return NextResponse.json({
-          status: deductResult.status,
-          updatedUserData: deductResult.updatedUserData,
-          message: "Wallet is topped up successfully!",
-        });
-      } else if (deductResult.status === 400) {
-        return NextResponse.json({
-          status: deductResult.status,
-          message: "Invalid top up amount.",
-        });
-      } else if (deductResult.status === 404) {
-        return NextResponse.json({
-          status: deductResult.status,
-          message: "User not found.",
-        });
-      } else if (deductResult.status === 500) {
-        return NextResponse.json(
-          { message: "Error occurred when topping up wallet." },
-          { status: deductResult.status }
-        );
-      }
+    const walletResult =
+      walletAction === "topup"
+        ? await topupWallet(userId, walletAmount)
+        : walletAction === "deduct"
+        ? await deductWallet(userId, walletAmount)
+        : null;
+
+    if (!walletResult) {
+      return NextResponse.json(
+        { message: "Invalid wallet action." },
+        { status: 400 }
+      );
     }
-    return NextResponse.json(
-      { message: "Invalid wallet action." },
-      { status: 400 }
-    );
+
+    if (walletResult.status === 200) {
+      return NextResponse.json({
+        status: walletResult.status,
+        updatedUserData: walletResult.updatedUserData,
+        message: `Wallet is ${
+          walletAction === "topup"
+            ? "topped up"
+            : walletAction === "deduct"
+            ? "deducted"
+            : null
+        } successfully!`,
+      });
+    } else if (walletResult.status === 400) {
+      return NextResponse.json({
+        status: walletResult.status,
+        message: "Invalid amount.",
+      });
+    } else if (walletResult.status === 404) {
+      return NextResponse.json({
+        status: walletResult.status,
+        message: "User not found.",
+      });
+    } else if (walletResult.status === 500) {
+      return NextResponse.json(
+        {
+          message: `Error occurred when ${
+            walletAction === "topup"
+              ? "topping up"
+              : walletAction === "deduct"
+              ? "deducting"
+              : null
+          } wallet.`,
+        },
+        { status: walletResult.status }
+      );
+    }
   } catch (error) {
     console.error("Error: ", error);
     return NextResponse.json(
