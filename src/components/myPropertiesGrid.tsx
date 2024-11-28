@@ -2,11 +2,18 @@
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, BedDouble, Calendar, HomeIcon } from "lucide-react";
+import {
+  AlertCircle,
+  BedDouble,
+  Calendar,
+  HomeIcon,
+  Loader2,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
 
 type Property = {
   property_id: number;
@@ -51,6 +58,20 @@ export default function MyPropertiesGrid() {
       day: "numeric",
     });
   }
+
+  const [loadingStates, setLoadingStates] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  const handleViewDetails = async (propertyId: number) => {
+    setLoadingStates((prev: any) => ({ ...prev, [propertyId]: true }));
+
+    try {
+      await router.push(`/property/${propertyId}`);
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [propertyId]: false }));
+    }
+  };
 
   if (isLoading) {
     return (
@@ -117,9 +138,17 @@ export default function MyPropertiesGrid() {
           <CardFooter className="p-4 pt-0">
             <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white"
-              onClick={() => router.push(`/property/${property.property_id}`)}
+              onClick={() => handleViewDetails(property.property_id)}
+              disabled={loadingStates[property.property_id]}
             >
-              View Details
+              {loadingStates[property.property_id] ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "View Details"
+              )}
             </Button>
           </CardFooter>
         </Card>

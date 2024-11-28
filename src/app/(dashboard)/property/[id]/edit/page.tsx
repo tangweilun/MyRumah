@@ -1,92 +1,62 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import Image from "next/image";
+import { Trash, Plus, X } from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Trash, Plus, Loader2 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
-import { propertyImage } from "@/lib/data";
-
-// Zod imports
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
-// Shadcn Form components
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { DateRange } from "react-day-picker";
-import { addDays, format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-// Zod Schema (similar to add page)
-const editPropertySchema = z.object({
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { DatePickerWithRange } from "@/components/DateRangePicker";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+
+type Property = {
+  deleteProperty: boolean;
+  property_id: number;
+  description: string;
+  rental_fee: number;
+  address: string;
+  occupant_num: number;
+  images: string[];
+  start_date: string;
+  end_date: string;
+  status: string;
+};
+// Zod validation schema
+const formSchema = z.object({
   description: z.string().min(10, {
     message: "Description must be at least 10 characters.",
   }),
   address: z.string().min(2, {
     message: "Address must be at least 2 characters.",
   }),
-  occupantNum: z.number().min(1, {
-    message: "Number of rooms must be at least 1.",
+  occupant_num: z.coerce.number().min(0, {
+    message: "Number of rooms must be non-negative.",
   }),
-  rentalFee: z.string().regex(/^\d+$/, {
-    message: "Please enter a valid number.",
+  rental_fee: z.coerce.number().min(0, {
+    message: "Price must be non-negative.",
   }),
-  images: z.custom<FileList | null>().optional(),
-  dateRange: z.object(
-    {
-      from: z.date(),
-      to: z.date(),
-    },
-    {
-      required_error: "Please select a date range.",
-    }
-  ),
 });
 
 const EditProperty = () => {
   const router = useRouter();
   const { id } = useParams();
-  const queryClient = useQueryClient();
-
-  // Property type definition
-  type Property = {
-    property_id: number;
-    description: string;
-    rental_fee: number;
-    address: string;
-    occupant_num: number;
-    image?: string | null;
-    start_date: string;
-    end_date: string;
-  };
-
-  // Fetch property data
   const {
     data: property,
     isLoading,
@@ -102,102 +72,158 @@ const EditProperty = () => {
         rental_fee: Number(property.rental_fee),
         address: property.address,
         occupant_num: property.occupant_num,
-        image: property.image,
+        images: property.images,
         start_date: property.start_date,
         end_date: property.end_date,
+        status: property.status,
+        deleteProperty: false,
       };
     },
   });
-
-  // Mutation for updating property
-  const updatePropertyMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const response = await fetch(`/api/property/${id}`, {
-        method: "PATCH",
-        body: formData,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property", id] });
-      toast.success("Property updated successfully!");
-      //router.push(`/property/${id}`);
-    },
-    onError: () => {
-      toast.error("Failed to update property. Please try again.");
-    },
-  });
-
-  // Form initialization
-  const form = useForm<z.infer<typeof editPropertySchema>>({
-    resolver: zodResolver(editPropertySchema),
+  // Initialize form with default values
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       description: property?.description || "",
       address: property?.address || "",
-      occupantNum: property?.occupant_num || 1,
-      rentalFee: property?.rental_fee.toString() || "",
-      images: null,
-      dateRange: {
-        from: property ? new Date(property.start_date) : new Date(),
-        to: property ? new Date(property.end_date) : addDays(new Date(), 365),
-      },
+      occupant_num: property?.occupant_num || 1,
+      rental_fee: property?.rental_fee || 1000,
     },
   });
 
-  // Convert file to base64
-  const convertToBase64 = (file: File): Promise<string> => {
+  const { watch } = form; // Track form changes using watch
+  const currentValues = watch(); // Get current form values
+
+  // Function to convert Buffer to Base64
+  const convertBufferToBase64 = (buffer: Buffer): string => {
+    return `data:image/jpeg;base64,${buffer.toString("base64")}`; // Adjust the type if necessary
+  };
+
+  const mutation = useMutation({
+    mutationFn: async (data: Partial<Property>) => {
+      // Convert existingImages (Buffers) to Base64 format
+      const base64Images = existingImages.map((imageBuffer) => {
+        return convertBufferToBase64(imageBuffer); // Convert each Buffer to Base64
+      });
+      data.images = base64Images;
+      console.log(data.images);
+      console.log("===================");
+
+      existingImages.forEach((image, index) => {
+        console.log(`Item ${index}:`, image); // Log the item itself
+        console.log(`Type of item ${index}:`, typeof image); // Log the type of the item
+        // If the item is an object, you can further inspect its properties
+        if (typeof image === "object" && image !== null) {
+          console.log(`Properties of item ${index}:`, Object.keys(image)); // Log the keys of the object
+        }
+      });
+      data.deleteProperty = false;
+
+      const response = await fetch(`/api/property/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update property");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast.success("Property updated successfully!");
+      router.push(`/property/${id}`); // Redirect after successful update
+    },
+    onError: () => {
+      toast.error("Failed to update property.");
+    },
+  });
+
+  const initialValues = {
+    description: property?.description || "",
+    address: property?.address || "",
+    occupant_num: property?.occupant_num || 1,
+    rental_fee: property?.rental_fee || 1000,
+  };
+
+  const handleSave = () => {
+    const updates: Partial<Property> = {};
+    const keys = Object.keys(currentValues) as (keyof typeof initialValues)[];
+
+    keys.forEach((key) => {
+      if (currentValues[key] !== initialValues[key]) {
+        updates[key] = currentValues[key] as any;
+      }
+    });
+
+    mutation.mutate(updates); // Trigger the mutation with the updates
+  };
+
+  const [existingImages, setExistingImages] = useState<any[]>(
+    property?.images || []
+  );
+  const [newImages, setNewImages] = useState<FileList | null>(null);
+
+  // Function to convert file to Buffer
+  const convertToBuffer = (file: File): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
+      reader.onloadend = () => {
+        const arrayBuffer = reader.result as ArrayBuffer;
+        const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer
+        resolve(buffer);
+      };
       reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.readAsArrayBuffer(file); // Read the file as an ArrayBuffer
     });
   };
 
-  // Submit handler
-  const onSubmit = async (values: z.infer<typeof editPropertySchema>) => {
-    const formData = new FormData();
+  // Function to handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    console.log("Files uploaded:", files); // Log the uploaded files
 
-    // Append other form fields
-    formData.append("description", values.description);
-    formData.append("address", values.address);
-    formData.append("occupantNum", values.occupantNum.toString());
-    formData.append("rentalFee", values.rentalFee);
+    if (files) {
+      const existingFiles = existingImages; // Keep existing image URLs
+      console.log("Existing images before upload:", existingFiles); // Log existing images
 
-    // Handle date range
-    if (values.dateRange.from && values.dateRange.to) {
-      formData.append(
-        "startDate",
-        values.dateRange.from.toLocaleDateString("en-CA")
-      );
-      formData.append(
-        "endDate",
-        values.dateRange.to.toLocaleDateString("en-CA")
-      );
-    }
+      const newFiles = Array.from(files);
+      const dataTransfer = new DataTransfer(); // Ensure DataTransfer is instantiated correctly
 
-    // Handle image uploads
-    if (values.images) {
-      const base64Images = await Promise.all(
-        Array.from(values.images).map(async (file) => {
-          const base64 = await convertToBase64(file);
-          return base64;
+      // Convert new files to Buffer
+      const newImageBuffers = await Promise.all(
+        newFiles.map(async (file) => {
+          const buffer = await convertToBuffer(file);
+          console.log("Converted buffer for file:", file.name, buffer); // Log each converted buffer
+          return buffer; // Return the Buffer
         })
       );
-      base64Images.forEach((base64) => {
-        formData.append("image", base64);
-      });
-    }
 
-    // Trigger mutation
-    updatePropertyMutation.mutate(formData);
+      console.log("New image buffers:", newImageBuffers); // Log all new image buffers
+
+      setNewImages(dataTransfer.files); // Update the state with the new FileList
+      setExistingImages([...existingFiles, ...newImageBuffers]); // Update existing images for display
+      console.log("Updated existing images:", [
+        ...existingFiles,
+        ...newImageBuffers.map((buffer) => buffer.toString()),
+      ]); // Log updated existing images
+    }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error loading property</div>;
+  // Function to trigger file input
+  const handleAddPhotoClick = () => {
+    document.getElementById("fileInput")?.click();
+  };
+
+  // Function to handle image deletion
+  const handleImageDelete = (index: number) => {
+    const updatedImages = existingImages.filter((_, i) => i !== index);
+    setExistingImages(updatedImages);
+  };
 
   return (
-    <div className="bg-stone-50 p-16 space-y-6">
+    <div className="min-h-screen bg-stone-50 p-16 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-green-800">
@@ -205,32 +231,19 @@ const EditProperty = () => {
         </h1>
         <div className="space-x-2">
           <Button
-            type="button"
             className="bg-green-600 hover:bg-green-700"
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={updatePropertyMutation.isPending}
+            onClick={form.handleSubmit(handleSave)}
           >
-            {updatePropertyMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Changes"
-            )}
+            Save Changes
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/property/${id}`)}
-            disabled={updatePropertyMutation.isPending}
-          >
+          <Button variant="outline" onClick={() => router.back()}>
             Cancel
           </Button>
         </div>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {/* Basic Information */}
@@ -246,7 +259,11 @@ const EditProperty = () => {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea className="min-h-[100px]" {...field} />
+                          <Textarea
+                            placeholder="Describe your property"
+                            className="min-h-[100px]"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -261,7 +278,7 @@ const EditProperty = () => {
                         <FormItem>
                           <FormLabel>Address</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input placeholder="Enter address" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -280,41 +297,12 @@ const EditProperty = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
-                      name="occupantNum"
+                      name="occupant_num"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Rooms</FormLabel>
-                          <Select
-                            onValueChange={(value) =>
-                              field.onChange(Number(value))
-                            }
-                            defaultValue={field.value?.toString()}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select number of rooms" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="1">1 Room</SelectItem>
-                              <SelectItem value="2">2 Rooms</SelectItem>
-                              <SelectItem value="3">3 Rooms</SelectItem>
-                              <SelectItem value="4">4 Rooms</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="rentalFee"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Price per Month ($)</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} min="0" />
+                            <Input type="number" min="0" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -323,54 +311,22 @@ const EditProperty = () => {
 
                     <FormField
                       control={form.control}
-                      name="dateRange"
+                      name="rental_fee"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Lease Dates</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal h-10",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
-                                  {field.value?.from ? (
-                                    field.value.to ? (
-                                      <>
-                                        {format(field.value.from, "LLL dd, y")}{" "}
-                                        - {format(field.value.to, "LLL dd, y")}
-                                      </>
-                                    ) : (
-                                      format(field.value.from, "LLL dd, y")
-                                    )
-                                  ) : (
-                                    <span>Pick a date range</span>
-                                  )}
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                initialFocus
-                                mode="range"
-                                defaultMonth={field.value?.from}
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                numberOfMonths={2}
-                              />
-                            </PopoverContent>
-                          </Popover>
+                          <FormLabel>Price per Month ($)</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" {...field} />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    <FormItem>
+                      <FormLabel>Lease Start and End Date</FormLabel>
+                      <DatePickerWithRange />
+                    </FormItem>
                   </div>
                 </CardContent>
               </Card>
@@ -383,66 +339,47 @@ const EditProperty = () => {
                   <CardTitle>Photos</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <FormField
-                    control={form.control}
-                    name="images"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="grid grid-cols-2 gap-4">
-                          {propertyImage.map((image) => (
-                            <div
-                              key={image.id}
-                              className="relative aspect-[4/3] bg-gray-100 rounded-md"
-                            >
-                              <Button
-                                size="icon"
-                                variant="destructive"
-                                className="absolute top-2 right-2 h-6 w-6"
-                                type="button"
-                              >
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                              <Image
-                                src={image.url}
-                                alt={`Property photo ${image.id}`}
-                                className="w-full h-full object-cover rounded-md"
-                                width={400}
-                                height={300}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                        <FormControl>
-                          <div>
-                            <input
-                              type="file"
-                              multiple
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                field.onChange(e.target.files);
-                              }}
-                              id="images"
-                            />
-                            <Button
-                              type="button"
-                              className="w-full mt-4"
-                              variant="outline"
-                              onClick={() =>
-                                document.getElementById("images")?.click()
-                              }
-                            >
-                              <Plus className="mr-2 h-4 w-4" /> Add Photo
-                            </Button>
-                          </div>
-                        </FormControl>
-                        {field.value && (
-                          <p className="text-sm text-muted-foreground">
-                            {(field.value as FileList).length} files selected
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
+                  <div className="grid grid-cols-2 gap-4">
+                    {existingImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
+                      >
+                        <img
+                          // src={image}
+                          src={`data:image/jpeg;base64,${Buffer.from(
+                            image
+                          ).toString("base64")}`}
+                          alt={`Image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6"
+                          onClick={() => handleImageDelete(index)} // Call the delete function
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="py-2"></div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddPhotoClick}
+                  >
+                    + Add Photo
+                  </Button>
+                  <input
+                    id="fileInput"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
                   />
                 </CardContent>
               </Card>

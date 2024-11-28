@@ -19,6 +19,7 @@ import {
   MapPin,
   Calendar,
   Clock,
+  Loader,
 } from "lucide-react";
 import Image from "next/image";
 import PropertyGallery from "@/components/PhotoGallery";
@@ -247,6 +248,14 @@ const SinglePropertyPage = () => {
     }
   };
 
+  const [isEditLoading, setEditLoading] = useState(false); // State to track loading for Edit button
+
+  const handleEditProperty = async () => {
+    setEditLoading(true); // Set loading to true
+    await router.push(`${window.location.pathname}/edit`); // Navigate to the edit page
+    setEditLoading(false); // Optionally set loading to false after navigation
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen px-16 py-8 bg-stone-50">
@@ -330,10 +339,21 @@ const SinglePropertyPage = () => {
           <Button
             variant="outline"
             className="text-green-600"
-            onClick={() => router.push(`${window.location.pathname}/edit`)}
+            onClick={handleEditProperty} // Use the new handler
+            disabled={isEditLoading} // Disable button while loading
           >
-            <Edit2 className="h-4 w-4 mr-2" />
-            Edit Property
+            {isEditLoading ? (
+              <div className="flex items-center gap-2">
+                <Loader className="animate-spin h-4 w-4" />{" "}
+                {/* Use the Loader icon */}
+                Processing...
+              </div>
+            ) : (
+              <>
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Property
+              </>
+            )}
           </Button>
           <Button
             variant="outline"
