@@ -130,23 +130,26 @@ export async function getPropertiesByUser(userId: number, role: string): Promise
 }
 
 
-export async function getAllProperties(): Promise<PropertyInfo[]> {
+export async function getAllProperties(address?: string): Promise<PropertyInfo[]> {
   try {
-    // Fetch all active properties
+    // Fetch all active properties with optional address filtering
     const properties = await prisma.propertyInfo.findMany({
       where: {
         status: 'active', // Filter properties with status "active"
+        ...(address && { address: { contains: address, mode: 'insensitive' } }), // Filter by address if provided
       },
       include: {
         owner: true, // Include owner details if needed
       },
     });
+
     return properties;
   } catch (error) {
     console.error("Error fetching active properties:", error);
     throw new Error("Error fetching active properties");
   }
 }
+
 
 
 

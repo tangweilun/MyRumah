@@ -25,6 +25,14 @@ const getContract = async () => {
 
 export async function createAgreement(proposalId: number) {
   try {
+    // Check if the proposal already has an agreement
+    const existingAgreement = await prisma.agreement.findMany({
+      where: { proposal_id: proposalId },
+    });
+    if (existingAgreement.length > 0) {
+      return { status: 400, message: 'An agreement already exists for this proposal.' };
+    }
+
     // Fetch the proposal and related data
     const proposal = await prisma.proposal.findUnique({
       where: { proposal_id: proposalId },
@@ -103,6 +111,7 @@ export async function createAgreement(proposalId: number) {
     return { status: 500, message: 'Error occurred while creating agreement.' };
   }
 }
+  
 
 
 import { editProperty } from './property-service';
