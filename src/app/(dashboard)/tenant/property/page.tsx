@@ -11,6 +11,7 @@ import {
   Bath,
   Home,
   Calendar,
+  CircleCheckBig,
 } from "lucide-react";
 import {
   Dialog,
@@ -22,9 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-//import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function PropertyPage() {
@@ -43,8 +42,6 @@ export default function PropertyPage() {
       (prevIndex) => (prevIndex - 1 + images.length) % images.length
     );
   };
-
-  const [moveInDate, setMoveInDate] = useState(new Date());
 
   return (
     <div>
@@ -162,30 +159,17 @@ export default function PropertyPage() {
                   Apply Now
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Rental Application</DialogTitle>
-                </DialogHeader>
-                <form className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="moveInDate">Move-In Date</Label>
-                    {/* <DatePicker
-                      id="moveInDate"
-                      selected={moveInDate}
-                      onChange={(date: Date) => setMoveInDate(date)}
-                      dateFormat="MMMM d, yyyy"
-                      minDate={new Date()}
-                      className="w-full rounded-md border border-input px-3 py-2"
-                    /> */}
+              <DialogContent className="sm:max-w-md">
+                <div className="flex flex-col items-center text-center">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+                    <CircleCheckBig className="h-10 w-10 text-green-600" />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea id="message" className="resize-none" />
-                  </div>
-                </form>
-                <DialogFooter>
-                  <Button type="submit">Submit Application</Button>
-                </DialogFooter>
+                  <DialogHeader className="mb-8">
+                    <DialogTitle className="text-2xl font-bold">
+                      Applied Successfully!
+                    </DialogTitle>
+                  </DialogHeader>
+                </div>
               </DialogContent>
             </Dialog>
           </div>

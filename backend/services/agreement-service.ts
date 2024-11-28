@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 import { ethers } from "ethers";
 import { parseUnits } from "ethers";
 import { AgreementContractAddress } from "../../src/utils/smartContractAddress";
@@ -30,7 +30,10 @@ export async function createAgreement(proposalId: number) {
       where: { proposal_id: proposalId },
     });
     if (existingAgreement.length > 0) {
-      return { status: 400, message: 'An agreement already exists for this proposal.' };
+      return {
+        status: 400,
+        message: "An agreement already exists for this proposal.",
+      };
     }
 
     // Fetch the proposal and related data
@@ -47,11 +50,11 @@ export async function createAgreement(proposalId: number) {
     });
 
     if (!proposal) {
-      return { status: 404, message: 'Proposal not found.' };
+      return { status: 404, message: "Proposal not found." };
     }
 
-    if (proposal.status !== 'approved') {
-      return { status: 400, message: 'Proposal is not approved.' };
+    if (proposal.status !== "approved") {
+      return { status: 400, message: "Proposal is not approved." };
     }
 
     const { property } = proposal;
@@ -59,7 +62,7 @@ export async function createAgreement(proposalId: number) {
     const tenant = proposal.tenant;
 
     if (!tenant || !owner) {
-      return { status: 404, message: 'Owner or tenant details not found.' };
+      return { status: 404, message: "Owner or tenant details not found." };
     }
 
     const deposit = parseFloat(property.rental_fee.toString()) * 1.5;
@@ -68,7 +71,7 @@ export async function createAgreement(proposalId: number) {
 
     const durationInMonths = Math.ceil(
       (endDate.getFullYear() - startDate.getFullYear()) * 12 +
-      (endDate.getMonth() - startDate.getMonth())
+        (endDate.getMonth() - startDate.getMonth())
     );
 
     const content = `Agreement between owner (${owner.username}) and tenant (${tenant.username}) for the property at ${property.address}. The rental duration is ${durationInMonths} month(s).`;
@@ -79,12 +82,12 @@ export async function createAgreement(proposalId: number) {
         proposal_id: proposalId,
         content: content,
         deposit: deposit,
-        deposit_status: 'pending',
+        deposit_status: "pending",
         init_rental_fee: property.rental_fee,
-        initial_fee_status: 'pending',
+        initial_fee_status: "pending",
         tenant_signature: false,
         owner_signature: false,
-        agreement_status: 'pending',
+        agreement_status: "pending",
       },
     });
 
@@ -96,32 +99,30 @@ export async function createAgreement(proposalId: number) {
       content, // content
       parseUnits(deposit.toString(), "ether"), // deposit in wei
       parseUnits(property.rental_fee.toString(), "ether"), // rentalFee in wei
-      'pending', // depositStatus
-      'pending' // agreementStatus
+      "pending", // depositStatus
+      "pending" // agreementStatus
     );
 
     // Wait for transaction to be mined
     const receipt = await agreementTx.wait();
 
-    console.log('Transaction receipt:', receipt);
+    console.log("Transaction receipt:", receipt);
 
     return { status: 200, agreement, transactionHash: receipt.transactionHash };
   } catch (error) {
-    console.error('Error creating agreement:', error);
-    return { status: 500, message: 'Error occurred while creating agreement.' };
+    console.error("Error creating agreement:", error);
+    return { status: 500, message: "Error occurred while creating agreement." };
   }
 }
-  
 
-
-import { editProperty } from './property-service';
-import { processDeposit } from './deposit-service'; // Import the editProperty function
+import { editProperty } from "./property-service";
+import { processDeposit } from "./deposit-service"; // Import the editProperty function
 
 export async function updateAgreement(
   agreementId: number,
-  action: 'sign' | 'approve' | 'editDeposit' | 'unsign', // Removed 'resetSignatures'
-  userType?: 'owner' | 'tenant',
-  newDepositStatus?: 'pending' | 'submitted' | 'pending_returned' | 'returned' // Strict type for deposit statuses
+  action: "sign" | "approve" | "editDeposit" | "unsign", // Removed 'resetSignatures'
+  userType?: "owner" | "tenant",
+  newDepositStatus?: "pending" | "submitted" | "pending_returned" | "returned" // Strict type for deposit statuses
 ) {
   try {
     // Fetch the agreement along with related details
@@ -137,7 +138,7 @@ export async function updateAgreement(
     });
 
     if (!agreement) {
-      return { status: 404, message: 'Agreement not found.' };
+      return { status: 404, message: "Agreement not found." };
     }
 
     const currentDate = new Date();
@@ -146,19 +147,16 @@ export async function updateAgreement(
     // Get the smart contract instance
     const agreementContract = await getContract();
 
-    if (action === 'unsign') {
+    if (action === "unsign") {
       if (!userType) {
-        return { status: 400, message: 'User type is required to unsign.' };
-      }
-
-      // Ensure the agreement has not been approved
-      if (agreement.agreement_status === 'ongoing' || agreement.agreement_status === 'completed') {
-        return { status: 400, message: 'Cannot unsign an approved or completed agreement.' };
+        return { status: 400, message: "User type is required to unsign." };
       }
 
       // Determine which signature to reset
-      const updatedTenantSignature = userType === 'tenant' ? false : agreement.tenant_signature;
-      const updatedOwnerSignature = userType === 'owner' ? false : agreement.owner_signature;
+      const updatedTenantSignature =
+        userType === "tenant" ? false : agreement.tenant_signature;
+      const updatedOwnerSignature =
+        userType === "owner" ? false : agreement.owner_signature;
 
       // Update the blockchain agreement
       const tx = await agreementContract.updateAgreement(
@@ -182,18 +180,22 @@ export async function updateAgreement(
 
       return {
         status: 200,
-        message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} has unsigned the agreement.`,
+        message: `${
+          userType.charAt(0).toUpperCase() + userType.slice(1)
+        } has unsigned the agreement.`,
       };
     }
 
-    if (action === 'sign') {
+    if (action === "sign") {
       if (!userType) {
-        return { status: 400, message: 'User type is required for signing.' };
+        return { status: 400, message: "User type is required for signing." };
       }
 
       // Determine the signature update based on user type
-      const updatedTenantSignature = userType === 'tenant' ? true : agreement.tenant_signature;
-      const updatedOwnerSignature = userType === 'owner' ? true : agreement.owner_signature;
+      const updatedTenantSignature =
+        userType === "tenant" ? true : agreement.tenant_signature;
+      const updatedOwnerSignature =
+        userType === "owner" ? true : agreement.owner_signature;
 
       // Call the smart contract to update the agreement
       const tx = await agreementContract.updateAgreement(
@@ -216,7 +218,7 @@ export async function updateAgreement(
       });
 
       // Check if deposit status is `pending_returned` and process the deposit
-      if (agreement.deposit_status === 'pending_returned') {
+      if (agreement.deposit_status === "pending_returned") {
         const processDepositResult = await processDeposit(agreementId);
 
         if (processDepositResult.status !== 200) {
@@ -229,11 +231,17 @@ export async function updateAgreement(
 
       return {
         status: 200,
-        message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} has signed the agreement.`,
+        message: `${
+          userType.charAt(0).toUpperCase() + userType.slice(1)
+        } has signed the agreement.`,
       };
-    } else if (action === 'approve') {
+    } else if (action === "approve") {
       if (!agreement.owner_signature || !agreement.tenant_signature) {
-        return { status: 400, message: 'Both owner and tenant must sign the agreement before approval.' };
+        return {
+          status: 400,
+          message:
+            "Both owner and tenant must sign the agreement before approval.",
+        };
       }
 
       // Determine the agreement and deposit statuses
@@ -241,12 +249,12 @@ export async function updateAgreement(
       let depositStatus = agreement.deposit_status;
 
       if (currentDate > end_date) {
-        agreementStatus = 'completed';
-        depositStatus = 'pending_returned';
+        agreementStatus = "completed";
+        depositStatus = "pending_returned";
       } else if (currentDate >= start_date && currentDate <= end_date) {
-        agreementStatus = 'ongoing';
+        agreementStatus = "ongoing";
       } else if (currentDate < start_date) {
-        agreementStatus = 'expired';
+        agreementStatus = "expired";
       }
 
       // Call the smart contract to update the agreement
@@ -270,13 +278,20 @@ export async function updateAgreement(
       });
 
       // Update the associated property's status to 'occupied' if agreement is approved and signed by both parties
-      if (agreementStatus === 'ongoing' && agreement.owner_signature && agreement.tenant_signature) {
-        const propertyUpdateResult = await editProperty(property_id, false, { status: 'occupied' });
+      if (
+        agreementStatus === "ongoing" &&
+        agreement.owner_signature &&
+        agreement.tenant_signature
+      ) {
+        const propertyUpdateResult = await editProperty(property_id, false, {
+          status: "occupied",
+        });
 
         if (propertyUpdateResult.status !== 200) {
           return {
             status: 500,
-            message: 'Agreement approved, but failed to update property status to "occupied".',
+            message:
+              'Agreement approved, but failed to update property status to "occupied".',
           };
         }
       }
@@ -285,15 +300,28 @@ export async function updateAgreement(
         status: 200,
         message: `Agreement has been updated to status: ${agreementStatus}.`,
       };
-    } else if (action === 'editDeposit') {
+    } else if (action === "editDeposit") {
       if (!newDepositStatus) {
-        return { status: 400, message: 'New deposit status is required for editing deposit.' };
+        return {
+          status: 400,
+          message: "New deposit status is required for editing deposit.",
+        };
       }
 
       // Validate the new deposit status
-      const validDepositStatuses = ['pending', 'submitted', 'pending_returned', 'returned'];
+      const validDepositStatuses = [
+        "pending",
+        "submitted",
+        "pending_returned",
+        "returned",
+      ];
       if (!validDepositStatuses.includes(newDepositStatus)) {
-        return { status: 400, message: `Invalid deposit status. Allowed values are: ${validDepositStatuses.join(', ')}.` };
+        return {
+          status: 400,
+          message: `Invalid deposit status. Allowed values are: ${validDepositStatuses.join(
+            ", "
+          )}.`,
+        };
       }
 
       // Call the smart contract to update the deposit status
@@ -320,26 +348,30 @@ export async function updateAgreement(
         message: `Deposit status updated to ${newDepositStatus}.`,
       };
     } else {
-      return { status: 400, message: 'Invalid action. Valid actions are "sign", "approve", or "editDeposit".' };
+      return {
+        status: 400,
+        message:
+          'Invalid action. Valid actions are "sign", "approve", or "editDeposit".',
+      };
     }
   } catch (error) {
-    console.error('Error updating agreement:', error);
-    return { status: 500, message: 'Error updating agreement.' };
+    console.error("Error updating agreement:", error);
+    return { status: 500, message: "Error updating agreement." };
   }
 }
 
-
-
-  
-export async function getAgreementsByUserId(userId: number, userType: 'tenant' | 'owner') {
+export async function getAgreementsByUserId(
+  userId: number,
+  userType: "tenant" | "owner"
+) {
   try {
     // Step 1: Fetch agreements based on the user ID and role from the database
     const agreements = await prisma.agreement.findMany({
       where: {
         proposal: {
           OR: [
-            userType === 'tenant' ? { tenant_id: userId } : {},
-            userType === 'owner' ? { property: { owner_id: userId } } : {},
+            userType === "tenant" ? { tenant_id: userId } : {},
+            userType === "owner" ? { property: { owner_id: userId } } : {},
           ],
         },
       },
@@ -358,7 +390,10 @@ export async function getAgreementsByUserId(userId: number, userType: 'tenant' |
     });
 
     if (!agreements.length) {
-      return { status: 404, message: 'No agreements found for the provided userId.' };
+      return {
+        status: 404,
+        message: "No agreements found for the provided userId.",
+      };
     }
 
     // Step 2: Call the smart contract to fetch hashed agreement details
@@ -386,8 +421,11 @@ export async function getAgreementsByUserId(userId: number, userType: 'tenant' |
 
     return { status: 200, agreements: agreements };
   } catch (error) {
-    console.error('Error fetching agreements:', error);
-    return { status: 500, message: 'Error occurred while fetching agreements.' };
+    console.error("Error fetching agreements:", error);
+    return {
+      status: 500,
+      message: "Error occurred while fetching agreements.",
+    };
   }
 }
 
@@ -411,15 +449,18 @@ export async function getAgreementById(agreementId: number) {
     });
 
     if (!agreement) {
-      return { status: 404, message: 'Agreement not found for the provided agreementId.' };
+      return {
+        status: 404,
+        message: "Agreement not found for the provided agreementId.",
+      };
     }
 
     return { status: 200, agreement };
   } catch (error) {
-    console.error('Error fetching agreement:', error);
-    return { status: 500, message: 'Error occurred while fetching the agreement.' };
+    console.error("Error fetching agreement:", error);
+    return {
+      status: 500,
+      message: "Error occurred while fetching the agreement.",
+    };
   }
 }
-
-
-

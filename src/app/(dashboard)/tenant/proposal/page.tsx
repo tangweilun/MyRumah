@@ -53,6 +53,7 @@ type Agreement = {
 export default function TenantProposalPage() {
   const { data: session } = useSession();
   const tenantId = session?.user.user_id;
+  const userRole = session?.user.role;
   const {
     data: proposal,
     isLoading,
@@ -87,6 +88,25 @@ export default function TenantProposalPage() {
     },
   });
 
+  const tenantSignAgreement = async (agreementId: number) => {
+    try {
+      const response = await fetch(`/api/agreement/${agreementId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "sign",
+          userType: userRole,
+        }),
+      });
+
+      setTenantSignedAgreement(true);
+    } catch (error) {
+      console.error("Error while signing the agreement.");
+    }
+  };
+
   function formatDate(dateString: string) {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-MY", {
@@ -120,7 +140,6 @@ export default function TenantProposalPage() {
   }
 
   if (!proposal?.length) {
-    console.log(proposal?.length);
     // return <EmptyProposalList />;
   }
 
@@ -136,17 +155,19 @@ export default function TenantProposalPage() {
   const viewAgreement = (proposal: Proposal) => {
     setSelectedProposal(proposal);
     setShowAgreement(true);
+    setOwnerSignedAgreement(proposal.agreements[0].owner_signature);
+    setTenantSignedAgreement(proposal.agreements[0].tenant_signature);
   };
 
-  const [ownerSigned, setOwnerSigned] = useState(false);
-  const [tenantSigned, setTenantSigned] = useState(false);
+  const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
+  const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
 
   const ownerSign = () => {
-    setOwnerSigned(true);
+    setOwnerSignedAgreement(true);
   };
 
   const tenantSign = () => {
-    setTenantSigned(true);
+    setTenantSignedAgreement(true);
   };
 
   const agreementConfirmation = () => {
@@ -191,7 +212,9 @@ export default function TenantProposalPage() {
                             variant="outline"
                             size="sm"
                             className="shadow"
-                            onClick={() => viewAgreement(proposal)}
+                            onClick={() => {
+                              viewAgreement(proposal);
+                            }}
                           >
                             View Agreement
                           </Button>
@@ -295,15 +318,17 @@ export default function TenantProposalPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Owner Signature</span>
-                    {selectedProposal?.agreements[0].owner_signature ? (
+                    {ownerSignedAgreement ? (
                       <div className="flex items-center text-green-600">
                         <Check className="h-4 w-4 mr-1" />
                         <span className="text-sm">Signed by Owner</span>
                       </div>
-                    ) : (
+                    ) : userRole === "owner" ? (
                       <Button variant="outline" size="sm" onClick={ownerSign}>
                         Sign as Owner
                       </Button>
+                    ) : (
+                      <div></div>
                     )}
                   </div>
                 </div>
@@ -311,15 +336,33 @@ export default function TenantProposalPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Tenant Signature</span>
-                    {selectedProposal?.agreements[0].tenant_signature ? (
-                      <div className="flex items-center text-green-600">
-                        <Check className="h-4 w-4 mr-1" />
-                        <span className="text-sm">Signed by Tenant</span>
-                      </div>
+                    {ownerSignedAgreement ? (
+                      tenantSignedAgreement ? (
+                        <div className="flex items-center text-green-600">
+                          <Check className="h-4 w-4 mr-1" />
+                          <span className="text-sm">Signed by Tenant</span>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const agreementId =
+                              selectedProposal?.agreements[0]?.agreement_id;
+                            if (agreementId !== undefined) {
+                              tenantSignAgreement(agreementId);
+                            }
+                          }}
+                        >
+                          Sign as Tenant
+                        </Button>
+                      )
                     ) : (
-                      <Button variant="outline" size="sm" onClick={tenantSign}>
-                        Sign as Tenant
-                      </Button>
+                      <div className="flex items-center text-red-600">
+                        <span className="text-xs">
+                          Wait Owner to Sign First
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -330,7 +373,7 @@ export default function TenantProposalPage() {
             <Button
               className="bg-green-700 hover:bg-green-800"
               onClick={agreementConfirmation}
-              disabled={!ownerSigned || !tenantSigned}
+              disabled={!ownerSignedAgreement || !tenantSignedAgreement}
             >
               Comfirm
             </Button>
