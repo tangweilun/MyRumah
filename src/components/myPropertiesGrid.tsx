@@ -21,6 +21,7 @@ type Property = {
 
 export default function MyPropertiesGrid() {
   const { data: session } = useSession();
+  console.log("Session " + session);
   const userId = session?.user.user_id;
   const role = session?.user.role;
   const router = useRouter();

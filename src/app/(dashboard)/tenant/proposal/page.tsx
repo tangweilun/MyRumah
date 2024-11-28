@@ -23,31 +23,35 @@ import { Check, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
-interface Proposal {
+type Proposal = {
   proposal_id: number;
   property_id: number;
   status: string;
   created_date: string;
   modified_date: string;
   property: Property;
-  agreement: Agreement;
-  // amount: number;
-  // agreement?: object;
-  // agreementStatus: string;
-}
-
-interface Property {
+  agreements: Agreement[];
   description: string;
-}
+  rental_fee: number;
+  agreement_status: string;
+};
 
-interface Agreement {
+type Property = {
+  description: string;
+  rental_fee: number;
+};
+
+type Agreement = {
+  agreement_id: number;
   proposal_id: number;
-}
+  agreement_status: string;
+  content: string;
+  tenant_signature: boolean;
+  owner_signature: boolean;
+};
 
 export default function TenantProposalPage() {
   const { data: session } = useSession();
-
-  console.log("Session Data:", session);
   const tenantId = session?.user.user_id;
   const {
     data: proposal,
@@ -63,10 +67,6 @@ export default function TenantProposalPage() {
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch proposals");
-      }
-
       const json = await response.json();
       return json.proposalList.map((proposal: Proposal) => ({
         proposal_id: proposal.proposal_id,
@@ -75,16 +75,28 @@ export default function TenantProposalPage() {
         created_date: proposal.created_date,
         modified_date: proposal.modified_date,
         description: proposal.property?.description,
+        rental_fee: proposal.property?.rental_fee,
+        agreements: proposal.agreements.map((agreement) => ({
+          agreement_id: agreement.agreement_id,
+          agreement_status: agreement.agreement_status,
+          content: agreement.content,
+          tenant_signature: agreement.tenant_signature,
+          owner_signature: agreement.owner_signature,
+        })),
       }));
     },
   });
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("en-MY", {
       year: "numeric",
       month: "short",
       day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
     });
   }
 
@@ -103,6 +115,8 @@ export default function TenantProposalPage() {
   if (isError) {
     console.log("error");
     // return <PropertyError message={"Something went wrong"} />;
+  } else {
+    console.log("success" + proposal);
   }
 
   if (!proposal?.length) {
@@ -110,60 +124,13 @@ export default function TenantProposalPage() {
     // return <EmptyProposalList />;
   }
 
-  // const proposalList: Proposal[] = [
-  //   {
-  //     property: "Cozy Downtown Apartment",
-  //     dateSubmitted: "10/15/2024",
-  //     proposalStatus: "Approved",
-  //     amount: 1200,
-  //     agreementStatus: "Pending",
-  //   },
-  //   {
-  //     property: "Cozy Downtown Apartment",
-  //     dateSubmitted: "10/15/2024",
-  //     proposalStatus: "Pending",
-  //     amount: 1200,
-  //     agreementStatus: "Pending",
-  //   },
-  //   {
-  //     property: "Cozy Downtown Apartment",
-  //     dateSubmitted: "10/15/2024",
-  //     proposalStatus: "Pending",
-  //     amount: 1200,
-  //     agreementStatus: "Pending",
-  //   },
-  //   {
-  //     property: "Cozy Downtown Apartment",
-  //     dateSubmitted: "10/15/2024",
-  //     proposalStatus: "Pending",
-  //     amount: 1200,
-  //     agreementStatus: "Pending",
-  //   },
-  //   {
-  //     property: "Cozy Downtown Apartment",
-  //     dateSubmitted: "10/15/2024",
-  //     proposalStatus: "Pending",
-  //     amount: 1200,
-  //     agreementStatus: "Pending",
-  //   },
-  //   {
-  //     property: "Cozy Downtown Apartment",
-  //     dateSubmitted: "10/15/2024",
-  //     proposalStatus: "Cancelled",
-  //     amount: 1200,
-  //     agreementStatus: "Pending",
-  //   },
-  // ];
-
   const [currentPage, setCurrentPage] = useState(1);
   const paginatedProposals = proposal
     ? getPaginatedItems(proposal, currentPage)
     : [];
 
   const [showAgreement, setShowAgreement] = useState(false);
-  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(
-    null
-  );
+  const [selectedProposal, setSelectedProposal] = useState<Proposal>();
 
   //function to show agreement for selected approved proposal
   const viewAgreement = (proposal: Proposal) => {
@@ -213,12 +180,13 @@ export default function TenantProposalPage() {
                   {paginatedProposals.map((proposal) => (
                     <TableRow key={proposal.proposal_id} className="h-12">
                       <TableCell className="font-medium">
-                        {proposal.property.description}
+                        {proposal.description}
                       </TableCell>
-                      <TableCell>{proposal.created_date}</TableCell>
+                      <TableCell>{formatDate(proposal.created_date)}</TableCell>
                       <TableCell>{proposal.status}</TableCell>
-                      {/* <TableCell>
-                        {proposal.status === "Approved" && (
+                      <TableCell>RM {proposal.rental_fee}</TableCell>
+                      <TableCell>
+                        {proposal.agreements.length > 0 && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -229,12 +197,17 @@ export default function TenantProposalPage() {
                           </Button>
                         )}
                       </TableCell>
-                      <TableCell>{proposal.agreementStatus}</TableCell> */}
-                      <TableCell>
+                      {proposal.agreements.length > 0 &&
+                        proposal.agreements.map((agreement, index) => (
+                          <TableCell key={index}>
+                            {agreement.agreement_status}
+                          </TableCell>
+                        ))}
+                      {/* <TableCell>
                         <Button variant="outline" size="sm" className="shadow">
                           View Details
                         </Button>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -258,7 +231,7 @@ export default function TenantProposalPage() {
               Rental Agreement
             </DialogTitle>
           </DialogHeader>
-          {/* <div className="space-y-6">
+          <div className="space-y-6">
             <div className="rounded-lg border p-4">
               <h3 className="text-lg font-semibold text-green-700 mb-4">
                 Agreement Terms
@@ -268,16 +241,14 @@ export default function TenantProposalPage() {
                 <div>
                   <h4 className="font-semibold mb-2">1. Term of Agreement</h4>
                   <p className="text-gray-600">
-                    This rental agreement is entered into on [Date] between
-                    [Owner Name] and [Tenant Name].
+                    {selectedProposal?.agreements[0].content}
                   </p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold mb-2">2. Property Details</h4>
                   <p className="text-gray-600">
-                    The property located at{" "}
-                    {selectedProposal ? selectedProposal.property : ""}.
+                    {selectedProposal?.description}
                   </p>
                 </div>
 
@@ -286,8 +257,7 @@ export default function TenantProposalPage() {
                     3. Rent and Payment Terms
                   </h4>
                   <p className="text-gray-600">
-                    Monthly rent amount:{" "}
-                    {selectedProposal ? selectedProposal.amount : 0}
+                    Monthly rent amount: {selectedProposal?.rental_fee}
                   </p>
                 </div>
               </div>
@@ -301,72 +271,31 @@ export default function TenantProposalPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Deposit</span>
-                  <span className="font-semibold">
-                    ${selectedProposal ? selectedProposal.amount : 0}
-                  </span>
+                  <span className="font-semibold">$0</span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="font-medium">First Month's Rental</span>
-                  <span className="font-semibold">
-                    ${selectedProposal ? selectedProposal.amount : 0}
-                  </span>
+                  <span className="font-semibold">$0</span>
                 </div>
 
                 <div className="flex justify-between items-center pt-2">
                   <span className="font-semibold">Total Due</span>
-                  <span className="font-bold text-lg">
-                    ${selectedProposal ? selectedProposal.amount * 2 : 0}
-                  </span>
+                  <span className="font-bold text-lg">$0</span>
                 </div>
               </div>
             </div>
 
             <div className="rounded-lg border p-4">
-              <h3 className="text-lg font-semibold text-green-700">
-                Security Deposit Terms
-              </h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Terms and conditions for the security deposit.
-              </p>
-
-              <div className="space-y-4">
-                <p className="text-gray-600">
-                  The security deposit of $
-                  {selectedProposal ? selectedProposal.amount : 0} will be held
-                  in accordance with state law and will be returned within 30
-                  days of lease termination, less any deductions for damages
-                  beyond normal wear and tear.
-                </p>
-
-                <div>
-                  <h4 className="font-semibold mb-2">
-                    Potential Deductions Include:
-                  </h4>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-600">
-                    <li>Unpaid rent or utilities.</li>
-                    <li>Damage to the property byeond normal wear and tear.</li>
-                    <li>
-                      Cleaning costs if property is not left in same condition.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-lg border p-4">
-              <h3 className="text-lg font-semibold text-green-700">
+              <h3 className="text-lg font-semibold text-green-700 mb-4">
                 Signature
               </h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Digital signature confirmation
-              </p>
 
               <div className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Owner Signature</span>
-                    {ownerSigned ? (
+                    {selectedProposal?.agreements[0].owner_signature ? (
                       <div className="flex items-center text-green-600">
                         <Check className="h-4 w-4 mr-1" />
                         <span className="text-sm">Signed by Owner</span>
@@ -382,7 +311,7 @@ export default function TenantProposalPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Tenant Signature</span>
-                    {tenantSigned ? (
+                    {selectedProposal?.agreements[0].tenant_signature ? (
                       <div className="flex items-center text-green-600">
                         <Check className="h-4 w-4 mr-1" />
                         <span className="text-sm">Signed by Tenant</span>
@@ -396,7 +325,7 @@ export default function TenantProposalPage() {
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
           <DialogFooter className="justify-end space-x-3">
             <Button
               className="bg-green-700 hover:bg-green-800"
