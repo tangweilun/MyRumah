@@ -11,7 +11,7 @@ const Owner = () => {
 
   const handleAddProperty = () => {
     setIsLoading(true);
-    router.push("/property/add");
+    router.push("/owner/property/add");
   };
 
   return (

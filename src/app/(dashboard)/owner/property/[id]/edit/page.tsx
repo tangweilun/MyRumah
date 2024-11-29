@@ -135,7 +135,7 @@ const EditProperty = () => {
     },
     onSuccess: () => {
       toast.success("Property updated successfully!");
-      router.push(`/property/${id}`); // Redirect after successful update
+      router.push(`/owner/property/${id}`); // Redirect after successful update
     },
     onError: () => {
       toast.error("Failed to update property.");

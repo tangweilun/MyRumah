@@ -73,7 +73,7 @@ export default function MyPropertiesGrid() {
     setLoadingStates((prev: any) => ({ ...prev, [propertyId]: true }));
 
     try {
-      await router.push(`/property/${propertyId}`);
+      await router.push(`/owner/property/${propertyId}`);
     } finally {
       setLoadingStates((prev) => ({ ...prev, [propertyId]: false }));
     }

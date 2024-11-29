@@ -503,7 +503,9 @@ const SinglePropertyPage = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => router.push(`/property/${proposal.id}`)} // Navigate to the specific property page
+                      onClick={() =>
+                        router.push(`/owner/property/${proposal.id}`)
+                      } // Navigate to the specific property page
                     >
                       View Details
                     </Button>
