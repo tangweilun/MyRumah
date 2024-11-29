@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import LocationSearch from "@/components/LocationSearch";
-import PropertyGrid from "@/components/propertyGrid";
+import PropertyGrid from "@/components/PropertyGrid";
 
 export default function Home() {
   return (

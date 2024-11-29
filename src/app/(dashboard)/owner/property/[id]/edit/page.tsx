@@ -103,20 +103,22 @@ const EditProperty = () => {
     mutationFn: async (data: Partial<Property>) => {
       // Convert existingImages (Buffers) to Base64 format
       const base64Images = existingImages.map((imageBuffer) => {
-        return convertBufferToBase64(imageBuffer); // Convert each Buffer to Base64
+        // If it's a Buffer object with data array
+        if (imageBuffer && imageBuffer.type === "Buffer" && imageBuffer.data) {
+          return `data:image/jpeg;base64,${Buffer.from(
+            imageBuffer.data
+          ).toString("base64")}`;
+        }
+        // If it's already a base64 string
+        if (
+          typeof imageBuffer === "string" &&
+          imageBuffer.startsWith("data:image")
+        ) {
+          return imageBuffer;
+        }
+        return convertBufferToBase64(imageBuffer);
       });
       data.images = base64Images;
-      console.log(data.images);
-      console.log("===================");
-
-      existingImages.forEach((image, index) => {
-        console.log(`Item ${index}:`, image); // Log the item itself
-        console.log(`Type of item ${index}:`, typeof image); // Log the type of the item
-        // If the item is an object, you can further inspect its properties
-        if (typeof image === "object" && image !== null) {
-          console.log(`Properties of item ${index}:`, Object.keys(image)); // Log the keys of the object
-        }
-      });
       data.deleteProperty = false;
 
       const response = await fetch(`/api/property/${id}`, {
@@ -182,32 +184,18 @@ const EditProperty = () => {
   // Function to handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    console.log("Files uploaded:", files); // Log the uploaded files
 
     if (files) {
       const existingFiles = existingImages; // Keep existing image URLs
-      console.log("Existing images before upload:", existingFiles); // Log existing images
-
       const newFiles = Array.from(files);
-      const dataTransfer = new DataTransfer(); // Ensure DataTransfer is instantiated correctly
-
       // Convert new files to Buffer
       const newImageBuffers = await Promise.all(
         newFiles.map(async (file) => {
           const buffer = await convertToBuffer(file);
-          console.log("Converted buffer for file:", file.name, buffer); // Log each converted buffer
           return buffer; // Return the Buffer
         })
       );
-
-      console.log("New image buffers:", newImageBuffers); // Log all new image buffers
-
-      setNewImages(dataTransfer.files); // Update the state with the new FileList
       setExistingImages([...existingFiles, ...newImageBuffers]); // Update existing images for display
-      console.log("Updated existing images:", [
-        ...existingFiles,
-        ...newImageBuffers.map((buffer) => buffer.toString()),
-      ]); // Log updated existing images
     }
   };
 

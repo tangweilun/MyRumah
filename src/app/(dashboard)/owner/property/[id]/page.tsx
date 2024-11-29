@@ -3,17 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { redirect, useParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   Edit2,
   Eye,
   Trash2,
-  Wifi,
-  Car,
-  ChefHat,
-  Camera,
-  Users,
   Bed,
   DollarSign,
   MapPin,
@@ -124,6 +119,7 @@ export function useDeleteProperty(
   setIsHideLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   return useMutation({
     mutationFn: deleteProperty,
     onMutate: () => {
@@ -134,7 +130,7 @@ export function useDeleteProperty(
       queryClient.invalidateQueries({ queryKey: ["properties"] });
       toast.success("Property has been successfully deleted!");
       setIsHideLoading(false);
-      redirect("/owner");
+      router.push(`/owner`);
     },
     onError: (error: Error) => {
       //  toast.error("Failed to delete property. Please try again.");
@@ -144,37 +140,41 @@ export function useDeleteProperty(
 }
 
 export async function hideProperty({ id, property }: HidePropertyParams) {
-  property.status = "inactive";
   const response = await fetch(`/api/property/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(property),
+    body: JSON.stringify({
+      status: "inactive",
+    }),
   });
   return response.json();
 }
 
 export async function unhideProperty({ id, property }: HidePropertyParams) {
-  property.status = "active";
   const response = await fetch(`/api/property/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(property),
+    body: JSON.stringify({
+      status: "active",
+    }),
   });
   return response.json();
 }
 
 export async function deleteProperty({ id, property }: HidePropertyParams) {
-  property.deleteProperty = true;
   const response = await fetch(`/api/property/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(property),
+    body: JSON.stringify({
+      deleteProperty: true,
+      status: "trash",
+    }),
   });
   return response.json();
 }
@@ -449,30 +449,6 @@ const SinglePropertyPage = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Amenities</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Wifi className="h-4 w-4" />
-                    <span>Free WiFi</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Car className="h-4 w-4" />
-                    <span>Free parking</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ChefHat className="h-4 w-4" />
-                    <span>Full Kitchen</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Camera className="h-4 w-4" />
-                    <span>Security cameras</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
           </div>
           <PropertyGallery photos={property?.images || []}></PropertyGallery>
         </TabsContent>

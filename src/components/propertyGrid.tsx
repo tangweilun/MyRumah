@@ -110,7 +110,9 @@ export default function PropertiesGrid() {
           <CardFooter className="p-4 pt-0">
             <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white"
-              onClick={() => router.push(`/property/${property.property_id}`)}
+              onClick={() =>
+                router.push(`/tenant/property/${property.property_id}`)
+              }
             >
               View Details
             </Button>

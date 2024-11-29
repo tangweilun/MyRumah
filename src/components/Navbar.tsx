@@ -5,13 +5,11 @@ import { Button } from "./ui/button";
 import { handleSignOut } from "@/app/actions/authActions";
 
 import { getSession } from "@/lib/getSession";
-import AuthButton from "./ui/AuthButton";
+import AuthButton from "./AuthButton";
+import { NavLink } from "./NavLink";
 
 const Navbar = async () => {
   const session = await getSession();
-  // const router = useRouter();
-  console.log("session using server compoment in nav bar:" + session);
-
   return (
     <div className="flex items-center justify-between h-16 px-16 bg-transparent">
       {/* Logo */}
@@ -26,44 +24,19 @@ const Navbar = async () => {
       <nav className="hidden md:flex items-center gap-2 space-x-4">
         {/* Dynamic Links based on role */}
         {session?.user?.role === "owner" && (
-          <>
-            <Link
-              href={"/owner"}
-              className="text-stone-600 hover:text-green-700"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href={"/list/my-proposals"}
-              className="text-stone-600 hover:text-green-700"
-            >
-              My Proposals
-            </Link>
-            <Link
-              href={"/list/my-tenants"}
-              className="text-stone-600 hover:text-green-700"
-            >
-              My Tenants
-            </Link>
-          </>
+          <div className="flex items-center gap-4">
+            <NavLink href="/owner">Dashboard</NavLink>
+            <NavLink href="/owner/proposal">My Proposals</NavLink>
+          </div>
         )}
         {session?.user?.role === "tenant" && (
-          <>
-            <Link
-              href={"/list/my-proposals"}
-              className="text-stone-600 hover:text-green-700"
-            >
-              My Proposals
-            </Link>
-            <Link
-              href={"/list/wishlist"}
-              className="text-stone-600 hover:text-green-700"
-            >
-              Wishlist
-            </Link>
-          </>
+          <div className="flex items-center gap-4">
+            <NavLink href="/tenant">View Properties</NavLink>
+            <NavLink href="/tenant/proposal">My Proposals</NavLink>
+            <NavLink href="/tenant/fee">Manage Fee</NavLink>
+          </div>
         )}
-        {/* User menu and responsive menu icon */}
+
         <div className="flex items-center gap-6">
           {!session ? (
             <>
@@ -79,37 +52,6 @@ const Navbar = async () => {
           )}
         </div>
       </nav>
-
-      {/* {!isLoading && (
-          <>
-            {!session ? (
-              <div className="flex gap-2 justify-center">
-                <Link href="/auth/sign-in">
-                  <Button
-                    variant="default"
-                    className='text-stone-600 hover:text-green-700"'
-                  >
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/auth/sign-up">
-                  <Button
-                    variant="default"
-                    className='text-stone-600 hover:text-green-700"'
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <form action={handleSignOut}>
-                <Button variant="default" type="submit">
-                  Sign Out
-                </Button>
-              </form>
-            )}
-          </>
-        )} */}
     </div>
   );
 };
