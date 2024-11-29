@@ -32,15 +32,6 @@ export async function GET(
       { status: 401 }
     );
   }
-  // if (userRole !== "owner") {
-  //   return NextResponse.json(
-  //     {
-  //       message:
-  //         "You are forbidden to retrieve proposal list of specific tenant.",
-  //     },
-  //     { status: 403 }
-  //   );
-  // }
   try {
     // const result = await getSpecTenantProposal(tenantId, ownerId, userRole);
     const result = await getSpecTenantProposal(tenantId, parseInt(ownerId));

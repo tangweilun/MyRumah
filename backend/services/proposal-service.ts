@@ -149,6 +149,14 @@ async function getSpecTenantProposal(tenantId: number, ownerId: number) {
         },
       },
       include: {
+        tenant: {
+          select: {
+            user_id: true,
+            username: true,
+            email: true,
+            phone_number: true,
+          },
+        },
         property: true,
         agreements: true,
       },
@@ -179,6 +187,14 @@ async function getSpecProposal(proposalId: number) {
         proposal_id: proposalId,
       },
       include: {
+        tenant: {
+          select: {
+            user_id: true,
+            username: true,
+            email: true,
+            phone_number: true,
+          },
+        },
         property: true,
         agreements: true,
       },
