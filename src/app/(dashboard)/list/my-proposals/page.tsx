@@ -32,6 +32,7 @@ type Proposal = {
   modified_date: string;
   property: Property;
   agreements: Agreement[];
+  tenant: Tenant;
   description: string;
   rental_fee: number;
   agreement_status: string;
@@ -49,6 +50,12 @@ type Agreement = {
   content: string;
   tenant_signature: boolean;
   owner_signature: boolean;
+};
+
+type Tenant = {
+  tenantName: string;
+  tenantEmail: string;
+  tenantPhoneNumber: string;
 };
 
 export default function OwnerProposalPage() {
@@ -78,6 +85,7 @@ export default function OwnerProposalPage() {
         modified_date: proposal.modified_date,
         description: proposal.property?.description,
         rental_fee: proposal.property?.rental_fee,
+        //tenantName: proposal.tenant.tenantName,
         agreements: proposal.agreements.map((agreement) => ({
           agreement_id: agreement.agreement_id,
           agreement_status: agreement.agreement_status,
@@ -105,7 +113,7 @@ export default function OwnerProposalPage() {
     console.log("error");
     // return <PropertyError message={"Something went wrong"} />;
   } else {
-    console.log("success" + proposal);
+    console.log("success" + JSON.stringify(proposal));
   }
 
   if (!proposal?.length) {
@@ -143,8 +151,6 @@ export default function OwnerProposalPage() {
       console.error("Error while signing the agreement.");
     }
   };
-
-  const 
 
   const [currentPage, setCurrentPage] = useState(1);
   const paginatedProposals = proposal
@@ -449,7 +455,7 @@ export default function OwnerProposalPage() {
               <h3 className="text-lg font-semibold">Tenant Information</h3>
               <div className="gap-4">
                 <div className="space-y-2">
-                  <h4 className="font-semibold">{selectedProposal?</h4>
+                  <h4 className="font-semibold"></h4>
                 </div>
               </div>
             </div>
