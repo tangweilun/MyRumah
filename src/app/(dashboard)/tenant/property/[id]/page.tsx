@@ -290,7 +290,7 @@ export default function TenantSingleProperyPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 space-y-6">
+    <div className="min-h-screen bg-stone-50 mx-auto py-8 px-24 space-y-6">
       <div className="space-y-2">
         {/* <h1 className="text-3xl font-bold text-green-700">
           {property?.address}
