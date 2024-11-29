@@ -1,22 +1,19 @@
 import LocationSearch from "@/components/LocationSearch";
-import PropertyGrid from "@/components/PropertyGrid";
+import PropertyGrid from "@/components/propertyGrid";
 
 const TenantPage = () => {
   return (
     <div className="bg-gradient-to-b from-stone-50 to-stone-100">
       {/* Hero section with search */}
-      <div className="bg-green-100 py-8 md:py-16 lg:py-16">
+      <div className="bg-stone-50 py-2 md:py-2 lg:py-2">
         <div className="max-w-xl mx-auto px-4">
-          <h1 className="text-4xl font-bold text-green-900 mb-4 text-center md:text-5xl">
+          <h1 className="text-3xl font-bold text-green-900 mb-4 text-center md:text-5xl">
             Explore Decentralized Rentals with MyRumah
           </h1>
           <p className="text-xl text-green-700 mb-8 text-center md:text-2xl">
             Discover trusted rentals powered by blockchain technology for
             transparent, secure, and hassle-free agreements.
           </p>
-          <div className="flex flex-col md:flex-row shadow-lg rounded-lg overflow-hidden bg-white">
-            <LocationSearch></LocationSearch>
-          </div>
         </div>
       </div>
       {/* Properties listing */}
