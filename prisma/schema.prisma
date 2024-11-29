@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,96 +7,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Userinfo table
-// unique constraint between email and User
-// because one email can at most register two role (two record), cannot have smae email register same role again
-
 model UserInfo {
-  user_id       Int      @id @default(autoincrement())
+  user_id       Int            @id @default(autoincrement())
   username      String
-  password      String // store the hased string after original password + salting
+  password      String
   email         String
   phone_number  String
   role          UserRole
-  wallet_amount Decimal  @db.Decimal(10, 2)
-  created_date  DateTime @default(now())
-  modified_date DateTime @updatedAt
-
-  // get data of table that make reference to this table
-  properties    PropertyInfo[]
-  wishlists     Wishlist[]
-  notifications Notification[]
-  proposals     Proposal[]
-
-  @@unique(name: "emailRole", [email, role])
-}
-
-enum UserRole {
-  tenant
-  owner
-}
-
-// Wishlist table (forming many-to-many relationship with PropertyInfo)
-// Prisma will handle such relationship itself (intermediary table)
-model Wishlist {
-  wishlist_id  Int      @id @default(autoincrement())
-  user_id      Int      @unique // each tenant has only one wishlist
-  created_date DateTime @default(now())
-
-  // relationship field
-  tenant UserInfo @relation(fields: [user_id], references: [user_id])
-
-  // get data of table that make reference to this table
-  properties PropertyInfo[]
-
-  WishlistProperty WishlistProperty[]
-}
-
-// PropertyInfo
-model PropertyInfo {
-  property_id   Int            @id @default(autoincrement())
-  owner_id      Int
-  address       String
-  image         Bytes?
-  description   String
-  occupant_num  Int
-  rental_fee    Decimal        @db.Decimal(10, 2)
-  start_date    DateTime    @db.Date
-  end_date      DateTime      @db.Date
-  status        PropertyStatus
-  created_date  DateTime      @default(now())
+  wallet_amount Decimal        @db.Decimal(10, 2)
+  created_date  DateTime       @default(now())
   modified_date DateTime       @updatedAt
+  notifications Notification[]
+  properties    PropertyInfo[]
+  proposals     Proposal[]
+  wishlists     Wishlist?
 
-  // relationship
-  owner UserInfo @relation(fields: [owner_id], references: [user_id])
+  @@unique([email, role], name: "emailRole")
+}
 
-  // get data of table that make reference to this table
-  proposals        Proposal[]
-  wishlists        Wishlist[]
+model Wishlist {
+  wishlist_id      Int                @id @default(autoincrement())
+  user_id          Int                @unique
+  created_date     DateTime           @default(now())
+  tenant           UserInfo           @relation(fields: [user_id], references: [user_id])
   WishlistProperty WishlistProperty[]
+  properties       PropertyInfo[]     @relation("PropertyInfoToWishlist")
 }
 
-enum PropertyStatus {
-  active
-  inactive
-  occupied
-  trash
+model PropertyInfo {
+  property_id      Int                @id @default(autoincrement())
+  owner_id         Int
+  address          String
+  images           Bytes[] // Change from Bytes? to Bytes[]
+  description      String
+  occupant_num     Int
+  rental_fee       Decimal            @db.Decimal(10, 2)
+  start_date       DateTime           @db.Date
+  end_date         DateTime           @db.Date
+  status           PropertyStatus
+  created_date     DateTime           @default(now())
+  modified_date    DateTime           @updatedAt
+  owner            UserInfo           @relation(fields: [owner_id], references: [user_id])
+  proposals        Proposal[]
+  WishlistProperty WishlistProperty[]
+  wishlists        Wishlist[]         @relation("PropertyInfoToWishlist")
 }
 
-// WishlistProperty table
 model WishlistProperty {
-  wishlist_id Int
-  wishlist    Wishlist @relation(fields: [wishlist_id], references: [wishlist_id])
-
-  property_id Int
-  property    PropertyInfo @relation(fields: [property_id], references: [property_id])
-
-  created_date DateTime @default(now())
+  wishlist_id  Int
+  property_id  Int
+  created_date DateTime     @default(now())
+  property     PropertyInfo @relation(fields: [property_id], references: [property_id])
+  wishlist     Wishlist     @relation(fields: [wishlist_id], references: [wishlist_id])
 
   @@unique([wishlist_id, property_id])
 }
 
-// Proposal table
 model Proposal {
   proposal_id   Int            @id @default(autoincrement())
   tenant_id     Int
@@ -110,27 +70,15 @@ model Proposal {
   status        ProposalStatus
   created_date  DateTime       @default(now())
   modified_date DateTime       @updatedAt
-
-  // relationship
-  tenant   UserInfo     @relation(fields: [tenant_id], references: [user_id])
-  property PropertyInfo @relation(fields: [property_id], references: [property_id])
-
-  // get data of table that make reference to this table
-  agreements Agreement[]
+  agreements    Agreement[]
+  property      PropertyInfo   @relation(fields: [property_id], references: [property_id])
+  tenant        UserInfo       @relation(fields: [tenant_id], references: [user_id])
 }
 
-enum ProposalStatus {
-  pending
-  approved
-  rejected
-  cancelled
-}
-
-// Agreement table
 model Agreement {
-  agreement_id       Int              @id @default(autoincrement()) // Primary key
-  proposal_id        Int // foregin key to proposal table
-  content            String // String type automatically is @db.String
+  agreement_id       Int              @id @default(autoincrement())
+  proposal_id        Int
+  content            String
   deposit            Decimal          @db.Decimal(10, 2)
   deposit_status     DepositStatus
   init_rental_fee    Decimal          @db.Decimal(10, 2)
@@ -140,12 +88,46 @@ model Agreement {
   agreement_status   AgreementStatus
   created_date       DateTime         @default(now())
   modified_date      DateTime         @updatedAt
+  proposal           Proposal         @relation(fields: [proposal_id], references: [proposal_id])
+  rental_fees        RentalFee[]
+}
 
-  // relation to proposal table
-  proposal Proposal @relation(fields: [proposal_id], references: [proposal_id])
+model RentalFee {
+  fee_id        Int             @id @default(autoincrement())
+  agreement_id  Int
+  amount        Decimal         @db.Decimal(10, 2)
+  status        RentalFeeStatus
+  created_date  DateTime        @default(now())
+  modified_date DateTime        @updatedAt
+  agreement     Agreement       @relation(fields: [agreement_id], references: [agreement_id])
+}
 
-  // get data of table that make reference to this table
-  rental_fees RentalFee[]
+model Notification {
+  notif_id    Int                @id @default(autoincrement())
+  receiver_id Int
+  message     String
+  status      NotificationStatus
+  createdDate DateTime           @default(now())
+  user        UserInfo           @relation(fields: [receiver_id], references: [user_id])
+}
+
+enum UserRole {
+  tenant
+  owner
+}
+
+enum PropertyStatus {
+  active
+  inactive
+  occupied
+  trash
+}
+
+enum ProposalStatus {
+  pending
+  approved
+  rejected
+  cancelled
 }
 
 enum DepositStatus {
@@ -167,44 +149,12 @@ enum AgreementStatus {
   expired
 }
 
-// RentalFee table
-model RentalFee {
-  fee_id        Int             @id @default(autoincrement())
-  agreement_id  Int
-  amount        Decimal         @db.Decimal(10, 2)
-  status        RentalFeeStatus
-  created_date  DateTime        @default(now())
-  modified_date DateTime        @updatedAt
-
-  // relationship with Agreement table
-  agreement Agreement @relation(fields: [agreement_id], references: [agreement_id])
-}
-
 enum RentalFeeStatus {
   paid
   pending
-}
-
-// Notification
-model Notification {
-  notif_id    Int                @id @default(autoincrement())
-  receiver_id Int
-  message     String
-  status      NotificationStatus
-  createdDate DateTime           @default(now())
-
-  user UserInfo @relation(fields: [receiver_id], references: [user_id])
 }
 
 enum NotificationStatus {
   read
   unread
 }
-
-// command to run migration
-// 1. Create Migration File Only, Then Apply It
-// npx prisma migrate dev --create-only --name migration_name
-// npx prisma migrate dev
-
-// 2. Create and Apply Migration Immediately
-// npx prisma migrate dev --name migration_name

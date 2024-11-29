@@ -24,18 +24,12 @@ import { Button } from "@/components/ui/button";
 
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { Home } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { getSession } from "@/lib/getSession";
 
 export default function SignIn() {
   const params = useSearchParams();
   const error = params.get("error");
   const router = useRouter();
-  const { data: session } = useSession();
   const [globalError, setGlobalError] = useState<string>("");
-  if (session?.user) {
-    redirect(session.user.role === "tenant" ? "/tenant" : "/owner");
-  }
   useEffect(() => {
     if (error) {
       setGlobalError("An unexpected error occurred. Please try again.");
