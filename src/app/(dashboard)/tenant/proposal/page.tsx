@@ -220,12 +220,10 @@ export default function TenantProposalPage() {
                           </Button>
                         )}
                       </TableCell>
-                      {proposal.agreements.length > 0 &&
-                        proposal.agreements.map((agreement, index) => (
-                          <TableCell key={index}>
-                            {agreement.agreement_status}
-                          </TableCell>
-                        ))}
+                      <TableCell>
+                        {proposal.agreements.length > 0 &&
+                          proposal.agreements[0].agreement_status}
+                      </TableCell>
                       {/* <TableCell>
                         <Button variant="outline" size="sm" className="shadow">
                           View Details
@@ -264,7 +262,7 @@ export default function TenantProposalPage() {
                 <div>
                   <h4 className="font-semibold mb-2">1. Term of Agreement</h4>
                   <p className="text-gray-600">
-                    {selectedProposal?.agreements[0].content}
+                    {selectedProposal?.agreements[0]?.content}
                   </p>
                 </div>
 

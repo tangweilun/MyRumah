@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Check, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
@@ -50,7 +51,7 @@ type Agreement = {
   owner_signature: boolean;
 };
 
-export default function TenantProposalPage() {
+export default function OwnerProposalPage() {
   const { data: session } = useSession();
   const userId = session?.user.user_id;
   const userRole = session?.user.role;
@@ -88,38 +89,6 @@ export default function TenantProposalPage() {
     },
   });
 
-  const tenantSignAgreement = async (agreementId: number) => {
-    try {
-      const response = await fetch(`/api/agreement/${agreementId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "sign",
-          userType: userRole,
-        }),
-      });
-
-      setTenantSignedAgreement(true);
-    } catch (error) {
-      console.error("Error while signing the agreement.");
-    }
-  };
-
-  function formatDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-MY", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    });
-  }
-
   // if (isLoading) {
   //   return (
   //     <div className="p-8">
@@ -143,15 +112,60 @@ export default function TenantProposalPage() {
     // return <EmptyProposalList />;
   }
 
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-MY", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  }
+
+  const approveProposal = async (proposalId: number) => {
+    try {
+      const response = await fetch(`/api/agreement/${proposalId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Id": userId ? userId.toString() : "",
+        },
+        body: JSON.stringify({
+          status: "approved",
+        }),
+      });
+
+      setApprovedProposal(true);
+    } catch (error) {
+      console.error("Error while signing the agreement.");
+    }
+  };
+
+  const 
+
   const [currentPage, setCurrentPage] = useState(1);
   const paginatedProposals = proposal
     ? getPaginatedItems(proposal, currentPage)
     : [];
 
+  const [approvedProposal, setApprovedProposal] = useState(false);
+
+  const isProposalApproved = (proposalStatus: String) => {
+    setApprovedProposal(proposalStatus === "approved");
+  };
+
+  const [showProposalDetails, setShowProposalDetails] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<Proposal>();
 
-  //function to show agreement for selected approved proposal
+  const viewProposal = (proposal: Proposal) => {
+    setSelectedProposal(proposal);
+    setShowProposalDetails(true);
+  };
+
   const viewAgreement = (proposal: Proposal) => {
     setSelectedProposal(proposal);
     setShowAgreement(true);
@@ -162,12 +176,23 @@ export default function TenantProposalPage() {
   const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
   const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
 
-  const ownerSign = () => {
-    setOwnerSignedAgreement(true);
-  };
+  const tenantSignAgreement = async (agreementId: number) => {
+    try {
+      const response = await fetch(`/api/agreement/${agreementId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "sign",
+          userType: userRole,
+        }),
+      });
 
-  const tenantSign = () => {
-    setTenantSignedAgreement(true);
+      setTenantSignedAgreement(true);
+    } catch (error) {
+      console.error("Error while signing the agreement.");
+    }
   };
 
   const agreementConfirmation = () => {
@@ -180,7 +205,7 @@ export default function TenantProposalPage() {
         <div className="items-start justify-between p-6">
           <div>
             <h1 className="text-3xl font-bold text-green-900 mb-4">
-              Your Proposals
+              My Proposals
             </h1>
           </div>
           <Card>
@@ -194,6 +219,7 @@ export default function TenantProposalPage() {
                     <TableHead>Amount</TableHead>
                     <TableHead>Agreement</TableHead>
                     <TableHead>Agreement Status</TableHead>
+                    <TableHead></TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -210,7 +236,7 @@ export default function TenantProposalPage() {
                         {proposal.agreements.length > 0 && (
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="default"
                             className="shadow"
                             onClick={() => {
                               viewAgreement(proposal);
@@ -220,17 +246,30 @@ export default function TenantProposalPage() {
                           </Button>
                         )}
                       </TableCell>
-                      {proposal.agreements.length > 0 &&
-                        proposal.agreements.map((agreement, index) => (
-                          <TableCell key={index}>
-                            {agreement.agreement_status}
-                          </TableCell>
-                        ))}
-                      {/* <TableCell>
-                        <Button variant="outline" size="sm" className="shadow">
+                      <TableCell>
+                        {proposal.agreements.length > 0 &&
+                          proposal.agreements[0].agreement_status}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="default"
+                          className="shadow"
+                          onClick={() => viewProposal(proposal)}
+                        >
                           View Details
                         </Button>
-                      </TableCell> */}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="default"
+                          className="bg-green-700 hover:bg-green-800 text-white shadow"
+                        >
+                          <Check className="h-2 w-2 mr-1" />
+                          <span className="">Approve</span>
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -264,7 +303,7 @@ export default function TenantProposalPage() {
                 <div>
                   <h4 className="font-semibold mb-2">1. Term of Agreement</h4>
                   <p className="text-gray-600">
-                    {selectedProposal?.agreements[0].content}
+                    {selectedProposal?.agreements[0]?.content}
                   </p>
                 </div>
 
@@ -324,9 +363,10 @@ export default function TenantProposalPage() {
                         <span className="text-sm">Signed by Owner</span>
                       </div>
                     ) : userRole === "owner" ? (
-                      <Button variant="outline" size="sm" onClick={ownerSign}>
-                        Sign as Owner
-                      </Button>
+                      // <Button variant="outline" size="sm" onClick={ownerSign}>
+                      //   Sign as Owner
+                      // </Button>
+                      <div></div>
                     ) : (
                       <div></div>
                     )}
@@ -378,6 +418,42 @@ export default function TenantProposalPage() {
               Comfirm
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showProposalDetails} onOpenChange={setShowProposalDetails}>
+        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="relative mt-4">
+            <DialogTitle className="text-xl font-bold text-green-700 mb-4 ml-3">
+              Proposal Details
+            </DialogTitle>
+            <Badge
+              variant="secondary"
+              className={`absolute top-0 right-0 ${
+                selectedProposal?.status === "approved"
+                  ? "bg-green-50 text-green-700"
+                  : selectedProposal?.status === "pending"
+                  ? "bg-yellow-50 text-yellow-700"
+                  : selectedProposal?.status === "rejected"
+                  ? "bg-red-50 text-red-700"
+                  : selectedProposal?.status === "cancelled"
+                  ? "bg-gray-50 text-gray-700"
+                  : ""
+              }`}
+            >
+              {selectedProposal?.status}
+            </Badge>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Tenant Information</h3>
+              <div className="gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-semibold">{selectedProposal?</h4>
+                </div>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
