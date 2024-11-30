@@ -27,6 +27,7 @@ const Navbar = async () => {
           <div className="flex items-center gap-4">
             <NavLink href="/owner">Dashboard</NavLink>
             <NavLink href="/owner/proposal">My Proposals</NavLink>
+            <NavLink href="/owner/my-tenant">My Tenants</NavLink>
           </div>
         )}
         {session?.user?.role === "tenant" && (
