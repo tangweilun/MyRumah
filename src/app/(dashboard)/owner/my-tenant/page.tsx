@@ -137,6 +137,13 @@ const MyTenantPage = () => {
             }
             onRetry={() => refetch()}
           />
+        ) : tenantList && tenantList.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-xl text-gray-600">No tenants found.</p>
+            <p className="text-sm text-gray-500">
+              You currently don't have any tenants assigned to your account.
+            </p>
+          </div>
         ) : (
           <Card>
             <CardContent className="py-2">
