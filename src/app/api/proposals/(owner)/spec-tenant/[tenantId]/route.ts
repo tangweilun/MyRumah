@@ -35,6 +35,7 @@ export async function GET(
   try {
     // const result = await getSpecTenantProposal(tenantId, ownerId, userRole);
     const result = await getSpecTenantProposal(tenantId, parseInt(ownerId));
+    console.log(result.status);
     if (result.status === 200) {
       return NextResponse.json({
         status: result.status,

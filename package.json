@@ -54,7 +54,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "15.0.2",
-    "hardhat": "^2.22.16",
+    "hardhat": "^0.0.7",
     "html-loader": "^5.1.0",
     "postcss": "^8",
     "prisma": "^6.0.0",
