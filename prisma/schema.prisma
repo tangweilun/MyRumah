@@ -158,3 +158,12 @@ enum NotificationStatus {
   read
   unread
 }
+
+
+// command to run migration
+// 1. Create Migration File Only, Then Apply It
+// npx prisma migrate dev --create-only --name migration_name
+// npx prisma migrate dev
+
+// 2. Create and Apply Migration Immediately
+// npx prisma migrate dev --name migration_name
