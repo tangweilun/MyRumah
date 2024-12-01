@@ -1,5 +1,5 @@
-import { createProperty } from '@backend/services/property-service';
-import { NextResponse } from 'next/server';
+import { createProperty } from "@backend/services/property-service";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
@@ -22,24 +22,24 @@ export async function POST(req: Request) {
     if (!propertyData) {
       return NextResponse.json({
         status: 400,
-        message: 'Missing property information.',
+        message: "Missing property information.",
       });
     }
 
     // Validate the images field
     if (
       !Array.isArray(propertyData.images) ||
-      propertyData.images.some((img) => typeof img !== 'string')
+      propertyData.images.some((img) => typeof img !== "string")
     ) {
       return NextResponse.json({
         status: 400,
-        message: 'Invalid or missing images.',
+        message: "Invalid or missing images.",
       });
     }
 
     // Convert the base64 images to an array of Buffers
     const imageBuffers = propertyData.images.map((imageBase64) =>
-      Buffer.from(imageBase64.split(',')[1], 'base64')
+      Buffer.from(imageBase64.split(",")[1], "base64")
     );
 
     const result = await createProperty(
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         status: result.status,
         property: result.property,
-        message: 'Property created successfully!',
+        message: "Property created successfully!",
       });
     } else if (result.status === 400) {
       return NextResponse.json({
@@ -72,15 +72,13 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
     return NextResponse.json(
-      { message: 'Error occurred while processing POST request' },
+      { message: "Error occurred while processing POST request" },
       { status: 500 }
     );
   }
 }
-
-
 
 import { getPropertiesByUser } from "@backend/services/property-service";
 import { getAllProperties } from "@backend/services/property-service";
@@ -92,7 +90,7 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const userId = url.searchParams.get("userId");
     const role = url.searchParams.get("role"); // 'owner' or 'tenant'
-
+    const location = url.searchParams.get("location");
     console.log(userId);
     console.log(role);
 
@@ -100,7 +98,7 @@ export async function GET(req: Request) {
 
     if (!userId && !role) {
       // Guest: Fetch all properties
-      properties = await getAllProperties();
+      properties = await getAllProperties(location ? location : undefined);
     } else if (!userId || !role) {
       // Invalid combination of userId or role
       return new Response(
@@ -118,14 +116,8 @@ export async function GET(req: Request) {
     return new Response(JSON.stringify({ properties }), { status: 200 });
   } catch (error) {
     console.error("Error in GET request:", error);
-    return new Response(
-      JSON.stringify({ message: "Internal server error." }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ message: "Internal server error." }), {
+      status: 500,
+    });
   }
 }
-
-
-
-
-
