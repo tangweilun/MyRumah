@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,98 +27,57 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 
 interface Fee {
-  property: string;
-  dueDate?: string;
-  paidOn?: string;
   amount: number;
   status?: string;
   receiptNo?: string;
+  created_date?: string;
+  modified_date?: string;
+  dueDate?: string;
 }
 
 export default function FeeManagementPage() {
-  const pendingFees: Fee[] = [
-    {
-      property: "Cozy Downtown Apartment",
-      dueDate: "1/15/2024",
-      amount: 1200,
-      status: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dueDate: "1/15/2024",
-      amount: 1200,
-      status: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dueDate: "1/15/2024",
-      amount: 1200,
-      status: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dueDate: "1/15/2024",
-      amount: 1200,
-      status: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dueDate: "1/15/2024",
-      amount: 1200,
-      status: "Pending",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      dueDate: "1/15/2024",
-      amount: 1200,
-      status: "Pending",
-    },
-  ];
-
-  const paymentHistory: Fee[] = [
-    {
-      property: "Cozy Downtown Apartment",
-      paidOn: "12/15/2024",
-      amount: 1200,
-      receiptNo: "RCP-2023-001",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      paidOn: "12/15/2024",
-      amount: 1200,
-      receiptNo: "RCP-2023-001",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      paidOn: "12/15/2024",
-      amount: 1200,
-      receiptNo: "RCP-2023-001",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      paidOn: "12/15/2024",
-      amount: 1200,
-      receiptNo: "RCP-2023-001",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      paidOn: "12/15/2024",
-      amount: 1200,
-      receiptNo: "RCP-2023-001",
-    },
-    {
-      property: "Cozy Downtown Apartment",
-      paidOn: "12/15/2024",
-      amount: 1200,
-      receiptNo: "RCP-2023-001",
-    },
-  ];
-
   const [pendingFeesPage, setPendingFeesPage] = useState(1);
   const [paymentHistoryPage, setPaymentHistoryPage] = useState(1);
   const itemsPerPage = 5;
+  const { data: session } = useSession();
+  const userId = session?.user?.user_id;
+
+  const {
+    data: feeList,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery<Fee[]>({
+    queryKey: ["feeList"],
+    queryFn: async () => {
+      const response = await fetch(`/api/rental-fee`, {
+        method: "GET",
+        headers: {
+          "User-Id": userId ? String(userId) : "",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch fees");
+      }
+      const json = await response.json();
+      return json.feeList.map((fee: Fee) => ({
+        ...fee,
+      }));
+    },
+  });
+
+  const pendingFees = useMemo(() => {
+    return feeList?.filter((fee) => fee.status === "pending") || [];
+  }, [feeList]);
+
+  const paymentHistory = useMemo(() => {
+    return feeList?.filter((fee) => fee.status === "paid") || [];
+  }, [feeList]);
 
   const getPaginatedItems = (items: Fee[], currentPage: number) => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -209,7 +168,6 @@ export default function FeeManagementPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Property</TableHead>
                         <TableHead>Due Date</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
@@ -220,9 +178,6 @@ export default function FeeManagementPage() {
                       {getPaginatedItems(pendingFees, pendingFeesPage).map(
                         (fee, index) => (
                           <TableRow key={index}>
-                            <TableCell className="font-medium">
-                              {fee.property}
-                            </TableCell>
                             <TableCell>{fee.dueDate}</TableCell>
                             <TableCell>${fee.amount}</TableCell>
                             <TableCell>
@@ -280,17 +235,8 @@ export default function FeeManagementPage() {
                         paymentHistoryPage
                       ).map((fee, index) => (
                         <TableRow key={index}>
-                          <TableCell className="font-medium">
-                            {fee.property}
-                          </TableCell>
-                          <TableCell>{fee.paidOn}</TableCell>
+                          <TableCell>{fee.modified_date}</TableCell>
                           <TableCell>${fee.amount}</TableCell>
-                          <TableCell>{fee.receiptNo}</TableCell>
-                          <TableCell className="text-right">
-                            <Button className="bg-green-700 hover:bg-green-800">
-                              View Receipt
-                            </Button>
-                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -322,20 +268,11 @@ export default function FeeManagementPage() {
                 </DialogTitle>
               </DialogHeader>
               <div className="mb-6 w-full space-y-4 text-left">
-                <div className="flex justify-between border-b pb-2">
-                  <span className="text-gray-500">Transaction ID</span>
-                  <span className="font-medium">TXN123456789</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="text-gray-500">Property</span>
-                  <span className="font-medium">
-                    {selectedPendingFee.property}
-                  </span>
-                </div>
+                <div className="flex justify-between border-b pb-2"></div>
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-gray-500">Amount Paid</span>
                   <span className="font-medium">
-                    ${selectedPendingFee.amount.toFixed(2)}
+                    ${Number(selectedPendingFee.amount).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between border-b pb-2">
