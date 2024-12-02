@@ -53,6 +53,7 @@ type Agreement = {
 export default function TenantProposalPage() {
   const { data: session } = useSession();
   const userId = session?.user.user_id;
+  console.log(userId);
   const userRole = session?.user.role;
   const {
     data: proposal,

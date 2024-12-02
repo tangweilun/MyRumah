@@ -127,7 +127,9 @@ CREATE TABLE "Notification" (
 -- CreateTable
 CREATE TABLE "_PropertyInfoToWishlist" (
     "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "B" INTEGER NOT NULL,
+
+    CONSTRAINT "_PropertyInfoToWishlist_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateIndex
@@ -138,9 +140,6 @@ CREATE UNIQUE INDEX "Wishlist_user_id_key" ON "Wishlist"("user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "WishlistProperty_wishlist_id_property_id_key" ON "WishlistProperty"("wishlist_id", "property_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "_PropertyInfoToWishlist_AB_unique" ON "_PropertyInfoToWishlist"("A", "B");
 
 -- CreateIndex
 CREATE INDEX "_PropertyInfoToWishlist_B_index" ON "_PropertyInfoToWishlist"("B");

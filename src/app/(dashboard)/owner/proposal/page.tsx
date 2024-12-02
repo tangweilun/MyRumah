@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Search } from "lucide-react";
+import { Check, Search, Mail, Phone, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -33,13 +33,11 @@ type Proposal = {
   property: Property;
   agreements: Agreement[];
   tenant: Tenant;
-  description: string;
-  rental_fee: number;
-  agreement_status: string;
 };
 
 type Property = {
   description: string;
+  address: string;
   rental_fee: number;
 };
 
@@ -53,9 +51,10 @@ type Agreement = {
 };
 
 type Tenant = {
-  tenantName: string;
-  tenantEmail: string;
-  tenantPhoneNumber: string;
+  user_id: number;
+  username: string;
+  email: string;
+  phone_number: string;
 };
 
 export default function OwnerProposalPage() {
@@ -83,9 +82,7 @@ export default function OwnerProposalPage() {
         status: proposal.status,
         created_date: proposal.created_date,
         modified_date: proposal.modified_date,
-        description: proposal.property?.description,
-        rental_fee: proposal.property?.rental_fee,
-        //tenantName: proposal.tenant.tenantName,
+        property: proposal.property,
         agreements: proposal.agreements.map((agreement) => ({
           agreement_id: agreement.agreement_id,
           agreement_status: agreement.agreement_status,
@@ -133,6 +130,31 @@ export default function OwnerProposalPage() {
     });
   }
 
+  const getTenantDetails = async (proposalId: number) => {
+    try {
+      const response = await fetch(`/api/proposals/${proposalId}`, {
+        method: "GET",
+        headers: {
+          "User-Id": userId ? userId.toString() : "",
+        },
+      });
+      const json = await response.json();
+
+      const tenantInformation = json.specProposal.tenant;
+
+      const tenant: Tenant = {
+        user_id: tenantInformation.user_id,
+        username: tenantInformation.username,
+        email: tenantInformation.email,
+        phone_number: tenantInformation.phone_number,
+      };
+
+      return tenant;
+    } catch (error) {
+      console.log("Error while getting tenant information.");
+    }
+  };
+
   const approveProposal = async (proposalId: number) => {
     try {
       const response = await fetch(`/api/agreement/${proposalId}`, {
@@ -166,10 +188,14 @@ export default function OwnerProposalPage() {
   const [showProposalDetails, setShowProposalDetails] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<Proposal>();
+  const [tenant, setTenant] = useState<Tenant>();
 
-  const viewProposal = (proposal: Proposal) => {
+  const viewProposal = async (proposal: Proposal) => {
     setSelectedProposal(proposal);
     setShowProposalDetails(true);
+
+    const tenant = await getTenantDetails(proposal.proposal_id);
+    setTenant(tenant);
   };
 
   const viewAgreement = (proposal: Proposal) => {
@@ -233,11 +259,11 @@ export default function OwnerProposalPage() {
                   {paginatedProposals.map((proposal) => (
                     <TableRow key={proposal.proposal_id} className="h-12">
                       <TableCell className="font-medium">
-                        {proposal.description}
+                        {proposal.property?.description}
                       </TableCell>
                       <TableCell>{formatDate(proposal.created_date)}</TableCell>
                       <TableCell>{proposal.status}</TableCell>
-                      <TableCell>RM {proposal.rental_fee}</TableCell>
+                      <TableCell>RM {proposal.property?.rental_fee}</TableCell>
                       <TableCell>
                         {proposal.agreements.length > 0 && (
                           <Button
@@ -316,7 +342,7 @@ export default function OwnerProposalPage() {
                 <div>
                   <h4 className="font-semibold mb-2">2. Property Details</h4>
                   <p className="text-gray-600">
-                    {selectedProposal?.description}
+                    {selectedProposal?.property.description}
                   </p>
                 </div>
 
@@ -325,7 +351,7 @@ export default function OwnerProposalPage() {
                     3. Rent and Payment Terms
                   </h4>
                   <p className="text-gray-600">
-                    Monthly rent amount: {selectedProposal?.rental_fee}
+                    Monthly rent amount: {selectedProposal?.property.rental_fee}
                   </p>
                 </div>
               </div>
@@ -430,7 +456,7 @@ export default function OwnerProposalPage() {
       <Dialog open={showProposalDetails} onOpenChange={setShowProposalDetails}>
         <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
           <DialogHeader className="relative mt-4">
-            <DialogTitle className="text-xl font-bold text-green-700 mb-4 ml-3">
+            <DialogTitle className="text-xl font-bold text-green-700 mb-4">
               Proposal Details
             </DialogTitle>
             <Badge
@@ -451,11 +477,43 @@ export default function OwnerProposalPage() {
             </Badge>
           </DialogHeader>
           <div className="space-y-6">
-            <div className="space-y-4">
+            <div className="space-y-4 rounded-lg border p-4">
               <h3 className="text-lg font-semibold">Tenant Information</h3>
-              <div className="gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-semibold"></h4>
+              <h4 className="font-semibold">{tenant?.username}</h4>
+              <div className="space-y-1 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span>{tenant?.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span>{tenant?.phone_number}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border p-4">
+              <h3 className="text-lg font-semibold">Property Details</h3>
+              <h4 className="font-semibold">
+                {selectedProposal?.property.description}
+              </h4>
+              <div className="space-y-1 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{selectedProposal?.property.address}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border p-4">
+              <h3 className="text-lg font-semibold">Lease Terms</h3>
+              <h4 className="font-semibold">
+                {selectedProposal?.property.description}
+              </h4>
+              <div className="space-y-1 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{selectedProposal?.property.address}</span>
                 </div>
               </div>
             </div>
