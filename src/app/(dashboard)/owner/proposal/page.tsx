@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Check,
+  X,
   Search,
   Mail,
   Phone,
@@ -56,6 +57,8 @@ type Agreement = {
   proposal_id: number;
   agreement_status: string;
   content: string;
+  deposit: number;
+  init_rental_fee: number;
   tenant_signature: boolean;
   owner_signature: boolean;
 };
@@ -76,7 +79,7 @@ export default function OwnerProposalPage() {
     isLoading,
     isError,
   } = useQuery<Proposal[]>({
-    queryKey: ["proposals"],
+    queryKey: ["ownerProposals"],
     queryFn: async () => {
       const response = await fetch(`/api/proposals`, {
         method: "GET",
@@ -98,11 +101,14 @@ export default function OwnerProposalPage() {
           agreement_id: agreement.agreement_id,
           agreement_status: agreement.agreement_status,
           content: agreement.content,
+          deposit: agreement.deposit,
+          init_rental_fee: agreement.init_rental_fee,
           tenant_signature: agreement.tenant_signature,
           owner_signature: agreement.owner_signature,
         })),
       }));
     },
+    gcTime: 0,
   });
 
   // if (isLoading) {
@@ -169,6 +175,25 @@ export default function OwnerProposalPage() {
       });
 
       createAgreement(proposalId);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error while approving the proposal.");
+    }
+  };
+
+  const rejectProposal = async (proposalId: number) => {
+    try {
+      const response = await fetch(`/api/proposals/${proposalId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Id": userId ? userId.toString() : "",
+        },
+        body: JSON.stringify({
+          status: "rejected",
+        }),
+      });
+
       window.location.reload();
     } catch (error) {
       console.error("Error while approving the proposal.");
@@ -428,10 +453,22 @@ export default function OwnerProposalPage() {
                 <Check className="h-4 w-4 mr-1" />
                 <span>Approved</span>
               </div>
+            ) : selectedProposal?.status === "rejected" ? (
+              <div className="flex items-center text-red-600">
+                <X className="h-4 w-4 mr-1" />
+                <span>Rejected</span>
+              </div>
             ) : (
               <div className="flex gap-3 sm:gap-2">
                 {" "}
-                <Button variant="destructive" className="flex-1 sm:flex-none">
+                <Button
+                  variant="destructive"
+                  className="flex-1 sm:flex-none"
+                  onClick={() =>
+                    selectedProposal &&
+                    rejectProposal(selectedProposal?.proposal_id)
+                  }
+                >
                   Reject Proposal
                 </Button>
                 <Button
@@ -496,17 +533,25 @@ export default function OwnerProposalPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Deposit</span>
-                  <span className="font-semibold">$0</span>
+                  <span className="font-semibold">
+                    RM{selectedProposal?.agreements[0].deposit}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="font-medium">First Month's Rental</span>
-                  <span className="font-semibold">$0</span>
+                  <span className="font-semibold">
+                    RM{selectedProposal?.agreements[0].init_rental_fee}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center pt-2">
                   <span className="font-semibold">Total Due</span>
-                  <span className="font-bold text-lg">$0</span>
+                  <span className="font-bold text-lg">
+                    RM
+                    {selectedProposal?.agreements[0].deposit} +
+                    {selectedProposal?.agreements[0].init_rental_fee}
+                  </span>
                 </div>
               </div>
             </div>
@@ -527,7 +572,6 @@ export default function OwnerProposalPage() {
                       </div>
                     ) : (
                       <div>
-                        {" "}
                         <Button
                           variant="outline"
                           size="sm"

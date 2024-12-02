@@ -14,7 +14,6 @@ export async function POST(req: Request) {
     }
 
     const result = await createAgreement(proposalId);
-    console.log("status: " + result.status);
 
     if (result.status === 200) {
       return NextResponse.json({
