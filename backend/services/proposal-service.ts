@@ -253,15 +253,11 @@ async function createProposal(tenantId: number, propertyId: number) {
   try {
     // check current date and start date of property
     const isPropertyExpired = await chkPropertyExpiration(propertyId);
-    if (
-      !isPropertyExpired ||
-      isPropertyExpired.status !== 200 ||
-      isPropertyExpired.isExpired === null
-    ) {
-      return { status: isPropertyExpired?.status ?? 500 };
+    if (!isPropertyExpired || isPropertyExpired.isExpired === null) {
+      return { status: 500 };
     }
     if (isPropertyExpired.isExpired === true) {
-      return { status: isPropertyExpired.status };
+      return { status: 400 };
     }
     // check property status
     const propertyStatus = await chkPropertyStatus(propertyId);
@@ -362,13 +358,8 @@ async function updateProposalStatus(
     const isPropertyExpired = await chkPropertyExpiration(
       currProposal.property_id
     );
-    if (
-      !isPropertyExpired ||
-      isPropertyExpired.status !== 200 ||
-      isPropertyExpired.isExpired === null
-    ) {
-      console.log(isPropertyExpired);
-      return { status: isPropertyExpired?.status ?? 500 };
+    if (!isPropertyExpired || isPropertyExpired.isExpired === null) {
+      return { status: 500 };
     }
     if (isPropertyExpired.isExpired === true) {
       const cancelledStatus = "cancelled";
