@@ -251,8 +251,6 @@ async function createFee(agreementId: number) {
       createdDate: fee.created_date.toString(),
     }));
 
-    console.log(fees);
-
     const createFeeTx = await rentalFeeContract.createFee(fees);
 
     console.log(createFeeTx);
