@@ -19,7 +19,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Search, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Check,
+  Search,
+  Mail,
+  Phone,
+  MapPin,
+  CalendarDays,
+  DollarSign,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -39,6 +47,8 @@ type Property = {
   description: string;
   address: string;
   rental_fee: number;
+  start_date: string;
+  end_date: string;
 };
 
 type Agreement = {
@@ -155,25 +165,6 @@ export default function OwnerProposalPage() {
     }
   };
 
-  const approveProposal = async (proposalId: number) => {
-    try {
-      const response = await fetch(`/api/agreement/${proposalId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Id": userId ? userId.toString() : "",
-        },
-        body: JSON.stringify({
-          status: "approved",
-        }),
-      });
-
-      setApprovedProposal(true);
-    } catch (error) {
-      console.error("Error while signing the agreement.");
-    }
-  };
-
   const [currentPage, setCurrentPage] = useState(1);
   const paginatedProposals = proposal
     ? getPaginatedItems(proposal, currentPage)
@@ -196,6 +187,25 @@ export default function OwnerProposalPage() {
 
     const tenant = await getTenantDetails(proposal.proposal_id);
     setTenant(tenant);
+  };
+
+  const approveProposal = async (proposalId: number) => {
+    try {
+      const response = await fetch(`/api/agreement/${proposalId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Id": userId ? userId.toString() : "",
+        },
+        body: JSON.stringify({
+          status: "approved",
+        }),
+      });
+
+      setApprovedProposal(true);
+    } catch (error) {
+      console.error("Error while signing the agreement.");
+    }
   };
 
   const viewAgreement = (proposal: Proposal) => {
@@ -296,7 +306,7 @@ export default function OwnerProposalPage() {
                         <Button
                           variant="outline"
                           size="default"
-                          className="bg-green-700 hover:bg-green-800 text-white shadow"
+                          className="bg-green-600 hover:bg-green-700 text-white shadow"
                         >
                           <Check className="h-2 w-2 mr-1" />
                           <span className="">Approve</span>
@@ -456,7 +466,7 @@ export default function OwnerProposalPage() {
       <Dialog open={showProposalDetails} onOpenChange={setShowProposalDetails}>
         <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
           <DialogHeader className="relative mt-4">
-            <DialogTitle className="text-xl font-bold text-green-700 mb-4">
+            <DialogTitle className="text-2xl font-bold text-green-700 mb-4">
               Proposal Details
             </DialogTitle>
             <Badge
@@ -476,6 +486,7 @@ export default function OwnerProposalPage() {
               {selectedProposal?.status}
             </Badge>
           </DialogHeader>
+
           <div className="space-y-6">
             <div className="space-y-4 rounded-lg border p-4">
               <h3 className="text-lg font-semibold">Tenant Information</h3>
@@ -507,17 +518,46 @@ export default function OwnerProposalPage() {
 
             <div className="space-y-4 rounded-lg border p-4">
               <h3 className="text-lg font-semibold">Lease Terms</h3>
-              <h4 className="font-semibold">
-                {selectedProposal?.property.description}
-              </h4>
-              <div className="space-y-1 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{selectedProposal?.property.address}</span>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CalendarDays className="h-4 w-4 text-gray-500" />
+                    <span>Start Date</span>
+                  </div>
+                  <span className="text-sm">
+                    {formatDate(selectedProposal?.property.start_date || "")}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CalendarDays className="h-4 w-4 text-gray-500" />
+                    <span>End Date</span>
+                  </div>
+                  <span className="text-sm">
+                    {formatDate(selectedProposal?.property.end_date || "")}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <DollarSign className="h-4 w-4 text-gray-500" />
+                    <span>Monthly Rent</span>
+                  </div>
+                  <span className="text-sm">
+                    RM {selectedProposal?.property.rental_fee}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
+
+          <DialogFooter className="flex gap-3 sm:gap-0">
+            <Button variant="destructive" className="flex-1 sm:flex-none">
+              Reject Proposal
+            </Button>
+            <Button className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700">
+              Approve Proposal
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
