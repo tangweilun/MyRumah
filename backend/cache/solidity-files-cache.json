@@ -1,9 +1,45 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\Chunk\\Documents\\GitHub\\MyRumah\\backend\\contracts\\Lock.sol": {
-      "lastModificationDate": 1731308718499,
-      "contentHash": "101c00cb43bd6d4be9704e08c973d5ad",
+    "C:\\Users\\WyFong\\Documents\\GitHub\\MyRumah\\backend\\contracts\\AgreementContract.sol": {
+      "lastModificationDate": 1732716456811,
+      "contentHash": "9cdcdcf8447d50dbc12059d37e4ba354",
+      "sourceName": "contracts/AgreementContract.sol",
+      "solcConfig": {
+        "version": "0.8.27",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AgreementContract"
+      ]
+    },
+    "C:\\Users\\WyFong\\Documents\\GitHub\\MyRumah\\backend\\contracts\\Lock.sol": {
+      "lastModificationDate": 1732512587862,
+      "contentHash": "1da7c271214aff7ac25799dbcbca36be",
       "sourceName": "contracts/Lock.sol",
       "solcConfig": {
         "version": "0.8.27",
@@ -37,8 +73,8 @@
         "Lock"
       ]
     },
-    "C:\\Users\\Chunk\\Documents\\GitHub\\MyRumah\\backend\\contracts\\RentalFee.sol": {
-      "lastModificationDate": 1732345286817,
+    "C:\\Users\\WyFong\\Documents\\GitHub\\MyRumah\\backend\\contracts\\RentalFee.sol": {
+      "lastModificationDate": 1732512587862,
       "contentHash": "7f8c2cb6ca22aaa16f3732198981cc0d",
       "sourceName": "contracts/RentalFee.sol",
       "solcConfig": {
@@ -73,8 +109,8 @@
         "RentalFee"
       ]
     },
-    "C:\\Users\\Chunk\\Documents\\GitHub\\MyRumah\\backend\\contracts\\User.sol": {
-      "lastModificationDate": 1732345286818,
+    "C:\\Users\\WyFong\\Documents\\GitHub\\MyRumah\\backend\\contracts\\User.sol": {
+      "lastModificationDate": 1732512587864,
       "contentHash": "73c649578bbbdf5232e9628331fd5229",
       "sourceName": "contracts/User.sol",
       "solcConfig": {
@@ -107,42 +143,6 @@
       ],
       "artifacts": [
         "User"
-      ]
-    },
-    "C:\\Users\\Chunk\\Documents\\GitHub\\MyRumah\\backend\\contracts\\AgreementContract.sol": {
-      "lastModificationDate": 1732371382563,
-      "contentHash": "9cdcdcf8447d50dbc12059d37e4ba354",
-      "sourceName": "contracts/AgreementContract.sol",
-      "solcConfig": {
-        "version": "0.8.27",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "AgreementContract"
       ]
     }
   }

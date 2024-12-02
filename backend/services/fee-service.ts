@@ -251,8 +251,6 @@ async function createFee(agreementId: number) {
       createdDate: fee.created_date.toString(),
     }));
 
-    console.log(fees);
-
     const createFeeTx = await rentalFeeContract.createFee(fees);
 
     console.log(createFeeTx);
@@ -332,6 +330,9 @@ async function payFee(feeId: number, userId: number) {
     };
 
     const payFeeTx = await rentalFeeContract.payFee(fee);
+    console.log(payFeeTx);
+    // console.log(payFeeTx);
+
     return { status: 200, paidFee: paidFee };
   } catch (error) {
     console.error("Error in paying rental fee: ", error);
