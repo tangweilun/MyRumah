@@ -255,7 +255,7 @@ export default function AddProperty() {
                     name="rentalFee"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Monthly Price ($)</FormLabel>
+                        <FormLabel>Monthly Price (RM)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
