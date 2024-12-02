@@ -25,7 +25,7 @@ async function chkUserRole(
 
 async function chkPropertyExpiration(
   propertyId: number
-): Promise<{ status: number; isExpired: boolean | null }> {
+): Promise<{ isExpired: boolean | null }> {
   try {
     const property = await prisma.propertyInfo.findUnique({
       where: {
@@ -37,16 +37,16 @@ async function chkPropertyExpiration(
     });
 
     if (!property) {
-      return { status: 404, isExpired: null };
+      return { isExpired: null };
     }
 
     if (new Date() > property.start_date) {
-      return { status: 400, isExpired: true };
+      return { isExpired: true };
     }
-    return { status: 200, isExpired: false };
+    return { isExpired: false };
   } catch (error) {
     console.error("Error in retrieving property from database: ", error);
-    return { status: 500, isExpired: null };
+    return { isExpired: null };
   }
 }
 
