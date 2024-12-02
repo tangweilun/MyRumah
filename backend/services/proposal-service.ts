@@ -39,6 +39,14 @@ async function getAllProposal(userId: number) {
       // },
     },
     include: {
+      tenant: {
+        select: {
+          user_id: true,
+          username: true,
+          email: true,
+          phone_number: true,
+        },
+      },
       // relation name: property
       property: {
         select: {
@@ -46,6 +54,8 @@ async function getAllProposal(userId: number) {
           description: true,
           occupant_num: true,
           rental_fee: true,
+          start_date: true,
+          end_date: true,
           // relation name : owner
           owner: {
             select: {
@@ -69,6 +79,14 @@ async function getAllProposal(userId: number) {
       },
     },
     include: {
+      tenant: {
+        select: {
+          user_id: true,
+          username: true,
+          email: true,
+          phone_number: true,
+        },
+      },
       // relation name: property
       property: {
         select: {
@@ -76,6 +94,8 @@ async function getAllProposal(userId: number) {
           description: true,
           occupant_num: true,
           rental_fee: true,
+          start_date: true,
+          end_date: true,
           // relation name : owner
           owner: {
             select: {
