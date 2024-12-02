@@ -390,21 +390,15 @@ async function updateProposalStatus(
         return { status: 400 };
       }
       isRelated = await chkUserProposalRelation(proposalId, userId, userRole);
-      console.log("tenant");
-      console.log(isRelated);
     } else if (userRole === UserRole.owner) {
-      console.log(888);
       if (
         proposalStatus !== ProposalStatus.approved &&
         proposalStatus !== ProposalStatus.rejected
       ) {
-        console.log(22222);
         // owner can only change status from pending to approved/rejected, not others
         return { status: 400 };
       }
       isRelated = await chkUserProposalRelation(proposalId, userId, userRole);
-      console.log("owner");
-      console.log(isRelated);
     }
 
     if (!isRelated) {

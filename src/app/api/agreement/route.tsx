@@ -1,6 +1,6 @@
-import { createAgreement } from '@backend/services/agreement-service';
-import { getAgreementsByUserId } from '@backend/services/agreement-service';
-import { NextResponse } from 'next/server';
+import { createAgreement } from "@backend/services/agreement-service";
+import { getAgreementsByUserId } from "@backend/services/agreement-service";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
@@ -9,17 +9,18 @@ export async function POST(req: Request) {
     if (!proposalId) {
       return NextResponse.json({
         status: 400,
-        message: 'Proposal ID is required.',
+        message: "Proposal ID is required.",
       });
     }
 
     const result = await createAgreement(proposalId);
+    console.log("status: " + result.status);
 
     if (result.status === 200) {
       return NextResponse.json({
         status: result.status,
         agreement: result.agreement,
-        message: 'Agreement created successfully!',
+        message: "Agreement created successfully!",
       });
     } else if (result.status === 400 || result.status === 404) {
       return NextResponse.json({
@@ -33,9 +34,9 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
-    console.error('Error processing POST request:', error);
+    console.error("Error processing POST request:", error);
     return NextResponse.json(
-      { message: 'Error occurred while processing request.' },
+      { message: "Error occurred while processing request." },
       { status: 500 }
     );
   }
@@ -44,22 +45,25 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = parseInt(searchParams.get('userId') || '');
-    const userType = searchParams.get('userType');
+    const userId = parseInt(searchParams.get("userId") || "");
+    const userType = searchParams.get("userType");
 
     if (!userId || !userType) {
       return NextResponse.json({
         status: 400,
-        message: 'Both userId and userType are required.',
+        message: "Both userId and userType are required.",
       });
     }
 
-    const result = await getAgreementsByUserId(userId, userType as 'tenant' | 'owner');
+    const result = await getAgreementsByUserId(
+      userId,
+      userType as "tenant" | "owner"
+    );
 
     if (!result) {
       return NextResponse.json({
         status: 404,
-        message: 'No agreements found.',
+        message: "No agreements found.",
       });
     }
 
@@ -75,11 +79,10 @@ export async function GET(req: Request) {
       });
     }
   } catch (error) {
-    console.error('Error in GET /api/agreements:', error);
+    console.error("Error in GET /api/agreements:", error);
     return NextResponse.json(
-      { message: 'Error occurred while processing the request.' },
+      { message: "Error occurred while processing the request." },
       { status: 500 }
     );
   }
 }
-
