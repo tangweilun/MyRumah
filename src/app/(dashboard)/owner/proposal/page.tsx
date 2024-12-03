@@ -618,7 +618,8 @@ export default function OwnerProposalPage() {
             </div>
           </div>
           <DialogFooter className="mt-4 flex justify-end">
-            {tenantPaidDeposit ? (
+            {tenantPaidDeposit && (
+              depositReturned ? (<p className="text-green-600">Deposit Returned</p>) : (
               <Button
                 variant="default"
                 className="bg-green-600 hover:bg-green-700 text-white"
@@ -632,8 +633,6 @@ export default function OwnerProposalPage() {
               >
                 Return Deposit
               </Button>
-            ) : (
-              ""
             )}
           </DialogFooter>
         </DialogContent>
