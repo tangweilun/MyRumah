@@ -61,6 +61,7 @@ type Agreement = {
   init_rental_fee: number;
   tenant_signature: boolean;
   owner_signature: boolean;
+  deposit_status: string;
 };
 
 type Tenant = {
@@ -103,6 +104,7 @@ export default function OwnerProposalPage() {
           agreement_status: agreement.agreement_status,
           content: agreement.content,
           deposit: agreement.deposit,
+          deposit_status: agreement.deposit_status,
           init_rental_fee: agreement.init_rental_fee,
           tenant_signature: agreement.tenant_signature,
           owner_signature: agreement.owner_signature,
@@ -155,6 +157,9 @@ export default function OwnerProposalPage() {
   const [showProposalDetails, setShowProposalDetails] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<Proposal>();
+  const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
+  const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
+  const [tenantPaidDeposit, setTenantPaidDeposit] = useState(false);
 
   const viewProposal = async (proposal: Proposal) => {
     setSelectedProposal(proposal);
@@ -221,10 +226,8 @@ export default function OwnerProposalPage() {
     setShowAgreement(true);
     setOwnerSignedAgreement(proposal.agreements[0].owner_signature);
     setTenantSignedAgreement(proposal.agreements[0].tenant_signature);
+    setTenantPaidDeposit(proposal.agreements[0].deposit_status === "submitted");
   };
-
-  const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
-  const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
 
   const ownerSignAgreement = async (agreementId: number) => {
     try {
@@ -242,6 +245,26 @@ export default function OwnerProposalPage() {
       setOwnerSignedAgreement(true);
     } catch (error) {
       console.error("Error while signing the agreement.");
+    }
+  };
+
+  const ownerReturnDeposit = async (agreementId: number) => {
+    try {
+      const response = await fetch(`/api/deposit/pay-deposit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          agreementId: agreementId,
+          userId: userId,
+          userRole: userRole,
+        }),
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Error occurred while returning deposit.");
     }
   };
 
@@ -538,6 +561,10 @@ export default function OwnerProposalPage() {
                   </span>
                 </div>
               </div>
+
+              {tenantPaidDeposit && (
+                <div className="mt-4 flex justify-end text-green-600">Paid</div>
+              )}
             </div>
 
             <div className="rounded-lg border p-4">
@@ -590,6 +617,25 @@ export default function OwnerProposalPage() {
               </div>
             </div>
           </div>
+          <DialogFooter className="mt-4 flex justify-end">
+            {tenantPaidDeposit ? (
+              <Button
+                variant="default"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => {
+                  const agreementId =
+                    selectedProposal?.agreements[0]?.agreement_id;
+                  if (agreementId !== undefined) {
+                    ownerReturnDeposit(agreementId);
+                  }
+                }}
+              >
+                Return Deposit
+              </Button>
+            ) : (
+              ""
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
