@@ -212,9 +212,7 @@ export default function TenantProposalPage() {
         return;
       }
 
-      console.log(8888);
       const result = await response.json();
-      console.log("Result Status: " + result.status);
 
       if (result.status === 200) {
         try {
@@ -231,12 +229,10 @@ export default function TenantProposalPage() {
           window.location.reload();
         } catch (error) {
           console.error("Error while approving the agreement.");
-          console.log(7777);
         }
       }
     } catch (error) {
       console.error("Error occurred while paying deposit.");
-      console.log(9999);
     }
   };
 
