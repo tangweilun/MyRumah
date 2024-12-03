@@ -19,7 +19,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Search, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Check,
+  X,
+  Search,
+  Mail,
+  Phone,
+  MapPin,
+  CalendarDays,
+  DollarSign,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -39,6 +48,8 @@ type Property = {
   description: string;
   address: string;
   rental_fee: number;
+  start_date: string;
+  end_date: string;
 };
 
 type Agreement = {
@@ -46,6 +57,8 @@ type Agreement = {
   proposal_id: number;
   agreement_status: string;
   content: string;
+  deposit: number;
+  init_rental_fee: number;
   tenant_signature: boolean;
   owner_signature: boolean;
 };
@@ -58,9 +71,10 @@ type Tenant = {
 };
 
 export default function OwnerProposalPage() {
-  const { data: session } = useSession();
-  const userId = session?.user.user_id;
-  const userRole = session?.user.role;
+  const { data: ownerSession } = useSession();
+  const userId = ownerSession?.user.user_id;
+  const userRole = ownerSession?.user.role;
+
   const {
     data: proposal,
     isLoading,
@@ -83,10 +97,13 @@ export default function OwnerProposalPage() {
         created_date: proposal.created_date,
         modified_date: proposal.modified_date,
         property: proposal.property,
+        tenant: proposal.tenant,
         agreements: proposal.agreements.map((agreement) => ({
           agreement_id: agreement.agreement_id,
           agreement_status: agreement.agreement_status,
           content: agreement.content,
+          deposit: agreement.deposit,
+          init_rental_fee: agreement.init_rental_fee,
           tenant_signature: agreement.tenant_signature,
           owner_signature: agreement.owner_signature,
         })),
@@ -114,7 +131,7 @@ export default function OwnerProposalPage() {
   }
 
   if (!proposal?.length) {
-    // return <EmptyProposalList />;
+    console.log("empty proposal");
   }
 
   function formatDate(dateString: string) {
@@ -130,34 +147,23 @@ export default function OwnerProposalPage() {
     });
   }
 
-  const getTenantDetails = async (proposalId: number) => {
-    try {
-      const response = await fetch(`/api/proposals/${proposalId}`, {
-        method: "GET",
-        headers: {
-          "User-Id": userId ? userId.toString() : "",
-        },
-      });
-      const json = await response.json();
+  const [currentPage, setCurrentPage] = useState(1);
+  const paginatedProposals = proposal
+    ? getPaginatedItems(proposal, currentPage)
+    : [];
 
-      const tenantInformation = json.specProposal.tenant;
+  const [showProposalDetails, setShowProposalDetails] = useState(false);
+  const [showAgreement, setShowAgreement] = useState(false);
+  const [selectedProposal, setSelectedProposal] = useState<Proposal>();
 
-      const tenant: Tenant = {
-        user_id: tenantInformation.user_id,
-        username: tenantInformation.username,
-        email: tenantInformation.email,
-        phone_number: tenantInformation.phone_number,
-      };
-
-      return tenant;
-    } catch (error) {
-      console.log("Error while getting tenant information.");
-    }
+  const viewProposal = async (proposal: Proposal) => {
+    setSelectedProposal(proposal);
+    setShowProposalDetails(true);
   };
 
   const approveProposal = async (proposalId: number) => {
     try {
-      const response = await fetch(`/api/agreement/${proposalId}`, {
+      const response = await fetch(`/api/proposals/${proposalId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -168,34 +174,46 @@ export default function OwnerProposalPage() {
         }),
       });
 
-      setApprovedProposal(true);
+      createAgreement(proposalId);
+      window.location.reload();
     } catch (error) {
-      console.error("Error while signing the agreement.");
+      console.error("Error while approving the proposal.");
     }
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const paginatedProposals = proposal
-    ? getPaginatedItems(proposal, currentPage)
-    : [];
+  const rejectProposal = async (proposalId: number) => {
+    try {
+      const response = await fetch(`/api/proposals/${proposalId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Id": userId ? userId.toString() : "",
+        },
+        body: JSON.stringify({
+          status: "rejected",
+        }),
+      });
 
-  const [approvedProposal, setApprovedProposal] = useState(false);
-
-  const isProposalApproved = (proposalStatus: String) => {
-    setApprovedProposal(proposalStatus === "approved");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error while approving the proposal.");
+    }
   };
 
-  const [showProposalDetails, setShowProposalDetails] = useState(false);
-  const [showAgreement, setShowAgreement] = useState(false);
-  const [selectedProposal, setSelectedProposal] = useState<Proposal>();
-  const [tenant, setTenant] = useState<Tenant>();
-
-  const viewProposal = async (proposal: Proposal) => {
-    setSelectedProposal(proposal);
-    setShowProposalDetails(true);
-
-    const tenant = await getTenantDetails(proposal.proposal_id);
-    setTenant(tenant);
+  const createAgreement = async (proposalId: number) => {
+    try {
+      const response = await fetch(`/api/agreement`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          proposalId: proposalId,
+        }),
+      });
+    } catch (error) {
+      console.error("Error while creating agreement.");
+    }
   };
 
   const viewAgreement = (proposal: Proposal) => {
@@ -208,7 +226,7 @@ export default function OwnerProposalPage() {
   const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
   const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
 
-  const tenantSignAgreement = async (agreementId: number) => {
+  const ownerSignAgreement = async (agreementId: number) => {
     try {
       const response = await fetch(`/api/agreement/${agreementId}`, {
         method: "POST",
@@ -221,14 +239,10 @@ export default function OwnerProposalPage() {
         }),
       });
 
-      setTenantSignedAgreement(true);
+      setOwnerSignedAgreement(true);
     } catch (error) {
       console.error("Error while signing the agreement.");
     }
-  };
-
-  const agreementConfirmation = () => {
-    setShowAgreement(false);
   };
 
   return (
@@ -247,11 +261,10 @@ export default function OwnerProposalPage() {
                   <TableRow className="h-12">
                     <TableHead>Property</TableHead>
                     <TableHead>Date Submitted</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Proposal Status</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Agreement</TableHead>
                     <TableHead>Agreement Status</TableHead>
-                    <TableHead></TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -262,7 +275,24 @@ export default function OwnerProposalPage() {
                         {proposal.property?.description}
                       </TableCell>
                       <TableCell>{formatDate(proposal.created_date)}</TableCell>
-                      <TableCell>{proposal.status}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={`${
+                            proposal.status === "approved"
+                              ? "bg-green-50 text-green-700"
+                              : proposal.status === "pending"
+                              ? "bg-yellow-50 text-yellow-700"
+                              : proposal.status === "rejected"
+                              ? "bg-red-50 text-red-700"
+                              : proposal.status === "cancelled"
+                              ? "bg-gray-50 text-gray-700"
+                              : ""
+                          }`}
+                        >
+                          {proposal.status.toUpperCase()}
+                        </Badge>
+                      </TableCell>
                       <TableCell>RM {proposal.property?.rental_fee}</TableCell>
                       <TableCell>
                         {proposal.agreements.length > 0 && (
@@ -279,8 +309,28 @@ export default function OwnerProposalPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {proposal.agreements.length > 0 &&
-                          proposal.agreements[0].agreement_status}
+                        {proposal.agreements.length > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className={`${
+                              proposal.agreements[0].agreement_status ===
+                              "ongoing"
+                                ? "bg-green-50 text-green-700"
+                                : proposal.agreements[0].agreement_status ===
+                                  "pending"
+                                ? "bg-yellow-50 text-yellow-700"
+                                : proposal.agreements[0].agreement_status ===
+                                  "expired"
+                                ? "bg-red-50 text-red-700"
+                                : proposal.agreements[0].agreement_status ===
+                                  "completed"
+                                ? "bg-gray-50 text-gray-700"
+                                : ""
+                            }`}
+                          >
+                            {proposal.agreements[0].agreement_status.toUpperCase()}
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -290,16 +340,6 @@ export default function OwnerProposalPage() {
                           onClick={() => viewProposal(proposal)}
                         >
                           View Details
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="default"
-                          className="bg-green-700 hover:bg-green-800 text-white shadow"
-                        >
-                          <Check className="h-2 w-2 mr-1" />
-                          <span className="">Approve</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -317,6 +357,134 @@ export default function OwnerProposalPage() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={showProposalDetails} onOpenChange={setShowProposalDetails}>
+        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="relative mt-4">
+            <DialogTitle className="text-2xl font-bold text-green-700 mb-4">
+              Proposal Details
+            </DialogTitle>
+            <Badge
+              variant="secondary"
+              className={`absolute top-0 right-0 ${
+                selectedProposal?.status === "approved"
+                  ? "bg-green-50 text-green-700"
+                  : selectedProposal?.status === "pending"
+                  ? "bg-yellow-50 text-yellow-700"
+                  : selectedProposal?.status === "rejected"
+                  ? "bg-red-50 text-red-700"
+                  : selectedProposal?.status === "cancelled"
+                  ? "bg-gray-50 text-gray-700"
+                  : ""
+              }`}
+            >
+              {selectedProposal?.status.toUpperCase()}
+            </Badge>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="space-y-4 rounded-lg border p-4">
+              <h3 className="text-lg font-semibold">Tenant Information</h3>
+              <h4 className="font-semibold">
+                {selectedProposal?.tenant.username}
+              </h4>
+              <div className="space-y-1 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span>{selectedProposal?.tenant.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span>{selectedProposal?.tenant.phone_number}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border p-4">
+              <h3 className="text-lg font-semibold">Property Details</h3>
+              <h4 className="font-semibold">
+                {selectedProposal?.property.description}
+              </h4>
+              <div className="space-y-1 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{selectedProposal?.property.address}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border p-4">
+              <h3 className="text-lg font-semibold">Lease Terms</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CalendarDays className="h-4 w-4 text-gray-500" />
+                    <span>Start Date</span>
+                  </div>
+                  <span className="text-sm">
+                    {formatDate(selectedProposal?.property.start_date || "")}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CalendarDays className="h-4 w-4 text-gray-500" />
+                    <span>End Date</span>
+                  </div>
+                  <span className="text-sm">
+                    {formatDate(selectedProposal?.property.end_date || "")}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <DollarSign className="h-4 w-4 text-gray-500" />
+                    <span>Monthly Rent</span>
+                  </div>
+                  <span className="text-sm">
+                    RM {selectedProposal?.property.rental_fee}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            {selectedProposal?.status === "approved" ? (
+              <div className="flex items-center text-green-600">
+                <Check className="h-4 w-4 mr-1" />
+                <span>Approved</span>
+              </div>
+            ) : selectedProposal?.status === "rejected" ? (
+              <div className="flex items-center text-red-600">
+                <X className="h-4 w-4 mr-1" />
+                <span>Rejected</span>
+              </div>
+            ) : (
+              <div className="flex gap-3 sm:gap-2">
+                {" "}
+                <Button
+                  variant="destructive"
+                  className="flex-1 sm:flex-none"
+                  onClick={() =>
+                    selectedProposal &&
+                    rejectProposal(selectedProposal?.proposal_id)
+                  }
+                >
+                  Reject Proposal
+                </Button>
+                <Button
+                  className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700"
+                  onClick={() =>
+                    selectedProposal &&
+                    approveProposal(selectedProposal?.proposal_id)
+                  }
+                >
+                  Approve Proposal
+                </Button>
+              </div>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showAgreement} onOpenChange={setShowAgreement}>
         <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
@@ -359,23 +527,15 @@ export default function OwnerProposalPage() {
 
             <div className="rounded-lg border p-4">
               <h3 className="text-lg font-semibold text-green-700 mb-4">
-                Initial Fee Payment
+                Deposit
               </h3>
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Deposit</span>
-                  <span className="font-semibold">$0</span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">First Month's Rental</span>
-                  <span className="font-semibold">$0</span>
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <span className="font-semibold">Total Due</span>
-                  <span className="font-bold text-lg">$0</span>
+                  <span className="font-semibold">
+                    RM{selectedProposal?.agreements[0]?.deposit}
+                  </span>
                 </div>
               </div>
             </div>
@@ -394,27 +554,8 @@ export default function OwnerProposalPage() {
                         <Check className="h-4 w-4 mr-1" />
                         <span className="text-sm">Signed by Owner</span>
                       </div>
-                    ) : userRole === "owner" ? (
-                      // <Button variant="outline" size="sm" onClick={ownerSign}>
-                      //   Sign as Owner
-                      // </Button>
-                      <div></div>
                     ) : (
-                      <div></div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Tenant Signature</span>
-                    {ownerSignedAgreement ? (
-                      tenantSignedAgreement ? (
-                        <div className="flex items-center text-green-600">
-                          <Check className="h-4 w-4 mr-1" />
-                          <span className="text-sm">Signed by Tenant</span>
-                        </div>
-                      ) : (
+                      <div>
                         <Button
                           variant="outline"
                           size="sm"
@@ -422,98 +563,29 @@ export default function OwnerProposalPage() {
                             const agreementId =
                               selectedProposal?.agreements[0]?.agreement_id;
                             if (agreementId !== undefined) {
-                              tenantSignAgreement(agreementId);
+                              ownerSignAgreement(agreementId);
                             }
                           }}
                         >
-                          Sign as Tenant
+                          Sign as Owner
                         </Button>
-                      )
-                    ) : (
-                      <div className="flex items-center text-red-600">
-                        <span className="text-xs">
-                          Wait Owner to Sign First
-                        </span>
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="justify-end space-x-3">
-            <Button
-              className="bg-green-700 hover:bg-green-800"
-              onClick={agreementConfirmation}
-              disabled={!ownerSignedAgreement || !tenantSignedAgreement}
-            >
-              Comfirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      <Dialog open={showProposalDetails} onOpenChange={setShowProposalDetails}>
-        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader className="relative mt-4">
-            <DialogTitle className="text-xl font-bold text-green-700 mb-4">
-              Proposal Details
-            </DialogTitle>
-            <Badge
-              variant="secondary"
-              className={`absolute top-0 right-0 ${
-                selectedProposal?.status === "approved"
-                  ? "bg-green-50 text-green-700"
-                  : selectedProposal?.status === "pending"
-                  ? "bg-yellow-50 text-yellow-700"
-                  : selectedProposal?.status === "rejected"
-                  ? "bg-red-50 text-red-700"
-                  : selectedProposal?.status === "cancelled"
-                  ? "bg-gray-50 text-gray-700"
-                  : ""
-              }`}
-            >
-              {selectedProposal?.status}
-            </Badge>
-          </DialogHeader>
-          <div className="space-y-6">
-            <div className="space-y-4 rounded-lg border p-4">
-              <h3 className="text-lg font-semibold">Tenant Information</h3>
-              <h4 className="font-semibold">{tenant?.username}</h4>
-              <div className="space-y-1 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <span>{tenant?.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>{tenant?.phone_number}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4 rounded-lg border p-4">
-              <h3 className="text-lg font-semibold">Property Details</h3>
-              <h4 className="font-semibold">
-                {selectedProposal?.property.description}
-              </h4>
-              <div className="space-y-1 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{selectedProposal?.property.address}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4 rounded-lg border p-4">
-              <h3 className="text-lg font-semibold">Lease Terms</h3>
-              <h4 className="font-semibold">
-                {selectedProposal?.property.description}
-              </h4>
-              <div className="space-y-1 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{selectedProposal?.property.address}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Tenant Signature</span>
+                    {tenantSignedAgreement ? (
+                      <div className="flex items-center text-green-600">
+                        <Check className="h-4 w-4 mr-1" />
+                        <span className="text-sm">Signed by Tenant</span>
+                      </div>
+                    ) : (
+                      <div></div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

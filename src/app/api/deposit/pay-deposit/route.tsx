@@ -1,5 +1,5 @@
-import { payDeposit } from '@backend/services/deposit-service'; // Adjust path as needed
-import { NextResponse } from 'next/server';
+import { payDeposit } from "@backend/services/deposit-service"; // Adjust path as needed
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
@@ -9,12 +9,12 @@ export async function POST(req: Request) {
     if (!agreementId || !userId || !userRole) {
       return NextResponse.json({
         status: 400,
-        message: 'Agreement ID, User ID, and User Role are required.',
+        message: "Agreement ID, User ID, and User Role are required.",
       });
     }
 
     // Validate userRole value
-    if (userRole !== 'tenant' && userRole !== 'owner') {
+    if (userRole !== "tenant" && userRole !== "owner") {
       return NextResponse.json({
         status: 400,
         message: 'Invalid user role. Must be "tenant" or "owner".',
@@ -23,6 +23,7 @@ export async function POST(req: Request) {
 
     // Call the payDeposit function
     const result = await payDeposit(agreementId, userId, userRole);
+    console.log(result);
 
     // Handle response based on the service result
     if (result.status === 200) {
@@ -42,9 +43,9 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
-    console.error('Error processing POST request for deposit:', error);
+    console.error("Error processing POST request for deposit:", error);
     return NextResponse.json(
-      { message: 'Error occurred while processing deposit request.' },
+      { message: "Error occurred while processing deposit request." },
       { status: 500 }
     );
   }

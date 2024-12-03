@@ -123,6 +123,7 @@ export default {
         token.id = user.id as string;
         token.user_id = user.user_id as number;
         token.role = user.role as string;
+        token.iat = Date.now();
       }
       if (trigger === "update" && session) {
         token = { ...token, ...session };
