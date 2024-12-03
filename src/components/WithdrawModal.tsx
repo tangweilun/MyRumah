@@ -32,7 +32,7 @@ export async function withdrawWallet({ userId, walletAmount }: WithdrawParams) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      walletAsdfmount: walletAmount,
+      walletAmount: walletAmount,
       walletAction: "deduct",
     }),
   });
