@@ -109,7 +109,6 @@ export default function TenantProposalPage() {
         })),
       }));
     },
-    gcTime: 0,
   });
 
   function formatDate(dateString: string) {
@@ -156,6 +155,8 @@ export default function TenantProposalPage() {
   const [showProposalDetails, setShowProposalDetails] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<Proposal>();
+  const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
+  const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
 
   const viewProposal = async (proposal: Proposal) => {
     setSelectedProposal(proposal);
@@ -184,29 +185,57 @@ export default function TenantProposalPage() {
       });
 
       setTenantSignedAgreement(true);
-
-      try {
-        const response = await fetch(`/api/proposals/${agreementId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "approve",
-          }),
-        });
-
-        window.location.reload();
-      } catch (error) {
-        console.error("Error while approving the agreement.");
-      }
     } catch (error) {
-      console.error("Error while signing the agreement.");
+      console.error("Error occurred while signing the agreement.");
     }
   };
 
-  const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
-  const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
+  const tenantPayDeposit = async (agreementId: number) => {
+    try {
+      const response = await fetch(`/api/deposit/pay-deposit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          agreementId: agreementId,
+          userId: userId,
+          userRole: userRole,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("API call failed with status:", response.status);
+        return;
+      }
+
+      console.log(8888);
+      const result = await response.json();
+      console.log("Result Status: " + result.status);
+
+      if (result.status === 200) {
+        try {
+          const response = await fetch(`/api/agreement/${agreementId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "approve",
+            }),
+          });
+
+          window.location.reload();
+        } catch (error) {
+          console.error("Error while approving the agreement.");
+          console.log(7777);
+        }
+      }
+    } catch (error) {
+      console.error("Error occurred while paying deposit.");
+      console.log(9999);
+    }
+  };
 
   return (
     <div>
@@ -464,7 +493,8 @@ export default function TenantProposalPage() {
                     3. Rent and Payment Terms
                   </h4>
                   <p className="text-gray-600">
-                    Monthly rent amount: {selectedProposal?.property.rental_fee}
+                    Monthly rent amount: RM
+                    {selectedProposal?.property.rental_fee}
                   </p>
                 </div>
               </div>
@@ -472,32 +502,14 @@ export default function TenantProposalPage() {
 
             <div className="rounded-lg border p-4">
               <h3 className="text-lg font-semibold text-green-700 mb-4">
-                Initial Fee Payment
+                Deposit
               </h3>
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Deposit</span>
                   <span className="font-semibold">
-                    RM{selectedProposal?.agreements[0].deposit}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">First Month's Rental</span>
-                  <span className="font-semibold">
-                    RM{selectedProposal?.agreements[0].init_rental_fee}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <span className="font-semibold">Total Due</span>
-                  <span className="font-bold text-lg">
-                    RM
-                    {selectedProposal?.agreements[0]
-                      ? Number(selectedProposal?.agreements[0].deposit) +
-                        Number(selectedProposal?.agreements[0].init_rental_fee)
-                      : ""}
+                    RM{selectedProposal?.agreements[0]?.deposit}
                   </span>
                 </div>
               </div>
@@ -562,6 +574,23 @@ export default function TenantProposalPage() {
               </div>
             </div>
           </div>
+          {tenantSignedAgreement && (
+            <DialogFooter className="mt-4 flex justify-end">
+              <Button
+                variant="default"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => {
+                  const agreementId =
+                    selectedProposal?.agreements[0]?.agreement_id;
+                  if (agreementId !== undefined) {
+                    tenantPayDeposit(agreementId);
+                  }
+                }}
+              >
+                Pay Deposit
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </div>

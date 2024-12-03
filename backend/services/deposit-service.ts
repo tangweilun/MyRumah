@@ -2,7 +2,7 @@ import { updateAgreement } from "../services/agreement-service";
 import { topupWallet } from "../services/wallet-service";
 import { deductWallet } from "../services/wallet-service";
 import { Decimal } from "@prisma/client/runtime/library";
-import { PrismaClient } from '@prisma/client'; // Adjust based on your project structure
+import { PrismaClient } from "@prisma/client"; // Adjust based on your project structure
 // import { Decimal } from "@prisma/client/runtime"; // For handling decimals
 const prisma = new PrismaClient();
 async function processDeposit(agreementId: number) {
@@ -15,7 +15,7 @@ async function processDeposit(agreementId: number) {
         proposal: {
           include: {
             property: true, // Include property details to access `end_date`
-            tenant: true,   // Include tenant details
+            tenant: true, // Include tenant details
           },
         },
       },
@@ -38,7 +38,10 @@ async function processDeposit(agreementId: number) {
     const endDate = new Date(agreement.proposal.property.end_date);
 
     // If the end date is reached and deposit_status is not already pending_returned
-    if (currentDate >= endDate && agreement.deposit_status !== "pending_returned") {
+    if (
+      currentDate >= endDate &&
+      agreement.deposit_status !== "pending_returned"
+    ) {
       const updateResponse = await updateAgreement(
         agreementId,
         "editDeposit",
@@ -47,20 +50,27 @@ async function processDeposit(agreementId: number) {
       );
 
       if (updateResponse.status !== 200) {
-        return { status: 500, message: "Failed to update deposit status to pending_returned." };
+        return {
+          status: 500,
+          message: "Failed to update deposit status to pending_returned.",
+        };
       }
     }
 
-    return { status: 200, message: "Deposit processing completed successfully." };
+    return {
+      status: 200,
+      message: "Deposit processing completed successfully.",
+    };
   } catch (error) {
     console.error("Error processing deposit:", error);
-    return { status: 500, message: "Internal server error while processing deposit." };
+    return {
+      status: 500,
+      message: "Internal server error while processing deposit.",
+    };
   }
 }
 
 export { processDeposit };
-
-
 
 export async function getDepositData(agreementId: number) {
   try {
@@ -88,7 +98,7 @@ export async function getDepositData(agreementId: number) {
     if (!depositDetails) {
       return {
         status: 404,
-        message: 'Agreement not found.',
+        message: "Agreement not found.",
       };
     }
 
@@ -98,16 +108,20 @@ export async function getDepositData(agreementId: number) {
       depositDetails,
     };
   } catch (error) {
-    console.error('Error fetching deposit data:', error);
+    console.error("Error fetching deposit data:", error);
 
     return {
       status: 500,
-      message: 'An error occurred while fetching deposit data.',
+      message: "An error occurred while fetching deposit data.",
     };
   }
 }
 
-async function payDeposit(agreementId: number, userId: number, userRole: 'tenant' | 'owner') {
+async function payDeposit(
+  agreementId: number,
+  userId: number,
+  userRole: "tenant" | "owner"
+) {
   try {
     // Fetch the agreement details
     const agreement = await prisma.agreement.findUnique({
@@ -123,7 +137,7 @@ async function payDeposit(agreementId: number, userId: number, userRole: 'tenant
     });
 
     if (!agreement) {
-      return { status: 404, message: 'Agreement not found.' };
+      return { status: 404, message: "Agreement not found." };
     }
 
     const depositAmount: Decimal = agreement.deposit;
@@ -132,24 +146,30 @@ async function payDeposit(agreementId: number, userId: number, userRole: 'tenant
     const depositAmountValue = depositAmount.toNumber();
 
     if (!depositAmountValue || depositAmountValue <= 0) {
-      return { status: 400, message: 'Invalid deposit amount.' };
+      return { status: 400, message: "Invalid deposit amount." };
     }
 
     // Tenant pays the deposit
-    if (userRole === 'tenant') {
-      if (agreement.proposal.tenant_id !== userId) {
-        return { status: 403, message: 'Unauthorized access. Only the tenant can pay the deposit.' };
+    if (userRole === "tenant") {
+      if (agreement.proposal.tenant_id != userId) {
+        return {
+          status: 403,
+          message: "Unauthorized access. Only the tenant can pay the deposit.",
+        };
       }
 
-      if (agreement.deposit_status !== 'pending') {
-        return { status: 400, message: 'Deposit is not in a pending state.' };
+      if (agreement.deposit_status !== "pending") {
+        return { status: 400, message: "Deposit is not in a pending state." };
       }
 
       // Deduct tenant wallet
       const deductResponse = await deductWallet(userId, depositAmountValue);
 
       if (deductResponse.status !== 200) {
-        return { status: 500, message: 'Failed to deduct from tenant\'s wallet.' };
+        return {
+          status: 500,
+          message: "Failed to deduct from tenant's wallet.",
+        };
       }
 
       // Top up owner's wallet
@@ -159,11 +179,19 @@ async function payDeposit(agreementId: number, userId: number, userRole: 'tenant
       if (topupResponse.status !== 200) {
         // Rollback deduction if top-up fails
         await topupWallet(userId, depositAmountValue);
-        return { status: 500, message: 'Failed to top up owner\'s wallet. Transaction rolled back.' };
+        return {
+          status: 500,
+          message: "Failed to top up owner's wallet. Transaction rolled back.",
+        };
       }
 
       // Update agreement deposit status to 'submitted'
-      const updateResult = await updateAgreement(agreementId, 'editDeposit', undefined, 'submitted');
+      const updateResult = await updateAgreement(
+        agreementId,
+        "editDeposit",
+        undefined,
+        "submitted"
+      );
 
       if (updateResult.status !== 200) {
         return {
@@ -172,24 +200,34 @@ async function payDeposit(agreementId: number, userId: number, userRole: 'tenant
         };
       }
 
-      return { status: 200, message: 'Deposit successfully paid by tenant.' };
+      return { status: 200, message: "Deposit successfully paid by tenant." };
     }
 
     // Owner returns the deposit
-    if (userRole === 'owner') {
+    if (userRole === "owner") {
       if (agreement.proposal.property.owner_id !== userId) {
-        return { status: 403, message: 'Unauthorized access. Only the owner can return the deposit.' };
+        return {
+          status: 403,
+          message:
+            "Unauthorized access. Only the owner can return the deposit.",
+        };
       }
 
-      if (agreement.deposit_status !== 'pending_returned') {
-        return { status: 400, message: 'Deposit is not in a pending_returned state.' };
+      if (agreement.deposit_status !== "pending_returned") {
+        return {
+          status: 400,
+          message: "Deposit is not in a pending_returned state.",
+        };
       }
 
       // Deduct owner wallet
       const deductResponse = await deductWallet(userId, depositAmountValue);
 
       if (deductResponse.status !== 200) {
-        return { status: 500, message: 'Failed to deduct from owner\'s wallet.' };
+        return {
+          status: 500,
+          message: "Failed to deduct from owner's wallet.",
+        };
       }
 
       // Top up tenant's wallet
@@ -199,26 +237,54 @@ async function payDeposit(agreementId: number, userId: number, userRole: 'tenant
       if (topupResponse.status !== 200) {
         // Rollback deduction if top-up fails
         await topupWallet(userId, depositAmountValue);
-        return { status: 500, message: 'Failed to top up tenant\'s wallet. Transaction rolled back.' };
-      }
-
-      // Update agreement deposit status to 'returned'
-      const updateResult = await updateAgreement(agreementId, 'editDeposit', undefined, 'returned');
-
-      if (updateResult.status !== 200) {
         return {
-          status: updateResult.status,
-          message: `Failed to update agreement deposit status: ${updateResult.message}`,
+          status: 500,
+          message: "Failed to top up tenant's wallet. Transaction rolled back.",
         };
       }
 
-      return { status: 200, message: 'Deposit successfully returned by owner.' };
+      // Update agreement deposit status to 'returned'
+      const updateDepositResult = await updateAgreement(
+        agreementId,
+        "editDeposit",
+        undefined,
+        "returned"
+      );
+
+      if (updateDepositResult.status !== 200) {
+        return {
+          status: updateDepositResult.status,
+          message: `Failed to update agreement deposit status: ${updateDepositResult.message}`,
+        };
+      }
+
+      // Mark agreement as completed
+      const updateCompleteResult = await updateAgreement(
+        agreementId,
+        "complete"
+      );
+
+      if (updateCompleteResult.status !== 200) {
+        return {
+          status: updateCompleteResult.status,
+          message: `Failed to mark agreement as completed: ${updateCompleteResult.message}`,
+        };
+      }
+
+      return {
+        status: 200,
+        message:
+          "Deposit successfully returned by owner, and agreement marked as completed.",
+      };
     }
 
-    return { status: 400, message: 'Invalid user role.' };
+    return { status: 400, message: "Invalid user role." };
   } catch (error) {
-    console.error('Error in payDeposit function:', error);
-    return { status: 500, message: 'Internal server error while processing deposit payment.' };
+    console.error("Error in payDeposit function:", error);
+    return {
+      status: 500,
+      message: "Internal server error while processing deposit payment.",
+    };
   }
 }
 

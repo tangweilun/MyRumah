@@ -71,15 +71,16 @@ type Tenant = {
 };
 
 export default function OwnerProposalPage() {
-  const { data: session } = useSession();
-  const userId = session?.user.user_id;
-  const userRole = session?.user.role;
+  const { data: ownerSession } = useSession();
+  const userId = ownerSession?.user.user_id;
+  const userRole = ownerSession?.user.role;
+
   const {
     data: proposal,
     isLoading,
     isError,
   } = useQuery<Proposal[]>({
-    queryKey: ["ownerProposals"],
+    queryKey: ["proposals"],
     queryFn: async () => {
       const response = await fetch(`/api/proposals`, {
         method: "GET",
@@ -108,7 +109,6 @@ export default function OwnerProposalPage() {
         })),
       }));
     },
-    gcTime: 0,
   });
 
   // if (isLoading) {
@@ -131,7 +131,7 @@ export default function OwnerProposalPage() {
   }
 
   if (!proposal?.length) {
-    // return <EmptyProposalList />;
+    console.log("empty proposal");
   }
 
   function formatDate(dateString: string) {
@@ -527,30 +527,14 @@ export default function OwnerProposalPage() {
 
             <div className="rounded-lg border p-4">
               <h3 className="text-lg font-semibold text-green-700 mb-4">
-                Initial Fee Payment
+                Deposit
               </h3>
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Deposit</span>
                   <span className="font-semibold">
-                    RM{selectedProposal?.agreements[0].deposit}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">First Month's Rental</span>
-                  <span className="font-semibold">
-                    RM{selectedProposal?.agreements[0].init_rental_fee}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <span className="font-semibold">Total Due</span>
-                  <span className="font-bold text-lg">
-                    RM
-                    {selectedProposal?.agreements[0].deposit} +
-                    {selectedProposal?.agreements[0].init_rental_fee}
+                    RM{selectedProposal?.agreements[0]?.deposit}
                   </span>
                 </div>
               </div>
