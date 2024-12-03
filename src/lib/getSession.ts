@@ -10,6 +10,5 @@ import { auth } from "../../auth";
 
 export const getSession = async () => {
   const session = await auth();
-  // console.log("Session: " + JSON.stringify(session));
   return session;
 };
