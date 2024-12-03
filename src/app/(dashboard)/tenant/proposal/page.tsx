@@ -62,6 +62,7 @@ type Agreement = {
   init_rental_fee: number;
   tenant_signature: boolean;
   owner_signature: boolean;
+  deposit_status: string;
 };
 
 type Tenant = {
@@ -103,6 +104,7 @@ export default function TenantProposalPage() {
           agreement_status: agreement.agreement_status,
           content: agreement.content,
           deposit: agreement.deposit,
+          deposit_status: agreement.deposit_status,
           init_rental_fee: agreement.init_rental_fee,
           tenant_signature: agreement.tenant_signature,
           owner_signature: agreement.owner_signature,
@@ -157,6 +159,7 @@ export default function TenantProposalPage() {
   const [selectedProposal, setSelectedProposal] = useState<Proposal>();
   const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
   const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
+  const [tenantPaidDeposit, setTenantPaidDeposit] = useState(false);
 
   const viewProposal = async (proposal: Proposal) => {
     setSelectedProposal(proposal);
