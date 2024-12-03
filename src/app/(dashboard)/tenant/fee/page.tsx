@@ -76,6 +76,8 @@ export async function payFee(fee: Fee, userId: any) {
     },
   });
 
+  //const deposit = await fetch();
+
   const data: PaymentResponse = await response.json();
 
   // Check if the internal status is not successful
