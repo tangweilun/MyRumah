@@ -426,7 +426,7 @@ const SinglePropertyPage = () => {
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <DollarSign className="h-4 w-4" />
-                        <span>${property?.rental_fee} per month</span>
+                        <span>RM{property?.rental_fee} per month</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin className="h-4 w-4" />

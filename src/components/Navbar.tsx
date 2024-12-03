@@ -7,6 +7,7 @@ import { handleSignOut } from "@/app/actions/authActions";
 import { getSession } from "@/lib/getSession";
 import AuthButton from "./AuthButton";
 import { NavLink } from "./NavLink";
+import { WalletButton } from "./WalletButton";
 
 const Navbar = async () => {
   const session = await getSession();
@@ -25,6 +26,7 @@ const Navbar = async () => {
         {/* Dynamic Links based on role */}
         {session?.user?.role === "owner" && (
           <div className="flex items-center gap-4">
+            <WalletButton></WalletButton>
             <NavLink href="/owner">Dashboard</NavLink>
             <NavLink href="/owner/proposal">My Proposals</NavLink>
             <NavLink href="/owner/my-tenant">My Tenants</NavLink>
@@ -32,6 +34,7 @@ const Navbar = async () => {
         )}
         {session?.user?.role === "tenant" && (
           <div className="flex items-center gap-4">
+            <WalletButton></WalletButton>
             <NavLink href="/tenant">View Properties</NavLink>
             <NavLink href="/tenant/proposal">My Proposals</NavLink>
             <NavLink href="/tenant/fee">Manage Fee</NavLink>

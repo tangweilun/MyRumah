@@ -102,6 +102,16 @@ export default function TenantProposalPage() {
         }),
       });
 
+      const payFeeResponse = await fetch(`/api/rental-fee`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          agreementId: agreementId,
+        }),
+      });
+
       setTenantSignedAgreement(true);
     } catch (error) {
       console.error("Error while signing the agreement.");
