@@ -302,7 +302,7 @@ const EditProperty = () => {
                       name="rental_fee"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price per Month ($)</FormLabel>
+                          <FormLabel>Price per Month (RM)</FormLabel>
                           <FormControl>
                             <Input type="number" min="0" {...field} />
                           </FormControl>

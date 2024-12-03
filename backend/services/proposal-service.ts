@@ -334,7 +334,6 @@ async function updateProposalStatus(
   }
 
   const userRole = chkRole.userRole;
-
   if (!isProposalStatus) {
     return { status: 400 };
   }
@@ -362,7 +361,6 @@ async function updateProposalStatus(
     if (!isPropertyExpired || isPropertyExpired.isExpired === null) {
       return { status: 500 };
     }
-
     if (isPropertyExpired.isExpired === true) {
       const cancelledStatus = "cancelled";
       if (proposalStatus !== ProposalStatus.cancelled) {
@@ -375,7 +373,6 @@ async function updateProposalStatus(
               ProposalStatus[cancelledStatus as keyof typeof ProposalStatus],
           },
         });
-
         return { updatedProposal: expiredProposal, status: 400 };
       }
       // the proposal already cancelled before
@@ -387,16 +384,12 @@ async function updateProposalStatus(
     }
 
     let isRelated: boolean = false;
-
     if (userRole === UserRole.tenant) {
       if (proposalStatus !== ProposalStatus.cancelled) {
         // tenant can only change status from pending to cancelled, not others
-
         return { status: 400 };
       }
       isRelated = await chkUserProposalRelation(proposalId, userId, userRole);
-      console.log("tenant");
-      console.log(isRelated);
     } else if (userRole === UserRole.owner) {
       if (
         proposalStatus !== ProposalStatus.approved &&
@@ -406,8 +399,6 @@ async function updateProposalStatus(
         return { status: 400 };
       }
       isRelated = await chkUserProposalRelation(proposalId, userId, userRole);
-      console.log("owner");
-      console.log(isRelated);
     }
 
     if (!isRelated) {

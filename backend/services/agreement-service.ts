@@ -120,7 +120,7 @@ import { processDeposit } from "./deposit-service"; // Import the editProperty f
 
 export async function updateAgreement(
   agreementId: number,
-  action: "sign" | "approve" | "editDeposit" | "unsign", // Removed 'resetSignatures'
+  action: "sign" | "approve" | "editDeposit" | "unsign" | "complete", // Removed 'resetSignatures'
   userType?: "owner" | "tenant",
   newDepositStatus?: "pending" | "submitted" | "pending_returned" | "returned" // Strict type for deposit statuses
 ) {
@@ -251,10 +251,10 @@ export async function updateAgreement(
       if (currentDate > end_date) {
         agreementStatus = "completed";
         depositStatus = "pending_returned";
-      } else if (currentDate >= start_date && currentDate <= end_date) {
-        agreementStatus = "ongoing";
-      } else if (currentDate < start_date) {
+      } else if (currentDate >= start_date) {
         agreementStatus = "expired";
+      } else if (currentDate < start_date && currentDate <= end_date) {
+        agreementStatus = "ongoing";
       }
 
       // Call the smart contract to update the agreement
@@ -347,11 +347,49 @@ export async function updateAgreement(
         status: 200,
         message: `Deposit status updated to ${newDepositStatus}.`,
       };
+    } else if (action === "complete") {
+      // Validate that the agreement can be marked as completed
+      if (currentDate <= end_date) {
+        return {
+          status: 400,
+          message:
+            "Agreement cannot be marked as completed before the end date.",
+        };
+      }
+
+      // Update the agreement status and deposit status to reflect completion
+      const agreementStatus = "completed";
+      const depositStatus = "pending_returned";
+
+      // Call the smart contract to update the agreement
+      const tx = await agreementContract.updateAgreement(
+        agreementId,
+        depositStatus,
+        agreementStatus,
+        agreement.tenant_signature,
+        agreement.owner_signature
+      );
+
+      await tx.wait(); // Wait for the transaction to be confirmed
+
+      // Update the local database with the new statuses
+      await prisma.agreement.update({
+        where: { agreement_id: agreementId },
+        data: {
+          agreement_status: agreementStatus,
+          deposit_status: depositStatus,
+        },
+      });
+
+      return {
+        status: 200,
+        message: "Agreement has been marked as completed.",
+      };
     } else {
       return {
         status: 400,
         message:
-          'Invalid action. Valid actions are "sign", "approve", or "editDeposit".',
+          'Invalid action. Valid actions are "sign", "approve", "editDeposit", "unsign", or "complete".',
       };
     }
   } catch (error) {

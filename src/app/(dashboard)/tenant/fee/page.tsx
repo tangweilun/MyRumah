@@ -287,7 +287,7 @@ export default function FeeManagementPage() {
                             (fee, index) => (
                               <TableRow key={index}>
                                 <TableCell>{fee.fee_id}</TableCell>
-                                <TableCell>${fee.amount}</TableCell>
+                                <TableCell>RM{fee.amount}</TableCell>
                                 <TableCell>
                                   <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800">
                                     {fee.status}
@@ -398,7 +398,7 @@ export default function FeeManagementPage() {
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-gray-500">Amount Paid</span>
                   <span className="font-medium">
-                    ${Number(selectedPendingFee.amount).toFixed(2)}
+                    RM{Number(selectedPendingFee.amount).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between border-b pb-2">
