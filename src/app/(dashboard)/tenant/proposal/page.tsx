@@ -188,16 +188,6 @@ export default function TenantProposalPage() {
         }),
       });
 
-      const payFeeResponse = await fetch(`/api/rental-fee`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          agreementId: agreementId,
-        }),
-      });
-
       setTenantSignedAgreement(true);
     } catch (error) {
       console.error("Error occurred while signing the agreement.");
@@ -233,7 +223,21 @@ export default function TenantProposalPage() {
             }),
           });
 
-          window.location.reload();
+          try {
+            const payFeeResponse = await fetch(`/api/rental-fee`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                agreementId: agreementId,
+              }),
+            });
+
+            window.location.reload();
+          } catch (error) {
+            console.error("Error while generating the rental fee.");
+          }
         } catch (error) {
           console.error("Error while approving the agreement.");
         }

@@ -226,6 +226,7 @@ export default function OwnerProposalPage() {
     setShowAgreement(true);
     setOwnerSignedAgreement(proposal.agreements[0].owner_signature);
     setTenantSignedAgreement(proposal.agreements[0].tenant_signature);
+    console.log(proposal.agreements[0].deposit_status);
     setDepositStatus(proposal.agreements[0].deposit_status);
   };
 

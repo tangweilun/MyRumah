@@ -53,9 +53,9 @@ export function useTopUp(
       if (data.status === 200) {
         queryClient.invalidateQueries({ queryKey: ["topUp"] });
         queryClient.invalidateQueries({ queryKey: ["wallet"] });
-        toast.success("Your deposit was successful!");
+        toast.success("Your top up was successful!");
       } else {
-        toast.error("Failed to deposit. Please try again.");
+        toast.error("Failed to top up. Please try again.");
       }
     },
     onError: (error: Error) => {

@@ -38,10 +38,7 @@ async function processDeposit(agreementId: number) {
     const endDate = new Date(agreement.proposal.property.end_date);
 
     // If the end date is reached and deposit_status is not already pending_returned
-    if (
-      currentDate >= endDate &&
-      agreement.deposit_status !== "pending_returned"
-    ) {
+    if (agreement.deposit_status !== "pending_returned") {
       const updateResponse = await updateAgreement(
         agreementId,
         "editDeposit",
@@ -164,6 +161,7 @@ async function payDeposit(
 
       // Deduct tenant wallet
       const deductResponse = await deductWallet(userId, depositAmountValue);
+      console.log(deductResponse.status);
 
       if (deductResponse.status !== 200) {
         return {
