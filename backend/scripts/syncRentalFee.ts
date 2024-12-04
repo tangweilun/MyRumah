@@ -46,18 +46,6 @@ async function syncRentalFee() {
       createdDate: fee.created_date.toString(),
     })
   );
-  console.log("Type is: " + typeof fees[0].feeId);
-  console.log("Type is: " + typeof fees[0].agreementId);
-  console.log("Type is: " + typeof fees[0].amount);
-  console.log("Type is: " + typeof fees[0].status);
-  console.log("Type is: " + typeof fees[0].createdDate);
-  console.log("Next fee\n");
-  console.log("Type is: " + typeof fees[1].feeId);
-  console.log("Type is: " + typeof fees[1].agreementId);
-  console.log("Type is: " + typeof fees[1].amount);
-  console.log("Type is: " + typeof fees[1].status);
-  console.log("Type is: " + typeof fees[1].createdDate);
-  console.log(fees);
 
   await sendToBlockchain(rentalFeeContract, "createFee", fees);
 }

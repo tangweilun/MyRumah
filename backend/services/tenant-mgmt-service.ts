@@ -5,8 +5,8 @@ import { chkUserRole } from "./misc-service";
 // All function with no export is set as private function by default
 
 // a Type Guard to check the role match with Enum value or not
-const isUserRole = (role: string): role is UserRole =>
-  Object.values(UserRole).includes(role as UserRole);
+// const isUserRole = (role: string): role is UserRole =>
+//   Object.values(UserRole).includes(role as UserRole);
 
 async function getAllTenant(ownerId: number) {
   const chkRole = await chkUserRole(ownerId);
