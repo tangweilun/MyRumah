@@ -8,6 +8,12 @@ export async function fetchFeeRecords(tableName: string) {
   return allFee;
 }
 
+export async function fetchAgreementRecords(tableName: string) {
+  const allAgreement = await (prisma as any)[tableName].findMany();
+  return allAgreement;
+}
+
+
 export async function sendToBlockchain(
   contract: ethers.Contract,
   methodName: string,

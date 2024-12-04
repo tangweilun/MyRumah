@@ -8,19 +8,39 @@ async function syncAll() {
   try {
     console.log("Starting RentalFee sync...");
 
-    const { stdout, stderr } = await execPromise(
-      "npx ts-node backend/scripts/syncRentalFee.ts"
-    );
+    try {
+      const rentalFeeResult = await execPromise(
+        "npx ts-node backend/scripts/syncRentalFee.ts"
+      );
 
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
+      if (rentalFeeResult.stderr) {
+        console.error(`RentalFee stderr: ${rentalFeeResult.stderr}`);
+      } else {
+        console.log(`RentalFee sync stdout: ${rentalFeeResult.stdout}`);
+      }
+    } catch (error) {
+      console.error("Error during RentalFee sync:", error);
     }
 
-    console.log(`stdout: ${stdout}`);
+    console.log("Starting Agreement sync...");
+
+    try {
+      const agreementResult = await execPromise(
+        "npx ts-node backend/scripts/syncAgreement.ts"
+      );
+
+      if (agreementResult.stderr) {
+        console.error(`Agreement stderr: ${agreementResult.stderr}`);
+      } else {
+        console.log(`Agreement sync stdout: ${agreementResult.stdout}`);
+      }
+    } catch (error) {
+      console.error("Error during Agreement sync:", error);
+    }
+
     console.log("All syncs completed.");
   } catch (error) {
-    console.error("Error during sync:", error);
+    console.error("Unexpected error during sync:", error);
   }
 }
 
