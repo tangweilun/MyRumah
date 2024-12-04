@@ -17,8 +17,8 @@ const isProposalStatus = (
 ): proposalStatus is ProposalStatus =>
   Object.values(ProposalStatus).includes(proposalStatus as ProposalStatus);
 
-const isUserRole = (role: string): role is UserRole =>
-  Object.values(UserRole).includes(role as UserRole);
+// const isUserRole = (role: string): role is UserRole =>
+//   Object.values(UserRole).includes(role as UserRole);
 
 // async function getAllProposal(userId: number, userRole: string) {
 async function getAllProposal(userId: number) {
@@ -141,11 +141,6 @@ async function getAllProposal(userId: number) {
   }
 }
 
-// async function getSpecTenantProposal(
-//   tenantId: number,
-//   ownerId: number,
-//   userRole: string
-// )
 async function getSpecTenantProposal(tenantId: number, ownerId: number) {
   // if (!isUserRole(userRole)) {
   //   return { status: 401 };

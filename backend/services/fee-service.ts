@@ -11,8 +11,8 @@ import { chkUserRole } from "./misc-service";
 import { RentalFeeContractAddress } from "../../src/utils/smartContractAddress";
 import rentalFeeAbi from "../../src/abi/rentalFee.json";
 
-const isUserRole = (role: string): role is UserRole =>
-  Object.values(UserRole).includes(role as UserRole);
+// const isUserRole = (role: string): role is UserRole =>
+//   Object.values(UserRole).includes(role as UserRole);
 
 const getContract = async () => {
   const provider = new ethers.JsonRpcProvider("http://localhost:8545"); // Local blockchain (e.g., Hardhat)
@@ -34,6 +34,7 @@ const getContract = async () => {
 
 async function getAllFee(userId: number) {
   const chkRole = await chkUserRole(userId);
+  console.log(chkRole.status);
   if (chkRole.status != 200 || !chkRole.userRole) {
     return { status: chkRole.status };
   }
@@ -331,7 +332,6 @@ async function payFee(feeId: number, userId: number) {
 
     const payFeeTx = await rentalFeeContract.payFee(fee);
     console.log(payFeeTx);
-    // console.log(payFeeTx);
 
     return { status: 200, paidFee: paidFee };
   } catch (error) {

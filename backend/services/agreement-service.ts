@@ -83,8 +83,6 @@ export async function createAgreement(proposalId: number) {
         content: content,
         deposit: deposit,
         deposit_status: "pending",
-        init_rental_fee: property.rental_fee,
-        initial_fee_status: "pending",
         tenant_signature: false,
         owner_signature: false,
         agreement_status: "pending",

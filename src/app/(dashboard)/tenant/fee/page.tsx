@@ -54,6 +54,7 @@ interface Fee {
   modified_date?: string;
 
   dueDate?: string;
+  agreement_id: string;
 }
 
 interface PaymentErrorResponse {
@@ -76,8 +77,19 @@ export async function payFee(fee: Fee, userId: any) {
     },
   });
 
-  const data: PaymentResponse = await response.json();
+  const deposit = await fetch(`/api/deposit/process-deposit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      agreementId: fee.agreement_id,
+    }),
+  });
 
+  const data: PaymentResponse = await response.json();
+  const dataDeposit = await deposit.json();
+  console.log(dataDeposit);
   // Check if the internal status is not successful
   if (data.status !== 200) {
     throw data;

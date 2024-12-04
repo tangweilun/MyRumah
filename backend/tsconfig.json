@@ -2,14 +2,11 @@
   "compilerOptions": {
     "target": "ES6", // Or whatever version you're targeting
     "module": "commonjs",
-    "jsx": "react",  // Enable JSX support
+    "jsx": "react", // Enable JSX support
     "esModuleInterop": true, // Helps with importing modules
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-
-    // addon
-    "jsx": "preserve"
+    "forceConsistentCasingInFileNames": true
   }
 }
-
