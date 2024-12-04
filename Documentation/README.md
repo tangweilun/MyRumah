@@ -104,6 +104,51 @@ Follow these steps to set up the project locally:
 
 ## Setup
 
+## First step
+
+1. Open a terminal and run 'npm install' to install all the dependency for the project
+
+## Second step (primsa/database setup)
+
+## NOTE (DATABASE_URL)
+
+1. Ensure that you have install postgresql and pgAdmin to act as your local database
+2. Ensure that you have create the superadmin in the pgAdmin such as the username and password for database usage
+3. Ensure that you have create the database name: MyRumah and localhost
+4. Ensure that your DATABASE_URL is being setup properly in your .env file as below
+
+DATABASE_URL="postgresql://postgres:admin9408@localhost:5432/MyRumah?schema=public" This is a sample
+
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME?schema=public" This is the reference
+
+## Ensure that you have paste the username and password to the DATABASE_URL in the .env file when creating the user and database (MyRumah) in pgAdmin
+
+## Prisma and database Setup
+
+1. Open a terminal and run 'npm run prisma:setup'
+
+## NOTE (npm run prisma:setup)
+
+This command has been configured in the package.json scripts as below
+
+"scripts": {
+"dev": "ts-node backend/scripts/syncAll.ts && next dev",
+"build": "next build",
+"start": "next start",
+"lint": "next lint",
+"prisma:migrate": "npx prisma migrate dev --name myrumah_migration",
+"prisma:generate": "npx prisma generate",
+"prisma:seed": "npx ts-node prisma/seed.ts",
+"prisma:setup": "npm run prisma:migrate && npm run prisma:generate && npm run prisma:seed"
+}
+
+The prisma:migrate is to run and apply the migration
+The prisma:generate is to create the prisma client for database linkage and allow CRUD interaction with the local database
+The prisma:seed is to auto-create fake data and insert into local database based on the seed.ts in the prisma folder
+The prisma:setup is to compile all the prisma command and run it all at once
+
+If you want to manually run the command run by one can refer to the scripts attached above
+
 ## Smart Contract
 
 Follow these steps to setup the smart contract environment
@@ -118,3 +163,7 @@ Follow these steps to setup the smart contract environment
 1. In the env file there will be NEXT_PUBLIC_AGREEMENT_CONTRACT_ADDRESS and NEXT_PUBLIC_RENTAL_FEE_CONTRACT_ADDRESS which will be the smart contract address for rental fee and agreement.
 2. When running the 'npm run deploy' the addresses will be updated and will be shown in the terminal to show that both of the addresses have been updated
 3. It is a must to run 'npx hardhat node' to setup the network for the smart contract
+
+## Run dev
+
+1. Open a terminal and run 'npm run dev' to start using the system
