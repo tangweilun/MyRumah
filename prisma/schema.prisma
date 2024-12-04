@@ -17,50 +17,27 @@ model UserInfo {
   wallet_amount Decimal        @db.Decimal(10, 2)
   created_date  DateTime       @default(now())
   modified_date DateTime       @updatedAt
-  notifications Notification[]
   properties    PropertyInfo[]
   proposals     Proposal[]
-  wishlists     Wishlist?
 
   @@unique([email, role], name: "emailRole")
 }
 
-model Wishlist {
-  wishlist_id      Int                @id @default(autoincrement())
-  user_id          Int                @unique
-  created_date     DateTime           @default(now())
-  tenant           UserInfo           @relation(fields: [user_id], references: [user_id])
-  WishlistProperty WishlistProperty[]
-  properties       PropertyInfo[]     @relation("PropertyInfoToWishlist")
-}
-
 model PropertyInfo {
-  property_id      Int                @id @default(autoincrement())
-  owner_id         Int
-  address          String
-  images           Bytes[] // Change from Bytes? to Bytes[]
-  description      String
-  occupant_num     Int
-  rental_fee       Decimal            @db.Decimal(10, 2)
-  start_date       DateTime           @db.Date
-  end_date         DateTime           @db.Date
-  status           PropertyStatus
-  created_date     DateTime           @default(now())
-  modified_date    DateTime           @updatedAt
-  owner            UserInfo           @relation(fields: [owner_id], references: [user_id])
-  proposals        Proposal[]
-  WishlistProperty WishlistProperty[]
-  wishlists        Wishlist[]         @relation("PropertyInfoToWishlist")
-}
-
-model WishlistProperty {
-  wishlist_id  Int
-  property_id  Int
-  created_date DateTime     @default(now())
-  property     PropertyInfo @relation(fields: [property_id], references: [property_id])
-  wishlist     Wishlist     @relation(fields: [wishlist_id], references: [wishlist_id])
-
-  @@unique([wishlist_id, property_id])
+  property_id   Int            @id @default(autoincrement())
+  owner_id      Int
+  address       String
+  images        Bytes[] // Change from Bytes? to Bytes[]
+  description   String
+  occupant_num  Int
+  rental_fee    Decimal        @db.Decimal(10, 2)
+  start_date    DateTime       @db.Date
+  end_date      DateTime       @db.Date
+  status        PropertyStatus
+  created_date  DateTime       @default(now())
+  modified_date DateTime       @updatedAt
+  owner         UserInfo       @relation(fields: [owner_id], references: [user_id])
+  proposals     Proposal[]
 }
 
 model Proposal {
@@ -76,20 +53,18 @@ model Proposal {
 }
 
 model Agreement {
-  agreement_id       Int              @id @default(autoincrement())
-  proposal_id        Int
-  content            String
-  deposit            Decimal          @db.Decimal(10, 2)
-  deposit_status     DepositStatus
-  init_rental_fee    Decimal          @db.Decimal(10, 2)
-  initial_fee_status InitialFeeStatus
-  tenant_signature   Boolean
-  owner_signature    Boolean
-  agreement_status   AgreementStatus
-  created_date       DateTime         @default(now())
-  modified_date      DateTime         @updatedAt
-  proposal           Proposal         @relation(fields: [proposal_id], references: [proposal_id])
-  rental_fees        RentalFee[]
+  agreement_id     Int             @id @default(autoincrement())
+  proposal_id      Int
+  content          String
+  deposit          Decimal         @db.Decimal(10, 2)
+  deposit_status   DepositStatus
+  tenant_signature Boolean
+  owner_signature  Boolean
+  agreement_status AgreementStatus
+  created_date     DateTime        @default(now())
+  modified_date    DateTime        @updatedAt
+  proposal         Proposal        @relation(fields: [proposal_id], references: [proposal_id])
+  rental_fees      RentalFee[]
 }
 
 model RentalFee {
@@ -100,15 +75,6 @@ model RentalFee {
   created_date  DateTime        @default(now())
   modified_date DateTime        @updatedAt
   agreement     Agreement       @relation(fields: [agreement_id], references: [agreement_id])
-}
-
-model Notification {
-  notif_id    Int                @id @default(autoincrement())
-  receiver_id Int
-  message     String
-  status      NotificationStatus
-  createdDate DateTime           @default(now())
-  user        UserInfo           @relation(fields: [receiver_id], references: [user_id])
 }
 
 enum UserRole {
@@ -137,11 +103,6 @@ enum DepositStatus {
   returned
 }
 
-enum InitialFeeStatus {
-  pending
-  submitted
-}
-
 enum AgreementStatus {
   pending
   ongoing
@@ -153,12 +114,6 @@ enum RentalFeeStatus {
   paid
   pending
 }
-
-enum NotificationStatus {
-  read
-  unread
-}
-
 
 // command to run migration
 // 1. Create Migration File Only, Then Apply It
