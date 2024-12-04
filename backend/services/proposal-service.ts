@@ -75,7 +75,7 @@ async function getAllProposal(userId: number) {
     where: {
       property: {
         owner_id: userId,
-        status: "active",
+        status: { in: ["active", "occupied"] },
       },
     },
     include: {
