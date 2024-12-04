@@ -29,7 +29,7 @@ type Property = {
   rental_fee: number;
   address: string;
   occupant_num: number;
-  images: string[];
+  images: Buffer[];
   start_date: string;
   end_date: string;
   status: string;
@@ -169,7 +169,7 @@ export default function TenantSingleProperyPage() {
             {property?.images && property.images.length > 0 && (
               <Image
                 src={`data:image/jpeg;base64,${Buffer.from(
-                  property.images[currentImageIndex]
+                  Object.values(property.images[currentImageIndex])
                 ).toString("base64")}`}
                 alt={`Apartment image ${currentImageIndex + 1}`}
                 fill
@@ -196,9 +196,9 @@ export default function TenantSingleProperyPage() {
                 }`}
               >
                 <Image
-                  src={`data:image/jpeg;base64,${Buffer.from(src).toString(
-                    "base64"
-                  )}`}
+                  src={`data:image/jpeg;base64,${Buffer.from(
+                    Object.values(src)
+                  ).toString("base64")}`}
                   alt={`Thumbnail ${index + 1}`}
                   fill
                   className="object-cover"

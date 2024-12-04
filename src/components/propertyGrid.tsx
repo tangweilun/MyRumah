@@ -104,7 +104,7 @@ export default function PropertiesGrid() {
                 {property.images && property.images.length > 0 ? (
                   <Image
                     src={`data:image/jpeg;base64,${Buffer.from(
-                      property.images[0]
+                      Object.values(property.images[0])
                     ).toString("base64")}`}
                     alt={property.description || "Property Image"}
                     fill
