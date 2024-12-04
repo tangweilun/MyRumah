@@ -149,6 +149,11 @@ The prisma:setup is to compile all the prisma command and run it all at once
 
 If you want to manually run the command run by one can refer to the scripts attached above
 
+## Prisma setup NOTE
+
+1. If you want to reset the database can run 'npx prisma migrate reset' but please ensure there is migration file under migrations folder under primsa folder
+2. Ensure that the migration file under the migrations folder under the prisma folder is called myrumah_migration as it is the latest migration if it is not please delete it and run 'npm run prisma:migrate' to create and run the correct migration.
+
 ## Smart Contract
 
 Follow these steps to setup the smart contract environment
