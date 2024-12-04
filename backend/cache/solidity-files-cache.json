@@ -22,20 +22,14 @@
                 "evm.methodIdentifiers",
                 "metadata"
               ],
-              "": [
-                "ast"
-              ]
+              "": ["ast"]
             }
           }
         }
       },
       "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "AgreementContract"
-      ]
+      "versionPragmas": ["^0.8.0"],
+      "artifacts": ["AgreementContract"]
     },
     "C:\\Users\\Chunk\\Documents\\GitHub\\MyRumah\\backend\\contracts\\RentalFee.sol": {
       "lastModificationDate": 1733298376617,
@@ -58,20 +52,14 @@
                 "evm.methodIdentifiers",
                 "metadata"
               ],
-              "": [
-                "ast"
-              ]
+              "": ["ast"]
             }
           }
         }
       },
       "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "RentalFee"
-      ]
+      "versionPragmas": ["^0.8.0"],
+      "artifacts": ["RentalFee"]
     }
   }
 }
