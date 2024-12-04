@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const result = await getAllFee(parseInt(userId));
+    console.log(result.status);
 
     if (result.status === 200) {
       return NextResponse.json({

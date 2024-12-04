@@ -76,7 +76,7 @@ export async function payFee(fee: Fee, userId: any) {
     },
   });
 
-  //const deposit = await fetch();
+  const deposit = await fetch(`/api/deposit/process-deposit`);
 
   const data: PaymentResponse = await response.json();
 
