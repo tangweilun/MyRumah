@@ -8,7 +8,6 @@ contract AgreementContract {
         string content;
         uint256 deposit;
         string depositStatus;
-        uint256 rentalFee;
         string agreementStatus;
         bool tenantSignature;
         bool ownerSignature;
@@ -26,7 +25,6 @@ contract AgreementContract {
         uint256 proposalId,
         string memory content,
         uint256 deposit,
-        uint256 rentalFee,
         string memory depositStatus,
         string memory agreementStatus
     ) public returns (uint256) {
@@ -37,7 +35,6 @@ contract AgreementContract {
             proposalId,
             content,
             deposit,
-            rentalFee,
             depositStatus,
             agreementStatus
         ));
@@ -49,7 +46,6 @@ contract AgreementContract {
             content: content,
             deposit: deposit,
             depositStatus: depositStatus,
-            rentalFee: rentalFee,
             agreementStatus: agreementStatus,
             tenantSignature: false,
             ownerSignature: false,
@@ -82,7 +78,6 @@ contract AgreementContract {
             agreement.proposalId,
             agreement.content,
             agreement.deposit,
-            agreement.rentalFee,
             newDepositStatus,
             newAgreementStatus,
             newTenantSignature,  // Include signature in the hash
@@ -99,7 +94,6 @@ contract AgreementContract {
         string memory content,
         uint256 deposit,
         string memory depositStatus,
-        uint256 rentalFee,
         string memory agreementStatus,
         bool tenantSignature,
         bool ownerSignature,
@@ -115,7 +109,6 @@ contract AgreementContract {
             agreement.content,
             agreement.deposit,
             agreement.depositStatus,
-            agreement.rentalFee,
             agreement.agreementStatus,
             agreement.tenantSignature,
             agreement.ownerSignature,

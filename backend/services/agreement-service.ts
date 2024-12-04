@@ -96,7 +96,6 @@ export async function createAgreement(proposalId: number) {
       proposalId, // proposalId
       content, // content
       parseUnits(deposit.toString(), "ether"), // deposit in wei
-      parseUnits(property.rental_fee.toString(), "ether"), // rentalFee in wei
       "pending", // depositStatus
       "pending" // agreementStatus
     );
