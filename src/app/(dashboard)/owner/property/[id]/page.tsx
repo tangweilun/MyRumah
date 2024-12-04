@@ -47,7 +47,7 @@ const proposals = [
   },
 ];
 
-type Property = {
+export type Property = {
   deleteProperty: boolean;
   property_id: number;
   description: string;
@@ -60,8 +60,8 @@ type Property = {
   status: string;
 };
 
-type HidePropertyParams = {
-  id: String;
+export type HidePropertyParams = {
+  id: string;
   property: Property;
 };
 
