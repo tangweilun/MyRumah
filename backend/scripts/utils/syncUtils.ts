@@ -13,7 +13,6 @@ export async function fetchAgreementRecords(tableName: string) {
   return allAgreement;
 }
 
-
 export async function sendToBlockchain(
   contract: ethers.Contract,
   methodName: string,
@@ -30,5 +29,5 @@ export async function sendToBlockchain(
   );
 
   const tx = await contract[methodName](feeRecordsFormatted);
-  console.log(tx);
+  console.log(`Rental fees synchronized: ${tx.hash}`);
 }

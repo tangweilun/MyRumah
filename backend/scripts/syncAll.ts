@@ -16,7 +16,7 @@ async function syncAll() {
       if (rentalFeeResult.stderr) {
         console.error(`RentalFee stderr: ${rentalFeeResult.stderr}`);
       } else {
-        console.log(`RentalFee sync stdout: ${rentalFeeResult.stdout}`);
+        console.log(`${rentalFeeResult.stdout}`);
       }
     } catch (error) {
       console.error("Error during RentalFee sync:", error);
@@ -32,7 +32,7 @@ async function syncAll() {
       if (agreementResult.stderr) {
         console.error(`Agreement stderr: ${agreementResult.stderr}`);
       } else {
-        console.log(`Agreement sync stdout: ${agreementResult.stdout}`);
+        console.log(`${agreementResult.stdout}`);
       }
     } catch (error) {
       console.error("Error during Agreement sync:", error);

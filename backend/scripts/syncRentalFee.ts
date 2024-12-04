@@ -26,7 +26,6 @@ const getContract = async () => {
 
 async function syncRentalFee() {
   const feeRecords = await fetchFeeRecords("rentalFee");
-  console.log(feeRecords);
   if (feeRecords.length === 0) {
     console.log("No fee records in database.");
     return;
@@ -47,6 +46,8 @@ async function syncRentalFee() {
       createdDate: fee.created_date.toString(),
     })
   );
+
+  console.log("Synchronizing rental fees...");
 
   await sendToBlockchain(rentalFeeContract, "createFee", fees);
 }
