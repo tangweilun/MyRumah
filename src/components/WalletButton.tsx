@@ -10,11 +10,11 @@ interface Wallet {
   walletAmount: string;
 }
 
-export function WalletButton() {
-  const { data: session } = useSession();
+interface WalletBUttonProps {
+  userId?: number; // Make userId optional
+}
 
-  const userId = session?.user?.user_id;
-
+export function WalletButton({ userId }: WalletBUttonProps) {
   const {
     data: walletBalance,
     isLoading,

@@ -11,6 +11,7 @@ import { WalletButton } from "./WalletButton";
 
 const Navbar = async () => {
   const session = await getSession();
+  const userId = session?.user?.user_id;
   return (
     <div className="flex items-center justify-between h-16 px-16 bg-transparent">
       {/* Logo */}
@@ -26,7 +27,7 @@ const Navbar = async () => {
         {/* Dynamic Links based on role */}
         {session?.user?.role === "owner" && (
           <div className="flex items-center gap-4">
-            <WalletButton></WalletButton>
+            <WalletButton userId={userId} />
             <NavLink href="/owner">Dashboard</NavLink>
             <NavLink href="/owner/proposal">My Proposals</NavLink>
             <NavLink href="/owner/my-tenant">My Tenants</NavLink>
@@ -34,7 +35,7 @@ const Navbar = async () => {
         )}
         {session?.user?.role === "tenant" && (
           <div className="flex items-center gap-4">
-            <WalletButton></WalletButton>
+            <WalletButton userId={userId} />
             <NavLink href="/tenant">View Properties</NavLink>
             <NavLink href="/tenant/proposal">My Proposals</NavLink>
             <NavLink href="/tenant/fee">Manage Fee</NavLink>

@@ -172,6 +172,7 @@ export default function TenantProposalPage() {
     setShowAgreement(true);
     setOwnerSignedAgreement(proposal.agreements[0].owner_signature);
     setTenantSignedAgreement(proposal.agreements[0].tenant_signature);
+    setTenantPaidDeposit(proposal.agreements[0].deposit_status === "submitted");
   };
 
   const tenantSignAgreement = async (agreementId: number) => {
@@ -217,13 +218,9 @@ export default function TenantProposalPage() {
         }),
       });
 
-      if (!response.ok) {
-        console.error("API call failed with status:", response.status);
-        return;
-      }
-
       const result = await response.json();
 
+      //change agreement status to "ongoing" after deposit is paid
       if (result.status === 200) {
         try {
           const response = await fetch(`/api/agreement/${agreementId}`, {
@@ -522,6 +519,10 @@ export default function TenantProposalPage() {
                   </span>
                 </div>
               </div>
+
+              {tenantPaidDeposit && (
+                <div className="mt-4 flex justify-end text-green-600">Paid</div>
+              )}
             </div>
 
             <div className="rounded-lg border p-4">
@@ -583,23 +584,26 @@ export default function TenantProposalPage() {
               </div>
             </div>
           </div>
-          {tenantSignedAgreement && (
-            <DialogFooter className="mt-4 flex justify-end">
-              <Button
-                variant="default"
-                className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => {
-                  const agreementId =
-                    selectedProposal?.agreements[0]?.agreement_id;
-                  if (agreementId !== undefined) {
-                    tenantPayDeposit(agreementId);
-                  }
-                }}
-              >
-                Pay Deposit
-              </Button>
-            </DialogFooter>
-          )}
+          <DialogFooter className="mt-4 flex justify-end">
+            {tenantSignedAgreement &&
+              (tenantPaidDeposit ? (
+                ""
+              ) : (
+                <Button
+                  variant="default"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    const agreementId =
+                      selectedProposal?.agreements[0]?.agreement_id;
+                    if (agreementId !== undefined) {
+                      tenantPayDeposit(agreementId);
+                    }
+                  }}
+                >
+                  Pay Deposit
+                </Button>
+              ))}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -99,3 +99,22 @@ Follow these steps to set up the project locally:
    git clone https://github.com/your-username/project-name.git
    cd project-name blablabla
    ```
+
+---
+
+## Setup
+
+## Smart Contract
+
+Follow these steps to setup the smart contract environment
+
+1. Open a terminal
+2. Run 'cd backend' to enter backend site
+3. Run 'npx hardhat node' to setup the network
+4. To update the addresses, open a new terminal, enter backend site by running 'cd backend', then run 'npm run deploy'
+
+### Smart Contract Note (Overview)
+
+1. In the env file there will be NEXT_PUBLIC_AGREEMENT_CONTRACT_ADDRESS and NEXT_PUBLIC_RENTAL_FEE_CONTRACT_ADDRESS which will be the smart contract address for rental fee and agreement.
+2. When running the 'npm run deploy' the addresses will be updated and will be shown in the terminal to show that both of the addresses have been updated
+3. It is a must to run 'npx hardhat node' to setup the network for the smart contract

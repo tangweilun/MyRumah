@@ -23,7 +23,6 @@ export async function POST(req: Request) {
 
     // Call the payDeposit function
     const result = await payDeposit(agreementId, userId, userRole);
-    console.log(result);
 
     // Handle response based on the service result
     if (result.status === 200) {
