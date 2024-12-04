@@ -228,8 +228,6 @@ export async function getAllProperties(address?: string): Promise<PropertyInfo[]
         include: {
           owner: true, // Include owner details
           proposals: true, // Include proposals associated with the property
-          wishlists: true, // Include wishlists associated with the property
-          WishlistProperty: true, // Include WishlistProperty association
         },
       });
   
