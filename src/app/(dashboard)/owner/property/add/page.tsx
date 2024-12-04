@@ -135,8 +135,8 @@ export default function AddProperty() {
       description: "",
       images: undefined,
       dateRange: {
-        from: new Date(),
-        to: addDays(new Date(), 365),
+        from: addDays(new Date(), 30),
+        to: addDays(new Date(), 395),
       },
     },
   });

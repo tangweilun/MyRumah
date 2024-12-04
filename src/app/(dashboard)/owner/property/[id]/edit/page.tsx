@@ -310,11 +310,11 @@ const EditProperty = () => {
                         </FormItem>
                       )}
                     />
-
+                    {/* 
                     <FormItem>
                       <FormLabel>Lease Start and End Date</FormLabel>
                       <DatePickerWithRange />
-                    </FormItem>
+                    </FormItem> */}
                   </div>
                 </CardContent>
               </Card>
