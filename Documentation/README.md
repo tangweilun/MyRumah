@@ -94,7 +94,7 @@ This project is a Web3-based real estate system that allows property owners and 
 Follow these steps to set up the project locally:
 
 1. Clone the repository:
-
+   
    ```bash
    git clone https://github.com/your-username/project-name.git
    cd project-name blablabla
@@ -102,35 +102,157 @@ Follow these steps to set up the project locally:
 
 ---
 
-## Setup
+# Setup
 
 ## First step
 
 1. Open a terminal and run 'npm install' to install all the dependency for the project
+   
+   ```bash
+   npm install
+   ```
 
 ## Second step (primsa/database setup)
+
+### PostgreSQL Installation
+
+- Please install postgreSQL thorugh this URL [PostgreSQL: Downloads](https://www.postgresql.org/download/)[PostgreSQL: Downloads](https://www.postgresql.org/download/)
+  
+  ![](attachement/2024-12-04-21-38-55-image.png)
+  
+  ![](attachement/2024-12-04-21-40-11-image.png)
+  
+  ![](attachement/2024-12-04-21-42-40-image.png)
+  
+  - After clicking the URL, it will lead you to the website shown in the figure above.
+  
+  - Then select the operating system that your laptop or computer is using.
+  
+  - If you select Windows, it will lead you to another page and click the **Download the installer** .
+  
+  - Then, it will lead you to another page and click the download icon under the Windows x86-64 to start downloading the postgreSQL installer.
+  
+  - After finish downloading the installer, please click the installer to start the installation
+    
+    ![](attachement/2024-12-04-21-50-31-image.png)
+    
+    - This will be shown after you click the postgreSQL installer
+      
+      ![](attachement/2024-12-04-21-57-23-image.png)
+      
+      ![](attachement/2024-12-04-22-00-17-image.png)
+    
+    - After you have click several next button you will be lead to the process shown above where you need to input your password for the superuser that will be very important in the setup process later.
+    
+    - The port shown above will also be important and will be explained in the following content.
+    
+    - The inputted password will be used in the pgAdmin and be inlcuded in the DATABASE_URL in the env file which will be explained in the following content.
+    
+    - After this just click next until the postgreSQL installation is complete.
+      
+      ### Please remember the password you inputted during this process.
+      
+      ![](attachement/2024-12-04-22-07-48-image.png)
+    
+    - After finish installing the postgreSQL, it will lead to this part and select the PostgreSQL 17 (x64) on port 5432 as it is the port that you choose while installing the PostgreSQL.
+      
+      ![](attachement/2024-12-04-22-14-01-image.png)
+    
+    - Then select the applications as shown in figure above to be installed.
+    
+    - Then just click next until the installation is completed.
+
+## pgAdmin Installation
+
+- Please click this URL [Download](https://www.pgadmin.org/download/)
+
+![](attachement/2024-12-04-22-23-40-image.png)
+
+- Same select your operating system 
+
+- If you select Windows, please click it
+
+![](attachement/2024-12-04-22-24-30-image.png)
+
+- Please select the latest version v8.13
+
+![](attachement/2024-12-04-22-25-11-image.png)
+
+- Select the pgAdmin4-8.13-x64.exe installer, click it and it will start downloading the pgAdmin installer
+
+- After finish downloading the pgAdmin installer, click it and start the pgAdmin installation
+
+![](attachement/2024-12-04-22-29-08-image.png)
+
+- Select install for me only
+
+![](attachement/2024-12-04-22-29-33-image.png)
+
+- Just click next button and follow the steps
+
+![](attachement/2024-12-04-22-30-12-image.png)
+
+- Click I accpet the agreement and continue click next button until the installation is finish
+
+#### Create server
+
+![](attachement/2024-12-04-22-41-01-image.png)
+
+- Open your pgAdmin application then click **add new server** 
+
+![](attachement/2024-12-04-22-42-39-image.png)
+
+- Then put the name as MyRumah as shown above
+
+- Then go to the **Connection** 
+
+![](attachement/2024-12-04-22-50-16-image.png)
+
+- Follow the configuration as shown above and click the **Save** button
+
+- The password use the password you inputted when you installing the postgreSQL
 
 ## NOTE (DATABASE_URL)
 
 1. Ensure that you have install postgresql and pgAdmin to act as your local database
-2. Ensure that you have create the superadmin in the pgAdmin such as the username and password for database usage
-3. Ensure that you have create the database name: MyRumah and localhost
-4. Ensure that your DATABASE_URL is being setup properly in your .env file as below
+2. Ensure that you have add the server in the pgAdmin such as the username and password for DATABASE_URL
+3. Ensure that your DATABASE_URL is being setup properly in your .env file as below
 
-DATABASE_URL="postgresql://postgres:admin9408@localhost:5432/MyRumah?schema=public" This is a sample
+DATABASE_URL="postgresql://postgres:admin12345@localhost:5432/MyRumah?schema=public" This is a sample
+
+- As shown in the pgAdmin installation and based on the reference below, the corresponding info will be shown below:
+
+- USER = postgres
+
+- PASSWORD = admin12345 (the password you inputted during the postgreSQL installation)
+
+- HOST = localhost
+
+- PORT = 5432
+
+- DATABASE_NAME = MyRumah
+
+- All info will need to follow the info that you have inputted during the add new server process
 
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME?schema=public" This is the reference
 
-## Ensure that you have paste the username and password to the DATABASE_URL in the .env file when creating the user and database (MyRumah) in pgAdmin
+## Ensure that you have paste the corresponding info to the DATABASE_URL in the .env file when creating the  database/server (MyRumah) in pgAdmin
+
+![](attachement/2024-12-04-23-08-51-image.png)
 
 ## Prisma and database Setup
 
 1. Open a terminal and run 'npm run prisma:setup'
+   
+   ```bash
+   npm run prisma:setup
+   ```
 
 ## NOTE (npm run prisma:setup)
 
 This command has been configured in the package.json scripts as below
 
+```typescript
 "scripts": {
 "dev": "ts-node backend/scripts/syncAll.ts && next dev",
 "build": "next build",
@@ -141,11 +263,18 @@ This command has been configured in the package.json scripts as below
 "prisma:seed": "npx ts-node prisma/seed.ts",
 "prisma:setup": "npm run prisma:migrate && npm run prisma:generate && npm run prisma:seed"
 }
+```
 
-The prisma:migrate is to run and apply the migration
-The prisma:generate is to create the prisma client for database linkage and allow CRUD interaction with the local database
-The prisma:seed is to auto-create fake data and insert into local database based on the seed.ts in the prisma folder
-The prisma:setup is to compile all the prisma command and run it all at once
+- The prisma:migrate is to run and apply the migration
+  
+
+- The prisma:generate is to create the prisma client for database linkage and allow CRUD interaction with the local database
+  
+
+- The prisma:seed is to auto-create fake data and insert into local database based on the seed.ts in the prisma folder
+  
+
+- The prisma:setup is to compile all the prisma command and run it all at once
 
 If you want to manually run the command run by one can refer to the scripts attached above
 
@@ -159,19 +288,56 @@ If you want to manually run the command run by one can refer to the scripts atta
 Follow these steps to setup the smart contract environment
 
 1. Open a terminal
+
 2. Run 'cd backend' to enter backend site
+   
+   ```bash
+   cd backend
+   ```
+
 3. Run 'npm install --save-dev hardhat' to install the hardhat
+   
+   ```bash
+   npm install --save-dev hardhat
+   ```
+
 4. Run 'npx hardhat node' to setup the network
+   
+   ```bash
+   npx hardhat node
+   ```
+
 5. To update the addresses, open a new terminal, enter backend site by running 'cd backend', then run 'npm run deploy'
+   
+   ```bash
+   cd backend
+   npm run deploy
+   ```
 
 ### Smart Contract Note (Overview)
 
 1. In the env file there will be NEXT_PUBLIC_AGREEMENT_CONTRACT_ADDRESS and NEXT_PUBLIC_RENTAL_FEE_CONTRACT_ADDRESS which will be the smart contract address for rental fee and agreement.
-2. When running the 'npm run deploy' the addresses will be updated and will be shown in the terminal to show that both of the addresses have been updated
-3. It is a must to run 'npx hardhat node' to setup the network for the smart contract
+
+![](attachement/2024-12-04-23-16-31-image.png)
+
+1. When running the 'npm run deploy' the addresses will be updated and will be shown in the terminal to show that both of the addresses have been updated
+
+
+
+1. ![](attachement/2024-12-04-23-17-05-image.png)It is a must to run 'npx hardhat node' to setup the network for the smart contract
 
 ## Run dev
 
 ## Ensure that you have exit the backend site by running 'cd..'
 
+```bash
+cd..
+```
+
 1. Open a terminal and run 'npm run dev' to start using the system
+
+```bash
+npm run dev
+```
+
+![](attachement/2024-12-04-23-17-30-image.png)

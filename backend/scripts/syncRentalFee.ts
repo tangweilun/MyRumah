@@ -26,6 +26,7 @@ const getContract = async () => {
 
 async function syncRentalFee() {
   const feeRecords = await fetchFeeRecords("rentalFee");
+  console.log(feeRecords);
   if (feeRecords.length === 0) {
     console.log("No fee records in database.");
     return;
