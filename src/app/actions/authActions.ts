@@ -98,16 +98,7 @@ export async function handleSignUp({
       };
     }
     return { success: false, message: "Account is already exist." };
-    console.log(2777);
-    return { success: false, message: "Account already exist." };
-
-    // return { success: true, message: "Account created successfully." };
   } catch (error) {
-    // console.error("Error creating account:", error);
-    // return {
-    //   success: false,
-    //   message: "An unexpected error occurred. Please try again.",
-    // };
     console.error("Error creating account in database:", error);
     return { success: false, message: "Something went wrong." };
   }
