@@ -34,6 +34,7 @@ const getContract = async () => {
 
 async function getAllFee(userId: number) {
   const chkRole = await chkUserRole(userId);
+  console.log(chkRole.status);
   if (chkRole.status != 200 || !chkRole.userRole) {
     return { status: chkRole.status };
   }

@@ -159,7 +159,7 @@ export default function OwnerProposalPage() {
   const [selectedProposal, setSelectedProposal] = useState<Proposal>();
   const [ownerSignedAgreement, setOwnerSignedAgreement] = useState(false);
   const [tenantSignedAgreement, setTenantSignedAgreement] = useState(false);
-  const [tenantPaidDeposit, setTenantPaidDeposit] = useState(false);
+  const [depositStatus, setDepositStatus] = useState(String);
 
   const viewProposal = async (proposal: Proposal) => {
     setSelectedProposal(proposal);
@@ -226,7 +226,7 @@ export default function OwnerProposalPage() {
     setShowAgreement(true);
     setOwnerSignedAgreement(proposal.agreements[0].owner_signature);
     setTenantSignedAgreement(proposal.agreements[0].tenant_signature);
-    setTenantPaidDeposit(proposal.agreements[0].deposit_status === "submitted");
+    setDepositStatus(proposal.agreements[0].deposit_status);
   };
 
   const ownerSignAgreement = async (agreementId: number) => {
@@ -562,7 +562,7 @@ export default function OwnerProposalPage() {
                 </div>
               </div>
 
-              {tenantPaidDeposit && (
+              {depositStatus === "submitted" && (
                 <div className="mt-4 flex justify-end text-green-600">Paid</div>
               )}
             </div>
@@ -618,7 +618,7 @@ export default function OwnerProposalPage() {
             </div>
           </div>
           <DialogFooter className="mt-4 flex justify-end">
-            {tenantPaidDeposit ? (
+            {depositStatus === "pending_returned" ? (
               <Button
                 variant="default"
                 className="bg-green-600 hover:bg-green-700 text-white"
@@ -632,6 +632,8 @@ export default function OwnerProposalPage() {
               >
                 Return Deposit
               </Button>
+            ) : depositStatus === "returned" ? (
+              <p className="text-green-600">Deposit Returned</p>
             ) : (
               ""
             )}
