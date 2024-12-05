@@ -345,23 +345,13 @@ export async function updateAgreement(
         message: `Deposit status updated to ${newDepositStatus}.`,
       };
     } else if (action === "complete") {
-      // Validate that the agreement can be marked as completed
-      if (currentDate <= end_date) {
-        return {
-          status: 400,
-          message:
-            "Agreement cannot be marked as completed before the end date.",
-        };
-      }
-
       // Update the agreement status and deposit status to reflect completion
       const agreementStatus = "completed";
-      const depositStatus = "pending_returned";
 
       // Call the smart contract to update the agreement
       const tx = await agreementContract.updateAgreement(
         agreementId,
-        depositStatus,
+        "returned",
         agreementStatus,
         agreement.tenant_signature,
         agreement.owner_signature
@@ -374,7 +364,6 @@ export async function updateAgreement(
         where: { agreement_id: agreementId },
         data: {
           agreement_status: agreementStatus,
-          deposit_status: depositStatus,
         },
       });
 

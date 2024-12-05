@@ -257,10 +257,14 @@ async function payDeposit(
       }
 
       // Mark agreement as completed
+      console.log("Marking agreement as completed...");
       const updateCompleteResult = await updateAgreement(
         agreementId,
-        "complete"
+        "complete",
+        undefined,
+        undefined
       );
+      console.log("Update complete result:", updateCompleteResult);
 
       if (updateCompleteResult.status !== 200) {
         return {
