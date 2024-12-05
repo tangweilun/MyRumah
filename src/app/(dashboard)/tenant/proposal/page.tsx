@@ -34,6 +34,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import ErrorMessage from "@/components/ErrorMessage";
 
 type Proposal = {
   proposal_id: number;
@@ -120,9 +121,7 @@ export default function TenantProposalPage() {
 
   if (isError) {
     return (
-      <div>
-        <p>error</p>
-      </div>
+      <ErrorMessage message="An error occurred while fetching proposals. Please try again later." />
     );
   }
 

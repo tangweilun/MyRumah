@@ -33,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import ErrorMessage from "@/components/ErrorMessage";
 
 type Proposal = {
   proposal_id: number;
@@ -100,23 +101,15 @@ export default function OwnerProposalPage() {
         modified_date: proposal.modified_date,
         property: proposal.property,
         tenant: proposal.tenant,
-        agreements: proposal.agreements.map((agreement) => ({
-          agreement_id: agreement.agreement_id,
-          agreement_status: agreement.agreement_status,
-          content: agreement.content,
-          deposit: agreement.deposit,
-          deposit_status: agreement.deposit_status,
-          init_rental_fee: agreement.init_rental_fee,
-          tenant_signature: agreement.tenant_signature,
-          owner_signature: agreement.owner_signature,
-        })),
+        agreements: proposal.agreements,
       }));
     },
   });
 
   if (isError) {
-    console.log("error");
-    // return <PropertyError message={"Something went wrong"} />;
+    return (
+      <ErrorMessage message="An error occurred while fetching proposals. Please try again later." />
+    );
   }
 
   function formatDate(dateString: string) {
