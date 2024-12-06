@@ -140,6 +140,8 @@ This project is a Web3-based real estate system that allows property owners and 
      npm install
      ```
 
+## Primsa/database setup
+
 ### PostgreSQL Installation
 
 - Please install postgreSQL thorugh this URL [PostgreSQL: Downloads](https://www.postgresql.org/download/)[PostgreSQL: Downloads](https://www.postgresql.org/download/)
