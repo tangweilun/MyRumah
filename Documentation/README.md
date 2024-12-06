@@ -337,3 +337,13 @@ npm run dev
 ```
 
 ![](attachment/2024-12-04-23-17-30-image.png)
+
+# Additional Note
+
+## ERD
+
+![](attachment/2024-12-06-16-54-48-image.png)
+
+## Github Link
+
+https://github.com/tangweilun/MyRumah
