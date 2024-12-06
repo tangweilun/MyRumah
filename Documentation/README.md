@@ -145,9 +145,7 @@ This project is a Web3-based real estate system that allows property owners and 
     
     - After finish installing the postgreSQL, it will lead to this part and select the PostgreSQL 17 (x64) on port 5432 as it is the port that you choose while installing the PostgreSQL.
       
-      ![](attachement/2024-12-04-22-14-01-image.png)
-    
-    - Then select the applications as shown in figure above to be installed.
+      ![](../attachment/2024-12-06-13-41-52-image.png)Then select the applications as shown in figure above to be installed.If tthere is something wrong, please install all packages.
     
     - Then just click next until the installation is completed.
 
@@ -255,13 +253,10 @@ This command has been configured in the package.json scripts as below
 ```
 
 - The prisma:migrate is to run and apply the migration
-  
 
 - The prisma:generate is to create the prisma client for database linkage and allow CRUD interaction with the local database
-  
 
 - The prisma:seed is to auto-create fake data and insert into local database based on the seed.ts in the prisma folder
-  
 
 - The prisma:setup is to compile all the prisma command and run it all at once
 
@@ -310,8 +305,6 @@ Follow these steps to setup the smart contract environment
 ![](attachement/2024-12-04-23-16-31-image.png)
 
 1. When running the 'npm run deploy' the addresses will be updated and will be shown in the terminal to show that both of the addresses have been updated
-
-
 
 1. ![](attachement/2024-12-04-23-17-05-image.png)It is a must to run 'npx hardhat node' to setup the network for the smart contract
 
