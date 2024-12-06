@@ -46,7 +46,7 @@ export function WalletModal({ isOpen, onClose, balance }: WalletModalProps) {
                 className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                 onClick={() => setIsWithdrawModalOpen(true)}
               >
-                <ArrowUpIcon className="mr-2 h-4 w-4" />
+                <ArrowDownIcon className="mr-2 h-4 w-4" />
                 Withdraw
               </Button>
               <Button
@@ -54,7 +54,7 @@ export function WalletModal({ isOpen, onClose, balance }: WalletModalProps) {
                 className="flex-1 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
                 onClick={() => setIsTopUpModalOpen(true)}
               >
-                <ArrowDownIcon className="mr-2 h-4 w-4" />
+                <ArrowUpIcon className="mr-2 h-4 w-4" />
                 Top Up
               </Button>
             </div>

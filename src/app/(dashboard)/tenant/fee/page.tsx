@@ -298,7 +298,7 @@ export default function FeeManagementPage() {
                           {getPaginatedItems(pendingFees, pendingFeesPage).map(
                             (fee, index) => (
                               <TableRow key={index}>
-                                <TableCell>{fee.fee_id}</TableCell>
+                                <TableCell>{index + 1}</TableCell>
                                 <TableCell>RM{fee.amount}</TableCell>
                                 <TableCell>
                                   <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800">
@@ -368,7 +368,7 @@ export default function FeeManagementPage() {
                             paymentHistoryPage
                           ).map((fee, index) => (
                             <TableRow key={index}>
-                              <TableCell>{fee.fee_id}</TableCell>
+                              <TableCell>{index + 1}</TableCell>
                               <TableCell>
                                 {convertDate(fee.modified_date)}
                               </TableCell>
