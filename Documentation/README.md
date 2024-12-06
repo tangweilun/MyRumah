@@ -89,6 +89,17 @@ This project is a Web3-based real estate system that allows property owners and 
 
 - **Hardhat**: For compiling, deploying, and testing smart contracts
 
+## Installation
+
+Follow these steps to set up the project locally:
+
+1. Clone the repository:
+   
+   ```bash
+   git clone https://github.com/your-username/project-name.git
+   cd project-name blablabla
+   ```
+
 ---
 
 # Setup
@@ -96,7 +107,7 @@ This project is a Web3-based real estate system that allows property owners and 
 ## First step
 
 1. Open a terminal and run 'npm install' to install all the dependency for the project
-
+   
    ```bash
    npm install
    ```
@@ -106,49 +117,49 @@ This project is a Web3-based real estate system that allows property owners and 
 ### PostgreSQL Installation
 
 - Please install postgreSQL thorugh this URL [PostgreSQL: Downloads](https://www.postgresql.org/download/)[PostgreSQL: Downloads](https://www.postgresql.org/download/)
-
+  
   ![](attachment/2024-12-04-21-38-55-image.png)
-
+  
   ![](attachment/2024-12-04-21-40-11-image.png)
-
+  
   ![](attachment/2024-12-04-21-42-40-image.png)
-
+  
   - After clicking the URL, it will lead you to the website shown in the figure above.
-
+  
   - Then select the operating system that your laptop or computer is using.
-
+  
   - If you select Windows, it will lead you to another page and click the **Download the installer** .
-
+  
   - Then, it will lead you to another page and click the download icon under the Windows x86-64 to start downloading the postgreSQL installer.
-
+  
   - After finish downloading the installer, please click the installer to start the installation
-
+    
     ![](attachment/2024-12-04-21-50-31-image.png)
-
+    
     - This will be shown after you click the postgreSQL installer
-
+      
       ![](attachment/2024-12-04-21-57-23-image.png)
-
+      
       ![](attachment/2024-12-04-22-00-17-image.png)
-
+    
     - After you have click several next button you will be lead to the process shown above where you need to input your password for the superuser that will be very important in the setup process later.
-
+    
     - The port shown above will also be important and will be explained in the following content.
-
+    
     - The inputted password will be used in the pgAdmin and be inlcuded in the DATABASE_URL in the env file which will be explained in the following content.
-
+    
     - After this just click next until the postgreSQL installation is complete.
-
+      
       ### Please remember the password you inputted during this process.
-
+      
       ![](attachment/2024-12-04-22-07-48-image.png)
-
+    
     - After finish installing the postgreSQL, it will lead to this part and select the PostgreSQL 17 (x64) on port 5432 as it is the port that you choose while installing the PostgreSQL.
-
+      
       ![](attachment/2024-12-04-22-14-01-image.png)
-
+    
     - Then select the applications as shown in figure above to be installed.
-
+    
     - Then just click next until the installation is completed.
 
 ## pgAdmin Installation
@@ -232,7 +243,7 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME?schema=public" 
 ## Prisma and database Setup
 
 1. Open a terminal and run 'npm run prisma:setup'
-
+   
    ```bash
    npm run prisma:setup
    ```
@@ -264,11 +275,6 @@ This command has been configured in the package.json scripts as below
 
 If you want to manually run the command run by one can refer to the scripts attached above
 
-## Prisma setup NOTE
-
-1. If you want to reset the database can run 'npx prisma migrate reset' but please ensure there is migration file under migrations folder under primsa folder
-2. Ensure that the migration file under the migrations folder under the prisma folder is called myrumah_migration as it is the latest migration if it is not please delete it and run 'npm run prisma:migrate' to create and run the correct migration.
-
 ## Smart Contract
 
 Follow these steps to setup the smart contract environment
@@ -276,25 +282,25 @@ Follow these steps to setup the smart contract environment
 1. Open a terminal
 
 2. Run 'cd backend' to enter backend site
-
+   
    ```bash
    cd backend
    ```
 
 3. Run 'npm install --save-dev hardhat' to install the hardhat
-
+   
    ```bash
    npm install --save-dev hardhat
    ```
 
 4. Run 'npx hardhat node' to setup the network
-
+   
    ```bash
    npx hardhat node
    ```
 
 5. To update the addresses, open a new terminal, enter backend site by running 'cd backend', then run 'npm run deploy'
-
+   
    ```bash
    cd backend
    npm run deploy
