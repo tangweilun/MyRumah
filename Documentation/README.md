@@ -7,6 +7,7 @@ This project is a Web3-based real estate system that allows property owners and 
 ## Assests
 
 ![](attachment/2024-12-06-19-58-36-image.png)
+![](attachment\2024-12-06-20-12-14-image.png)
 
 ## Features
 
