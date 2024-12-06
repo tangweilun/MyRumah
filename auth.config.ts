@@ -42,7 +42,6 @@ export default {
 
         if (pw && user.password) {
           const passwordMatches = await bcrypt.compare(pw, user.password);
-          console.log(user);
 
           if (!passwordMatches) {
             console.log("Invalid password");
