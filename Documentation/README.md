@@ -118,11 +118,11 @@ Follow these steps to set up the project locally:
 
 - Please install postgreSQL thorugh this URL [PostgreSQL: Downloads](https://www.postgresql.org/download/)[PostgreSQL: Downloads](https://www.postgresql.org/download/)
   
-  ![](attachement/2024-12-04-21-38-55-image.png)
+  ![](attachment/2024-12-04-21-38-55-image.png)
   
-  ![](attachement/2024-12-04-21-40-11-image.png)
+  ![](attachment/2024-12-04-21-40-11-image.png)
   
-  ![](attachement/2024-12-04-21-42-40-image.png)
+  ![](attachment/2024-12-04-21-42-40-image.png)
   
   - After clicking the URL, it will lead you to the website shown in the figure above.
   
@@ -134,13 +134,13 @@ Follow these steps to set up the project locally:
   
   - After finish downloading the installer, please click the installer to start the installation
     
-    ![](attachement/2024-12-04-21-50-31-image.png)
+    ![](attachment/2024-12-04-21-50-31-image.png)
     
     - This will be shown after you click the postgreSQL installer
       
-      ![](attachement/2024-12-04-21-57-23-image.png)
+      ![](attachment/2024-12-04-21-57-23-image.png)
       
-      ![](attachement/2024-12-04-22-00-17-image.png)
+      ![](attachment/2024-12-04-22-00-17-image.png)
     
     - After you have click several next button you will be lead to the process shown above where you need to input your password for the superuser that will be very important in the setup process later.
     
@@ -152,11 +152,11 @@ Follow these steps to set up the project locally:
       
       ### Please remember the password you inputted during this process.
       
-      ![](attachement/2024-12-04-22-07-48-image.png)
+      ![](attachment/2024-12-04-22-07-48-image.png)
     
     - After finish installing the postgreSQL, it will lead to this part and select the PostgreSQL 17 (x64) on port 5432 as it is the port that you choose while installing the PostgreSQL.
       
-      ![](attachement/2024-12-04-22-14-01-image.png)
+      ![](attachment/2024-12-04-22-14-01-image.png)
     
     - Then select the applications as shown in figure above to be installed.
     
@@ -166,47 +166,47 @@ Follow these steps to set up the project locally:
 
 - Please click this URL [Download](https://www.pgadmin.org/download/)
 
-![](attachement/2024-12-04-22-23-40-image.png)
+![](attachment/2024-12-04-22-23-40-image.png)
 
-- Same select your operating system 
+- Same select your operating system
 
 - If you select Windows, please click it
 
-![](attachement/2024-12-04-22-24-30-image.png)
+![](attachment/2024-12-04-22-24-30-image.png)
 
 - Please select the latest version v8.13
 
-![](attachement/2024-12-04-22-25-11-image.png)
+![](attachment/2024-12-04-22-25-11-image.png)
 
 - Select the pgAdmin4-8.13-x64.exe installer, click it and it will start downloading the pgAdmin installer
 
 - After finish downloading the pgAdmin installer, click it and start the pgAdmin installation
 
-![](attachement/2024-12-04-22-29-08-image.png)
+![](attachment/2024-12-04-22-29-08-image.png)
 
 - Select install for me only
 
-![](attachement/2024-12-04-22-29-33-image.png)
+![](attachment/2024-12-04-22-29-33-image.png)
 
 - Just click next button and follow the steps
 
-![](attachement/2024-12-04-22-30-12-image.png)
+![](attachment/2024-12-04-22-30-12-image.png)
 
 - Click I accpet the agreement and continue click next button until the installation is finish
 
 #### Create server
 
-![](attachement/2024-12-04-22-41-01-image.png)
+![](attachment/2024-12-04-22-41-01-image.png)
 
-- Open your pgAdmin application then click **add new server** 
+- Open your pgAdmin application then click **add new server**
 
-![](attachement/2024-12-04-22-42-39-image.png)
+![](attachment/2024-12-04-22-42-39-image.png)
 
 - Then put the name as MyRumah as shown above
 
-- Then go to the **Connection** 
+- Then go to the **Connection**
 
-![](attachement/2024-12-04-22-50-16-image.png)
+![](attachment/2024-12-04-22-50-16-image.png)
 
 - Follow the configuration as shown above and click the **Save** button
 
@@ -236,9 +236,9 @@ DATABASE_URL="postgresql://postgres:admin12345@localhost:5432/MyRumah?schema=pub
 
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME?schema=public" This is the reference
 
-## Ensure that you have paste the corresponding info to the DATABASE_URL in the .env file when creating the  database/server (MyRumah) in pgAdmin
+## Ensure that you have paste the corresponding info to the DATABASE_URL in the .env file when creating the database/server (MyRumah) in pgAdmin
 
-![](attachement/2024-12-04-23-08-51-image.png)
+![](attachment/2024-12-04-23-08-51-image.png)
 
 ## Prisma and database Setup
 
@@ -266,13 +266,10 @@ This command has been configured in the package.json scripts as below
 ```
 
 - The prisma:migrate is to run and apply the migration
-  
 
 - The prisma:generate is to create the prisma client for database linkage and allow CRUD interaction with the local database
-  
 
 - The prisma:seed is to auto-create fake data and insert into local database based on the seed.ts in the prisma folder
-  
 
 - The prisma:setup is to compile all the prisma command and run it all at once
 
@@ -313,13 +310,11 @@ Follow these steps to setup the smart contract environment
 
 1. In the env file there will be NEXT_PUBLIC_AGREEMENT_CONTRACT_ADDRESS and NEXT_PUBLIC_RENTAL_FEE_CONTRACT_ADDRESS which will be the smart contract address for rental fee and agreement.
 
-![](attachement/2024-12-04-23-16-31-image.png)
+![](attachment/2024-12-04-23-16-31-image.png)
 
 1. When running the 'npm run deploy' the addresses will be updated and will be shown in the terminal to show that both of the addresses have been updated
 
-
-
-1. ![](attachement/2024-12-04-23-17-05-image.png)It is a must to run 'npx hardhat node' to setup the network for the smart contract
+2. ![](attachment/2024-12-04-23-17-05-image.png)It is a must to run 'npx hardhat node' to setup the network for the smart contract
 
 ## Run dev
 
@@ -335,4 +330,4 @@ cd..
 npm run dev
 ```
 
-![](attachement/2024-12-04-23-17-30-image.png)
+![](attachment/2024-12-04-23-17-30-image.png)
