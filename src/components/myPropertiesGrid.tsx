@@ -147,13 +147,13 @@ export default function MyPropertiesGrid() {
           description={`${metrics.activeBookings} currently occupied`}
           iconColor="text-green-700"
         />
-        <MetricCard
+        {/* <MetricCard
           title="Total Earnings"
           icon={DollarSign}
           number={`$${metrics.totalEarnings}`}
           description={`Earnings this month`}
           iconColor="text-green-700"
-        />
+        /> */}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties?.map((property) => (

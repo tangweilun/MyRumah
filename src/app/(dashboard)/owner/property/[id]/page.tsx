@@ -147,6 +147,7 @@ export async function hideProperty({ id, property }: HidePropertyParams) {
     },
     body: JSON.stringify({
       status: "inactive",
+      deleteProperty: false,
     }),
   });
   return response.json();
@@ -160,6 +161,7 @@ export async function unhideProperty({ id, property }: HidePropertyParams) {
     },
     body: JSON.stringify({
       status: "active",
+      deleteProperty: false,
     }),
   });
   return response.json();

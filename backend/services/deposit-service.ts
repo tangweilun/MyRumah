@@ -1,4 +1,5 @@
 import { updateAgreement } from "../services/agreement-service";
+import { editProperty } from "../services/property-service";
 import { topupWallet } from "../services/wallet-service";
 import { deductWallet } from "../services/wallet-service";
 import { Decimal } from "@prisma/client/runtime/library";
@@ -270,6 +271,19 @@ async function payDeposit(
         return {
           status: updateCompleteResult.status,
           message: `Failed to mark agreement as completed: ${updateCompleteResult.message}`,
+        };
+      }
+
+      // Update property status to 'active'
+      const propertyId = agreement.proposal.property.property_id;
+      const updatePropertyStatus = await editProperty(propertyId, false, {
+        status: "active",
+      });
+
+      if (updatePropertyStatus.status !== 200) {
+        return {
+          status: updatePropertyStatus.status,
+          message: `Failed to update property status: ${updatePropertyStatus.message}`,
         };
       }
 

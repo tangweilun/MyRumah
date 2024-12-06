@@ -368,7 +368,7 @@ export default function FeeManagementPage() {
                             paymentHistoryPage
                           ).map((fee, index) => (
                             <TableRow key={index}>
-                              <TableCell>{fee.fee_id}</TableCell>
+                              <TableCell>{index + 1}</TableCell>
                               <TableCell>
                                 {convertDate(fee.modified_date)}
                               </TableCell>
