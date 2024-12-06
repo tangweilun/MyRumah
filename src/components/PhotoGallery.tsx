@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
-const PropertyGallery = ({ photos = [] }: { photos: string[] }) => {
+const PropertyGallery = ({ photos = [] }: { photos: Buffer[] }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
 
   const openModal = (index: number) => {
@@ -28,7 +28,8 @@ const PropertyGallery = ({ photos = [] }: { photos: string[] }) => {
 
       {/* Photo Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {photos.map((photo: string, index) => (
+        {photos.map((photo: Buffer, index) => (
+          //<div>{photo}</div>
           <div
             key={index}
             className="relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
@@ -36,7 +37,7 @@ const PropertyGallery = ({ photos = [] }: { photos: string[] }) => {
           >
             {photo ? (
               <Image
-                src={`data:image/jpeg;base64,${Buffer.from(photo).toString(
+                src={`data:image/jpeg;base64,${Buffer.from(Object.values(photo)).toString(
                   "base64"
                 )}`}
                 alt={`Photo ${index + 1}`}
@@ -91,7 +92,7 @@ const PropertyGallery = ({ photos = [] }: { photos: string[] }) => {
           <div className="flex justify-center items-center max-w-full max-h-[80vh] overflow-hidden">
             <Image
               src={`data:image/jpeg;base64,${Buffer.from(
-                photos[selectedPhoto]
+                Object.values(photos[selectedPhoto])
               ).toString("base64")}`}
               alt={`Photo ${selectedPhoto + 1}`}
               className="max-w-full max-h-full object-contain"

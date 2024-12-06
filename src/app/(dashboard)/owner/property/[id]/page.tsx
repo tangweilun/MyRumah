@@ -54,7 +54,7 @@ export type Property = {
   rental_fee: number;
   address: string;
   occupant_num: number;
-  images: string[];
+  images: Buffer[];
   start_date: string;
   end_date: string;
   status: string;
@@ -397,7 +397,7 @@ const SinglePropertyPage = () => {
       <Tabs defaultValue="details" className="">
         <TabsList className="grid w-fit grid-cols-2 mb-6">
           <TabsTrigger value="details">Property Details</TabsTrigger>
-          <TabsTrigger value="proposals">Proposals</TabsTrigger>
+          {/* <TabsTrigger value="proposals">Proposals</TabsTrigger> */}
         </TabsList>
 
         {/* Previous Property Details TabsContent remains the same */}
@@ -451,79 +451,6 @@ const SinglePropertyPage = () => {
             </Card>
           </div>
           <PropertyGallery photos={property?.images || []}></PropertyGallery>
-        </TabsContent>
-
-        <TabsContent value="proposals">
-          <div className="space-y-4">
-            {proposals.map((proposal) => (
-              <Card key={proposal.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <Image
-                        src={proposal.avatar}
-                        alt={proposal.name}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                      <div>
-                        <h3 className="font-semibold">{proposal.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {proposal.property}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge
-                      variant={
-                        proposal.status === "Pending" ? "outline" : "secondary"
-                      }
-                      className="ml-auto"
-                    >
-                      {proposal.status}
-                    </Badge>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      {proposal.duration}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <DollarSign className="h-4 w-4" />
-                      {proposal.rate}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      {proposal.submitted}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        router.push(`/owner/property/${proposal.id}`)
-                      } // Navigate to the specific property page
-                    >
-                      View Details
-                    </Button>
-                    {proposal.status === "Pending" && (
-                      <>
-                        <Button variant="destructive" size="sm">
-                          Reject
-                        </Button>
-                        <Button variant="default" size="sm">
-                          Approve
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </TabsContent>
       </Tabs>
     </div>
