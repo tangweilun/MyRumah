@@ -121,15 +121,18 @@ This project is a Web3-based real estate system that allows property owners and 
 
 # Setup
 
-## First step
-
 1. Open a terminal and run 'npm install' to install all the dependency for the project
    
    ```bash
    npm install
    ```
+2. install all the dependency for backend
+   ```bash
+  cd backend
+  npm install
+   ```
 
-## Second step (primsa/database setup)
+## Primsa/database setup
 
 ### PostgreSQL Installation
 
